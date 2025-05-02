@@ -20,7 +20,7 @@ export interface CartType extends Document {
 
 const CartSchema: Schema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     // product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     products: {
       type: [
@@ -40,8 +40,6 @@ const CartSchema: Schema = new Schema(
 
   { timestamps: true }
 );
-
-CartSchema.index({ userId: 1 });
 
 const Cart = models.Cart || model("Cart", CartSchema);
 

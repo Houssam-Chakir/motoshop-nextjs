@@ -6,7 +6,7 @@ interface SizeQuantityType {
 }
 
 export interface StockType extends Document {
-  product: mongoose.Types.ObjectId;
+  productId: mongoose.Types.ObjectId;
   sizes: SizeQuantityType[];
   createdAt: Date;
   updatedAt: Date;
@@ -14,29 +14,15 @@ export interface StockType extends Document {
 
 const SizeQuantitySchema = new Schema<SizeQuantityType>(
   {
-    size: {
-      type: String,
-      required: [true, "Please refrence the size (Ex: XS)"],
-      trim: true,
-      uppercase: true,
-    },
-    quantity: {
-      type: Number,
-      required: [true, 'Please include the quantity of the referenced size'],
-      min: 0,
-    },
+    size: { type: String, required: [true, "Please refrence the size (Ex: XS)"], trim: true, uppercase: true },
+    quantity: { type: Number, required: [true, "Please include the quantity of the referenced size"], min: 0 },
   },
   { _id: false }
 );
 
 const StockSchema = new Schema<StockType>(
   {
-    product: {
-      type: Schema.Types.ObjectId,
-      ref: "Product",
-      required: [true, 'Product id is required for stock collection'],
-      unique: true,
-    },
+    productId: { type: Schema.Types.ObjectId, ref: "Product", required: [true, "Product id is required for stock collection"], unique: true, index: true },
     sizes: {
       type: [SizeQuantitySchema],
       validate: {

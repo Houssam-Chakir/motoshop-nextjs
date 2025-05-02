@@ -8,6 +8,7 @@ interface SizeQuantityType {
 export interface StockType extends Document {
   product: mongoose.Types.ObjectId;
   sizes: SizeQuantityType[];
+  createdAt: Date;
   updatedAt: Date;
 }
 

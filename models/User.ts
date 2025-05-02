@@ -19,8 +19,8 @@ export interface User extends Document {
   cart: mongoose.Types.ObjectId[];
   orders: mongoose.Types.ObjectId[];
   deliveryInformation: DeliveryInformation;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
 

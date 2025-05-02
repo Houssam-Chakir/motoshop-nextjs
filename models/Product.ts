@@ -21,7 +21,7 @@ interface ProductImage {
 // Main Product interface that extends Document
 export interface IProduct extends Document {
   barcode: string;
-  sku?: string;
+  sku: string;
   title: string;
   productModel: string;
   brand: string;

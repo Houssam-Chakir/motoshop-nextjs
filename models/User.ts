@@ -51,19 +51,8 @@ const UserSchema: Schema = new Schema(
         ref: "Product",
       },
     ],
-    cart: [
-      {
-        product: { type: Schema.Types.ObjectId, ref: "Product" },
-        quantity: { type: Number, default: 1, min: [1, "Quantity cannot be less than 1"] },
-      },
-    ],
-    orders: [
-      {
-        type: Schema.Types.ObjectId,
-
-        ref: "Order",
-      },
-    ],
+    cart: { type: Schema.Types.ObjectId, ref: "Cart" },
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
 
     deliveryInformation: {
       fullName: { type: String, required: false, trim: true },
@@ -77,6 +66,6 @@ const UserSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-const User = models.User || model('User', UserSchema)
+const User = models.User || model("User", UserSchema);
 
 export default User;

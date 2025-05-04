@@ -27,6 +27,7 @@ export interface IProduct extends Document {
   brand: string;
   description: string;
   price: number;
+  saleInfo: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
 
   category: mongoose.Types.ObjectId;
@@ -39,8 +40,8 @@ export interface IProduct extends Document {
 
   likes: number;
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const ProductSchema: Schema = new Schema(
@@ -52,6 +53,7 @@ const ProductSchema: Schema = new Schema(
     brand: { type: String, required: [true, "Please provide a brand"], trim: true, index: true },
     description: { type: String, required: [true, "Please provide a description"], trim: true },
     price: { type: Number, required: [true, "Please provide a price"], min: [0, "Price cannot be negative"] },
+    saleInfo: { type: Schema.Types.ObjectId, ref: "Sale", index: true },
     season: { type: String, enum: ["All seasons", "Summer", "Winter", "Spring/Fall"], default: "All seasons" },
     images: {
       type: [{ url: String, altText: String }],

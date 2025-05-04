@@ -1,10 +1,12 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
 
-export interface Review extends Document {
+export interface ReviewDocument extends Document {
   user: mongoose.Types.ObjectId;
   product: mongoose.Types.ObjectId;
   body?: string;
   rating: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const ReviewSchema: Schema = new Schema(
@@ -19,5 +21,7 @@ const ReviewSchema: Schema = new Schema(
 );
 
 const Review = models.Review || model("Review", ReviewSchema);
+export type ReviewType = Omit<ReviewDocument, keyof Document>;
+
 
 export default Review;

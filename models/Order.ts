@@ -1,8 +1,8 @@
-import { Types, model, models, Schema } from "mongoose";
+import { Types, model, models, Schema, Document } from "mongoose";
 import { DeliveryInformation, DeliveryInfoSchema } from "./User";
 
-// Define the order item interface
-export interface IOrderItem {
+// Interface for each product in the order
+interface OrderProduct {
   productId: Types.ObjectId;
   size: string;
   quantity: number;
@@ -11,63 +11,23 @@ export interface IOrderItem {
   addedAt: Date;
 }
 
-// Define the payment method types
-export type PaymentMethod = "credit_card" | "cash_on_delivery";
-
-// Define the payment status types
-export type PaymentStatus = "pending" | "processing" | "paid" | "failed" | "refunded";
-
-// Define the delivery status types
-export type DeliveryStatus = "processing" | "shipped" | "delivered" | "cancelled";
-
-// Define the order interface
-export interface IOrder {
-  _id?: Types.ObjectId;
+// Main Order interface extending Mongoose Document
+export interface OrderDocument extends Document {
   trackingNumber: string;
   userId: Types.ObjectId;
-  products: IOrderItem[];
+  products: OrderProduct[];
   quantity: number;
-  totalAmount: number;
-  paymentMethod: PaymentMethod;
-  paymentStatus: PaymentStatus;
+  deliveryFee: number;
+  orderTotalPrice: number;
+  paymentMethod: "credit_card" | "cash_on_delivery";
+  paymentStatus: "pending" | "processing" | "paid" | "failed" | "refunded";
   orderedAt: Date;
   deliveryInformation: DeliveryInformation;
-  deliveryStatus: DeliveryStatus;
+  deliveryStatus: "processing" | "shipped" | "delivered" | "cancelled";
   estimatedDeliveryDate?: Date;
   notes?: string;
   createdAt?: Date;
   updatedAt?: Date;
-}
-
-// Interface for creating a new order (client-side)
-export interface ICreateOrderInput {
-  trackingNumber: string;
-  userId: string;
-  products: Array<{
-    productId: string;
-    size: string;
-    quantity: number;
-    unitPrice: number;
-    totalPrice: number;
-  }>;
-  quantity: number;
-  totalAmount: number;
-  paymentMethod: PaymentMethod;
-  deliveryInformation: DeliveryInformation;
-  notes?: string;
-}
-
-// Interface for order response (client-side)
-export interface IOrderResponse extends Omit<IOrder, "userId" | "products"> {
-  userId: string;
-  products: Array<{
-    productId: string;
-    size: string;
-    quantity: number;
-    unitPrice: number;
-    totalPrice: number;
-    addedAt: string;
-  }>;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -88,8 +48,8 @@ const OrderSchema: Schema = new Schema(
       ],
     },
     quantity: { type: Number, required: true, min: 0 },
-    deliveryPrice: { type: Number, required: true, min: 0 },
-    totalAmount: { type: Number, required: true, min: 0 },
+    deliveryFee: { type: Number, required: true, min: 0 },
+    orderTotalPrice: { type: Number, required: true, min: 0 },
     paymentMethod: { type: String, required: true, enum: ["credit_card", "cash_on_delivery"] },
     paymentStatus: { type: String, required: true, enum: ["pending", "processing", "paid", "failed", "refunded"], default: "pending" },
     orderedAt: { type: Date, default: Date.now },
@@ -102,4 +62,5 @@ const OrderSchema: Schema = new Schema(
 );
 
 const Order = models.Order || model("Order", OrderSchema);
+export type OrderType = Omit<OrderDocument, keyof Document>;
 export default Order;

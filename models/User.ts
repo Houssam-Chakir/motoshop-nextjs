@@ -10,7 +10,7 @@ export interface DeliveryInformation {
   extraDirections: string;
 }
 
-export interface User extends Document {
+export interface UserDocument extends Document {
   name: string;
   email: string;
   // password?: string;
@@ -68,5 +68,7 @@ const UserSchema: Schema = new Schema(
 );
 
 const User = models.User || model("User", UserSchema);
+export type UserType = Omit<UserDocument, keyof Document>;
+
 export default User;
 export { DeliveryInfoSchema };

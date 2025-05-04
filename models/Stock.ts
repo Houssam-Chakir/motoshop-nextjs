@@ -5,11 +5,11 @@ interface SizeQuantityType {
   quantity: number;
 }
 
-export interface StockType extends Document {
+export interface StockDocument extends Document {
   productId: mongoose.Types.ObjectId;
   sizes: SizeQuantityType[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const SizeQuantitySchema = new Schema<SizeQuantityType>(
@@ -20,7 +20,7 @@ const SizeQuantitySchema = new Schema<SizeQuantityType>(
   { _id: false }
 );
 
-const StockSchema = new Schema<StockType>(
+const StockSchema = new Schema<StockDocument>(
   {
     productId: { type: Schema.Types.ObjectId, ref: "Product", required: [true, "Product id is required for stock collection"], unique: true, index: true },
     sizes: {
@@ -36,5 +36,7 @@ const StockSchema = new Schema<StockType>(
   { timestamps: { updatedAt: true, createdAt: false } }
 );
 
-const Stock = models.Stock || model<StockType>("Stock", StockSchema);
+const Stock = models.Stock || model<StockDocument>("Stock", StockSchema);
+export type StockType = Omit<StockDocument, keyof Document>;
+
 export default Stock;

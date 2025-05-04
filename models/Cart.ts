@@ -1,6 +1,6 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
 
-interface ProductCartItem {
+interface CartProductItem {
   productId: mongoose.Types.ObjectId;
   size: string;
   quantity: number;
@@ -9,9 +9,9 @@ interface ProductCartItem {
   addedAt: Date;
 }
 
-export interface CartType extends Document {
+export interface CartDocument extends Document{
   userId: mongoose.Types.ObjectId;
-  products: ProductCartItem[];
+  products: CartProductItem[];
   quantity: number;
   totalAmount: number;
   createdAt?: Date;
@@ -42,5 +42,7 @@ const CartSchema: Schema = new Schema(
 );
 
 const Cart = models.Cart || model("Cart", CartSchema);
+export type CartType = Omit<CartDocument, keyof Document>;
+
 
 export default Cart;

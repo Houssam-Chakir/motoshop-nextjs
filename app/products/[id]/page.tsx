@@ -1,10 +1,13 @@
-"use client";
 
-import { ProductDocument } from "@/models/Product";
+
+import Product from "@/models/Product";
+import makeSerializable from "@/utils/convertToObj";
 import Link from "next/link";
-// import Image from "next/image";
 
-const ProductCard = ({ product }: { product: ProductDocument }) => {
+const ProductDetailsPage = async({params}: { params: { id: string } }) => {
+  const {id} = await params
+  const productDoc = await Product.findById(id).lean()
+  const product = makeSerializable(productDoc)
   return (
     <div className='w-full max-w-sm px-4 py-3 bg-white rounded-md shadow-md dark:bg-gray-800'>
       <div className='flex items-center justify-between'>
@@ -45,4 +48,4 @@ const ProductCard = ({ product }: { product: ProductDocument }) => {
   );
 };
 
-export default ProductCard;
+export default ProductDetailsPage;

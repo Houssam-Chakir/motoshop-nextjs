@@ -1,3 +1,10 @@
+import Link from 'next/link';
+
 export default async function Home() {
-  return <div>Hello world</div>;
+  return (
+    <>
+      <div>Links</div>
+      <Link href="/products">Products page</Link>
+    </>
+  );
 }

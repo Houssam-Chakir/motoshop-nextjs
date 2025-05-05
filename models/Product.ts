@@ -19,7 +19,7 @@ interface ProductImage {
 }
 
 // Main Product interface that extends Document
-export interface IProduct extends Document {
+export interface ProductDocument extends Document {
   barcode: string;
   sku: string;
   title: string;
@@ -87,5 +87,5 @@ ProductSchema.index({ title: "text", description: "text" });
 const Product = models.Product || model("Product", ProductSchema);
 
 // Export a type without the Document methods for use in functions
-export type ProductType = Omit<IProduct, keyof Document>;
+export type ProductType = Omit<ProductDocument, keyof Document>;
 export default Product;

@@ -16,10 +16,10 @@ export interface UserDocument extends Document {
   // password?: string;
   image?: string;
   role: "customer" | "admin";
-  likedProducts: mongoose.Types.ObjectId[];
-  cart: mongoose.Types.ObjectId[];
-  orders: mongoose.Types.ObjectId[];
-  deliveryInformation: DeliveryInformation;
+  likedProducts?: mongoose.Types.ObjectId[];
+  cart?: mongoose.Types.ObjectId[];
+  orders?: mongoose.Types.ObjectId[];
+  deliveryInformation?: DeliveryInformation;
   createdAt?: Date;
   updatedAt?: Date;
   // comparePassword(candidatePassword: string): Promise<boolean>;

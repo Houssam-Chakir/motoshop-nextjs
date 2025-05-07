@@ -1,4 +1,7 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
+import slug from 'mongoose-slug-updater';
+
+mongoose.plugin(slug);
 
 // Define interfaces first, within the same file
 interface ProductSpec {
@@ -23,6 +26,7 @@ export interface ProductDocument extends Document {
   barcode: string;
   sku: string;
   title: string;
+  slug: string;
   productModel: string;
   brand: string;
   description: string;
@@ -49,6 +53,7 @@ const ProductSchema: Schema = new Schema(
     barcode: { type: String, unique: true, required: [true, "Please provide a barcode"], trim: true, index: true },
     sku: { type: String, trim: true, required: [true, "Please provide a sku"], index: true },
     title: { type: String, required: [true, "Please provide a title"], trim: true, index: true },
+    slug: {type: String, slug: 'title', required: true, unique: true, index: true},
     productModel: { type: String, required: [true, "Please provide a model"], trim: true, index: true },
     brand: { type: String, required: [true, "Please provide a brand"], trim: true, index: true },
     description: { type: String, required: [true, "Please provide a description"], trim: true },

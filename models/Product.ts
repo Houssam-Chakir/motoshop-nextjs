@@ -28,7 +28,7 @@ export interface ProductDocument extends Document {
   title: string;
   slug: string;
   productModel: string;
-  brand: string;
+  brand: mongoose.Types.ObjectId;
   description: string;
   price: number;
   saleInfo: mongoose.Types.ObjectId;
@@ -55,7 +55,7 @@ const ProductSchema: Schema = new Schema(
     title: { type: String, required: [true, "Please provide a title"], trim: true, index: true },
     slug: {type: String, slug: 'title', required: true, unique: true, index: true},
     productModel: { type: String, required: [true, "Please provide a model"], trim: true, index: true },
-    brand: { type: String, required: [true, "Please provide a brand"], trim: true, index: true },
+    brand: { type: Schema.Types.ObjectId, required: [true, "Please provide a brand"], index: true },
     description: { type: String, required: [true, "Please provide a description"], trim: true },
     price: { type: Number, required: [true, "Please provide a price"], min: [0, "Price cannot be negative"] },
     saleInfo: { type: Schema.Types.ObjectId, ref: "Sale", index: true },

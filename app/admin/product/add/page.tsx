@@ -1,5 +1,10 @@
+
+import { ProductAddForm } from "@/components/forms/ProductAddFormV0";
+
 const AddProduct = () => {
-  return ( <div>add product</div> );
+  return ( <div>
+    <ProductAddForm/>
+  </div> );
 }
 
 export default AddProduct;

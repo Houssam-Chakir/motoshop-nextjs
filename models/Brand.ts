@@ -14,7 +14,7 @@ export interface BrandDocument extends Document {
 const BrandSchema = new Schema<BrandDocument>(
   {
     name: { type: String, required: [true, "Brand name is required"], trim: true },
-    logo: { type: String },
+    logo: { type: String, required: true },
     description: { type: String },
   },
   {

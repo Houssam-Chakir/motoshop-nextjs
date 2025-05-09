@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Oxanium } from "next/font/google";
+import { inter, oxanium } from './fonts';
 import "./globals.css";
 import AuthProvider from "@/components/authentication/AuthProvider";
 import NavBar from "@/components/Navbar";
@@ -25,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
+    <html lang='en' className={`${inter.variable} ${oxanium.variable}`}>
       <AuthProvider>
         <body>
           <NavBar />

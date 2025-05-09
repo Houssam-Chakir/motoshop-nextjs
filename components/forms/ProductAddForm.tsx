@@ -1,188 +1,301 @@
+"use client";
 
+import type React from "react";
 
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-const PropertyAddForm = () => {
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import SearchableSelect from "./SearchableSelect";
+import { Upload, X } from "lucide-react";
+import Image from "next/image";
+
+const formSchema = z.object({
+  brand: z.string().min(1, { message: "Brand is required" }),
+  model: z.string().min(1, { message: "Model is required" }),
+  title: z.string().min(1, { message: "Title is required" }),
+  category: z.string().min(1, { message: "Category is required" }),
+  type: z.string().min(1, { message: "Type is required" }),
+  season: z.string().min(1, { message: "Season is required" }),
+  wholesalePrice: z.coerce.number().positive({ message: "Wholesale price must be positive" }),
+  retailPrice: z.coerce.number().positive({ message: "Retail price must be positive" }),
+  stock: z.coerce.number().int().nonnegative({ message: "Stock must be a non-negative integer" }),
+  description: z.string().min(1, { message: "Description is required" }),
+});
+
+interface ProductAddFormProps {
+  brands: [{ _id: string; name: string }];
+  types: [{ _id: string; name: string }];
+  categories: [{ _id: string; name: string }];
+}
+
+//f/ ADD PRODUCT FORM
+export default function ProductAddForm({ brands, types, categories }: ProductAddFormProps) {
+  const [images, setImages] = useState<File[]>([]);
+  const [imageError, setImageError] = useState("");
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      brand: "",
+      model: "",
+      title: "",
+      category: "",
+      type: "",
+      season: "",
+      wholesalePrice: undefined,
+      retailPrice: undefined,
+      stock: undefined,
+      description: "",
+    },
+  });
+
+  //f/ ON SUBMIT
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    if (images.length === 0) {
+      setImageError("At least one image is required");
+      return;
+    }
+
+    const formData = {
+      ...values,
+      images,
+    };
+
+    console.log(formData);
+    alert("Product created successfully!");
+  }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageError("");
+    if (e.target.files && e.target.files.length > 0) {
+      const newImages = Array.from(e.target.files);
+      setImages([...images, ...newImages]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
+  };
+
+  const seasons = ["All seasons", "Summer", "Winter", "Spring/Fall"];
 
   return (
-    <form >
-      <h2 className='text-3xl text-center font-semibold mb-6'>Add Property</h2>
-      <div className='mb-4'>
-        <label htmlFor='type' className='block text-gray-700 font-bold mb-2'>
-          Property Type
-        </label>
-        <select id='type' name='type' className='border border-gray-300 rounded w-full py-2 px-3' required>
-          <option value='Apartment'>Apartment</option>
-          <option value='Condo'>Condo</option>
-          <option value='House'>House</option>
-          <option value='CabinOrCottage'>Cabin or Cottage</option>
-          <option value='Room'>Room</option>
-          <option value='Studio'>Studio</option>
-          <option value='Other'>Other</option>
-        </select>
-      </div>
-      <div className='mb-4'>
-        <label className='block text-gray-700 font-bold mb-2'>Listing Name</label>
-        <input type='text' id='name' name='name' className='border border-gray-300 rounded w-full py-2 px-3 mb-2' placeholder='eg. Beautiful Apartment In Miami' required />
-      </div>
-      <div className='mb-4'>
-        <label htmlFor='description' className='block text-gray-700 font-bold mb-2'>
-          Description
-        </label>
-        <textarea id='description' name='description' className='border border-gray-300 rounded w-full py-2 px-3' rows={4} placeholder='Add an optional description of your property'></textarea>
-      </div>
-
-      <div className='mb-4 bg-blue-50 p-4'>
-        <label className='block text-gray-700 font-bold mb-2'>Location</label>
-        <input type='text' id='street' name='location.street' className='bg-white border border-gray-300 rounded w-full py-2 px-3 mb-2' placeholder='Street' />
-        <input type='text' id='city' name='location.city' className='bg-white border border-gray-300 rounded w-full py-2 px-3 mb-2' placeholder='City' required />
-        <input type='text' id='state' name='location.state' className='bg-white border border-gray-300 rounded w-full py-2 px-3 mb-2' placeholder='State' required />
-        <input type='text' id='zipcode' name='location.zipcode' className='bg-white border border-gray-300 rounded w-full py-2 px-3 mb-2' placeholder='Zipcode' />
-      </div>
-
-      <div className='mb-4 flex flex-wrap'>
-        <div className='w-full sm:w-1/3 pr-2'>
-          <label htmlFor='beds' className='block text-gray-700 font-bold mb-2'>
-            Beds
-          </label>
-          <input type='number' id='beds' name='beds' className='border border-gray-300 rounded w-full py-2 px-3' required />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        {/* Row 1: Brand and Model */}
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <FormField
+            control={form.control}
+            name='brand'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Brand</FormLabel>
+                <FormControl>
+                  <SearchableSelect options={brands} placeholder='Select brand' value={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='model'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Model</FormLabel>
+                <FormControl>
+                  <Input placeholder='Enter model' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-        <div className='w-full sm:w-1/3 px-2'>
-          <label htmlFor='baths' className='block text-gray-700 font-bold mb-2'>
-            Baths
-          </label>
-          <input type='number' id='baths' name='baths' className='border border-gray-300 rounded w-full py-2 px-3' required />
+
+        {/* Row 2: Title */}
+        <FormField
+          control={form.control}
+          name='title'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input placeholder='Enter product title' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 3: Category and Type */}
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <FormField
+            control={form.control}
+            name='category'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category</FormLabel>
+                <FormControl>
+                  <SearchableSelect options={categories} placeholder='Select category' value={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='type'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type</FormLabel>
+                <FormControl>
+                  <SearchableSelect options={types} placeholder='Select type' value={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-        <div className='w-full sm:w-1/3 pl-2'>
-          <label htmlFor='square_feet' className='block text-gray-700 font-bold mb-2'>
-            Square Feet
-          </label>
-          <input type='number' id='square_feet' name='square_feet' className='border border-gray-300 rounded w-full py-2 px-3' required />
+
+        {/* Row 4: Season */}
+        <FormField
+          control={form.control}
+          name='season'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Season</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select season' />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {seasons.map((season) => (
+                    <SelectItem key={season} value={season}>
+                      {season}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 5: Wholesale Price and Retail Price */}
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <FormField
+            control={form.control}
+            name='wholesalePrice'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Wholesale Price</FormLabel>
+                <FormControl>
+                  <Input type='number' step='0.01' placeholder='0.00' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='retailPrice'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Retail Price</FormLabel>
+                <FormControl>
+                  <Input type='number' step='0.01' placeholder='0.00' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-      </div>
 
-      <div className='mb-4'>
-        <label className='block text-gray-700 font-bold mb-2'>Amenities</label>
-        <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
-          <div>
-            <input type='checkbox' id='amenity_wifi' name='amenities' value='Wifi' className='mr-2' />
-            <label htmlFor='amenity_wifi'>Wifi</label>
+        {/* Row 6: Stock */}
+        <FormField
+          control={form.control}
+          name='stock'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Stock</FormLabel>
+              <FormControl>
+                <Input type='number' placeholder='0' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 7: Description */}
+        <FormField
+          control={form.control}
+          name='description'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea placeholder='Enter product description' rows={4} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 8: Image Upload */}
+        <div className='space-y-2'>
+          <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>Product Images</label>
+          <div
+            className='border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors'
+            onClick={() => document.getElementById("image-upload")?.click()}
+          >
+            <Upload className='h-10 w-10 mx-auto mb-2 text-muted-foreground' />
+            <p className='text-sm text-muted-foreground mb-1'>Drag and drop your images here or click to browse</p>
+            <p className='text-xs text-muted-foreground'>PNG, JPG, WEBP up to 10MB</p>
+            <input id='image-upload' type='file' accept='image/*' multiple className='hidden' onChange={handleImageUpload} />
           </div>
-          <div>
-            <input type='checkbox' id='amenity_kitchen' name='amenities' value='Full kitchen' className='mr-2' />
-            <label htmlFor='amenity_kitchen'>Full kitchen</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_washer_dryer' name='amenities' value='Washer & Dryer' className='mr-2' />
-            <label htmlFor='amenity_washer_dryer'>Washer & Dryer</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_free_parking' name='amenities' value='Free Parking' className='mr-2' />
-            <label htmlFor='amenity_free_parking'>Free Parking</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_pool' name='amenities' value='Swimming Pool' className='mr-2' />
-            <label htmlFor='amenity_pool'>Swimming Pool</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_hot_tub' name='amenities' value='Hot Tub' className='mr-2' />
-            <label htmlFor='amenity_hot_tub'>Hot Tub</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_24_7_security' name='amenities' value='24/7 Security' className='mr-2' />
-            <label htmlFor='amenity_24_7_security'>24/7 Security</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_wheelchair_accessible' name='amenities' value='Wheelchair Accessible' className='mr-2' />
-            <label htmlFor='amenity_wheelchair_accessible'>Wheelchair Accessible</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_elevator_access' name='amenities' value='Elevator Access' className='mr-2' />
-            <label htmlFor='amenity_elevator_access'>Elevator Access</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_dishwasher' name='amenities' value='Dishwasher' className='mr-2' />
-            <label htmlFor='amenity_dishwasher'>Dishwasher</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_gym_fitness_center' name='amenities' value='Gym/Fitness Center' className='mr-2' />
-            <label htmlFor='amenity_gym_fitness_center'>Gym/Fitness Center</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_air_conditioning' name='amenities' value='Air Conditioning' className='mr-2' />
-            <label htmlFor='amenity_air_conditioning'>Air Conditioning</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_balcony_patio' name='amenities' value='Balcony/Patio' className='mr-2' />
-            <label htmlFor='amenity_balcony_patio'>Balcony/Patio</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_smart_tv' name='amenities' value='Smart TV' className='mr-2' />
-            <label htmlFor='amenity_smart_tv'>Smart TV</label>
-          </div>
-          <div>
-            <input type='checkbox' id='amenity_coffee_maker' name='amenities' value='Coffee Maker' className='mr-2' />
-            <label htmlFor='amenity_coffee_maker'>Coffee Maker</label>
-          </div>
+          {imageError && <p className='text-sm font-medium text-destructive'>{imageError}</p>}
+
+          {/* Preview uploaded images */}
+          {images.length > 0 && (
+            <div className='mt-4'>
+              <p className='text-sm font-medium mb-2'>Uploaded Images ({images.length})</p>
+              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2'>
+                {images.map((image, index) => (
+                  <div key={index} className='relative group'>
+                    <div className='aspect-square rounded-md overflow-hidden border'>
+                      <Image width={0} height={0} sizes='100vw' src={URL.createObjectURL(image) || "/placeholder.svg"} alt={`Product image ${index + 1}`} className='w-full h-full object-cover' />
+                    </div>
+                    <button
+                      type='button'
+                      onClick={() => removeImage(index)}
+                      className='absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity'
+                    >
+                      <X className='h-4 w-4' />
+                      <span className='sr-only'>Remove image</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
 
-      <div className='mb-4 bg-blue-50 p-4'>
-        <label className='block text-gray-700 font-bold mb-2'>Rates (Leave blank if not applicable)</label>
-        <div className='flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4'>
-          <div className='flex items-center'>
-            <label htmlFor='weekly_rate' className='mr-2'>
-              Weekly
-            </label>
-            <input type='number' id='weekly_rate' name='rates.weekly' className='border border-gray-300 bg-white rounded w-full py-2 px-3' />
-          </div>
-          <div className='flex items-center'>
-            <label htmlFor='monthly_rate' className='mr-2'>
-              Monthly
-            </label>
-            <input type='number' id='monthly_rate' name='rates.monthly' className='border border-gray-300 bg-white rounded w-full py-2 px-3' />
-          </div>
-          <div className='flex items-center'>
-            <label htmlFor='nightly_rate' className='mr-2'>
-              Nightly
-            </label>
-            <input type='number' id='nightly_rate' name='rates.nightly' className='border border-gray-300 bg-white rounded w-full py-2 px-3' />
-          </div>
-        </div>
-      </div>
-
-      <div className='mb-4'>
-        <label htmlFor='seller_name' className='block text-gray-700 font-bold mb-2'>
-          Seller Name
-        </label>
-        <input type='text' id='seller_name' name='seller_info.name' className='border border-gray-300 rounded w-full py-2 px-3' placeholder='Name' />
-      </div>
-      <div className='mb-4'>
-        <label htmlFor='seller_email' className='block text-gray-700 font-bold mb-2'>
-          Seller Email
-        </label>
-        <input type='email' id='seller_email' name='seller_info.email' className='border border-gray-300 rounded w-full py-2 px-3' placeholder='Email address' required />
-      </div>
-      <div className='mb-4'>
-        <label htmlFor='seller_phone' className='block text-gray-700 font-bold mb-2'>
-          Seller Phone
-        </label>
-        <input type='tel' id='seller_phone' name='seller_info.phone' className='border border-gray-300 rounded w-full py-2 px-3' placeholder='Phone' />
-      </div>
-
-      <div className='mb-4'>
-        <label htmlFor='images' className='block text-gray-700 font-bold mb-2'>
-          Images (Select up to 4 images)
-        </label>
-        <input type='file' id='images' name='images' className='border border-gray-300 rounded w-full py-2 px-3' accept='image/*' multiple required />
-      </div>
-
-      <div>
-        <button className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline' type='submit'>
-          Add Property
-        </button>
-      </div>
-    </form>
+        {/* Submit Button */}
+        <Button type='submit' className='w-full md:w-auto'>
+          Create Product
+        </Button>
+      </form>
+    </Form>
   );
-};
-
-export default PropertyAddForm;
+}

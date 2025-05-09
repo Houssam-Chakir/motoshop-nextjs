@@ -3,6 +3,7 @@ import { Inter, Oxanium } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/authentication/AuthProvider";
 import NavBar from "@/components/Navbar";
+import { ToastContainer } from "react-toastify";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -26,12 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <AuthProvider>
-        <body>
+      <body>
+        <AuthProvider>
           <NavBar />
           {children}
-        </body>
-      </AuthProvider>
+          <ToastContainer />
+        </AuthProvider>
+      </body>
     </html>
   );
 }

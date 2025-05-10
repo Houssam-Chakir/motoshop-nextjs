@@ -18,7 +18,7 @@ export default function RootLayout({
     <html lang='en' className={`${inter.variable} ${oxanium.variable}`}>
       <AuthProvider>
         <body>
-
+          <NavBar/>
           {children}
         </body>
       </AuthProvider>

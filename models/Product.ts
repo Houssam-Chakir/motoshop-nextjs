@@ -1,5 +1,6 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
-import slug from 'mongoose-slug-updater';
+import slug from "mongoose-slug-updater";
+import { nanoid } from "nanoid";
 
 mongoose.plugin(slug);
 
@@ -51,10 +52,10 @@ export interface ProductDocument extends Document {
 
 const ProductSchema: Schema = new Schema(
   {
-    barcode: { type: String, unique: true, required: [true, "Please provide a barcode"], trim: true, index: true },
+    barcode: { type: String, required: true, unique: true, default: () => nanoid(12), index: true },
     sku: { type: String, trim: true, required: [true, "Please provide a sku"], index: true },
     title: { type: String, required: [true, "Please provide a title"], trim: true, index: true },
-    slug: {type: String, slug: 'title', required: true, unique: true, index: true},
+    slug: { type: String, slug: "title", required: true, unique: true, index: true },
     productModel: { type: String, required: [true, "Please provide a model"], trim: true, index: true },
     brand: { type: Schema.Types.ObjectId, required: [true, "Please provide a brand"], index: true },
     description: { type: String, required: [true, "Please provide a description"], trim: true },

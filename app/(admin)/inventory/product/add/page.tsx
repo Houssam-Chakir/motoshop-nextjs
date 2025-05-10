@@ -1,4 +1,3 @@
-
 import connectDB from "@/config/database";
 import Brand from "@/models/Brand";
 import { unstable_cache as nextCache } from "next/cache";
@@ -71,14 +70,17 @@ export const getCachedCategories = nextCache(
 );
 
 const AddProduct = async () => {
-  const brands = await getCachedBrands() as [{ _id: string; name: string }];
-  const types = await getCachedTypes()as [{ _id: string; name: string }];
-  const categories = await getCachedCategories()as [{ _id: string; name: string }];
+  const brands = (await getCachedBrands()) as [{ _id: string; name: string }];
+  const types = (await getCachedTypes()) as [{ _id: string; name: string }];
+  const categories = (await getCachedCategories()) as [{ _id: string; name: string }];
 
   return (
-    <div>
-      <ProductAddForm brands={brands} types={types} categories={categories} />
-    </div>
+    <section className='flex justify-center bg-slate-100'>
+      <div className='px-12 py-6 border my-6 rounded-xs bg-white'>
+        <h1 className='font-display text-3xl pb-4 mb-8 text-center border-b'>Create new product</h1>
+        <ProductAddForm brands={brands} types={types} categories={categories} />
+      </div>
+    </section>
   );
 };
 

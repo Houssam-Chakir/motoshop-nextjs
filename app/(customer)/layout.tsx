@@ -1,18 +1,8 @@
 import type { Metadata } from "next";
-import { inter, oxanium } from './fonts';
-import "./globals.css";
+import { inter, oxanium } from '@/app/fonts';
+import "@/app/globals.css";
 import AuthProvider from "@/components/authentication/AuthProvider";
 import NavBar from "@/components/Navbar";
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
 
 export const metadata: Metadata = {
   title: "Motoshop",

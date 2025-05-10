@@ -6,7 +6,6 @@ import convertToSerializableObject from "@/utils/convertToObj";
 import Type from "@/models/Type";
 import Category from "@/models/Category";
 import ProductAddForm from "@/components/forms/ProductAddForm";
-
 /**
  * Fetches and caches the list of brands.
  * Uses nextCache for deduplication across requests and provides tagging for on-demand revalidation.
@@ -72,9 +71,9 @@ export const getCachedCategories = nextCache(
 );
 
 const AddProduct = async () => {
-  const brands = await getCachedBrands();
-  const types = await getCachedTypes();
-  const categories = await getCachedCategories();
+  const brands = await getCachedBrands() as [{ _id: string; name: string }];
+  const types = await getCachedTypes()as [{ _id: string; name: string }];
+  const categories = await getCachedCategories()as [{ _id: string; name: string }];
 
   return (
     <div>

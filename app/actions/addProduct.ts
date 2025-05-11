@@ -29,8 +29,8 @@ export default async function addNewProduct(values) {
     sku: "GENERATED_SKU", // Replace with actual SKU generation logic
     slug: title.toLowerCase().replace(/ /g, "-"), // Example slug generation
     saleInfo: { discount: 0, isOnSale: false }, // Replace with actual sale info
-    createdAt: new Date().toISOString(), // Example creation date
-    updatedAt: new Date().toISOString(), // Example update date
+    createdAt: new Date(), // Example creation date
+    updatedAt: new Date(), // Example update date
   };
   console.log(newProduct)
 

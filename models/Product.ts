@@ -33,7 +33,7 @@ export interface ProductDocument extends Document {
   description: string;
   wholesalePrice: number;
   retailPrice: number;
-  saleInfo: mongoose.Types.ObjectId;
+  saleInfo?: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
 
   category: mongoose.Types.ObjectId;
@@ -97,3 +97,47 @@ const Product = models.Product || model("Product", ProductSchema);
 // Export a type without the Document methods for use in functions
 export type ProductType = Omit<ProductDocument, keyof Document>;
 export default Product;
+
+// --- Helper function to generate attribute codes ---
+function getAttributeCode(attributeValue: string, length = 3) {
+  if (!attributeValue || typeof attributeValue !== "string") {
+    throw new Error("error creating attributes code");
+  }
+  return attributeValue
+    .substring(0, length)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, ""); // Sanitize
+}
+
+
+//f/ -- MIDDLEWARE --
+ProductSchema.pre("save", function (next) {
+  // Generate SKU only if it's a new document and SKU is not already set (allows manual override)
+  if (this.isNew && !this.isSet("sku")) {
+    const parts: string[] = [];
+
+    // 1. Brand Code
+    parts.push(getAttributeCode(this.brand as string, 3));
+
+    // 2. Category Code
+    parts.push(getAttributeCode(this.category as string, 3));
+
+    // 3. Product Type Code
+    parts.push(getAttributeCode(this.productType as string, 3));
+
+    // 4. Model Code
+    parts.push(getAttributeCode(this.productModel as string, 3));
+
+    if (this.size) {
+      parts.push(getAttributeCode(this.size as string, 2));
+    }
+
+    // 5. Unique Suffix (e.g., 4-character nanoid)
+    // This ensures uniqueness even if all attribute-based parts are identical for two distinct items
+    parts.push(nanoid(4).toUpperCase());
+
+    this.sku = parts.join("-"); // e.g., "NIK-APP-TSH-BLU-LG-A1B2"
+  }
+
+  next();
+});

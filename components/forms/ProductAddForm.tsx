@@ -16,7 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import addNewProduct from "@/app/actions/addProduct";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import Category from "@/models/Category";
 
 // Define the stock item schema
 const stockItemSchema = z.object({
@@ -236,18 +237,23 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
     // Here you would typically send the form data to your API
     // Find the full objects for the selected IDs
     const selectedBrand = brands.find((b) => b._id === values.brand);
+    console.log('selectedBrand: ', selectedBrand);
     const selectedCategory = categories.find((c) => c._id === values.category);
+    console.log('selectedCategory: ', selectedCategory);
     const selectedType = types.find((t) => t._id === values.type);
+    console.log('selectedType: ', selectedType);
 
     const formData = {
       ...values,
-      brandObj: selectedBrand,
-      categoryObj: selectedCategory,
-      typeObj: selectedType,
+      brand: selectedBrand?._id,
+      category: selectedCategory?._id,
+      type: selectedType?._id,
+      identifiers: { brand: selectedBrand?.name, categoryType: selectedType?.name, category: selectedCategory?.name },
       images,
     };
 
     addNewProduct(formData);
+    console.log("formData: ", formData);
     toast.success("Product created successfully!");
   }
 
@@ -557,7 +563,13 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
                 {images.map((image, index) => (
                   <div key={index} className='relative group w-[100px]'>
                     <div className='aspect-square rounded-md overflow-hidden border'>
-                      <Image width={110} height={110}  src={URL.createObjectURL(image) || "/placeholder.svg"} alt={`Product image ${index + 1}`} className='w-full h-full object-cover' />
+                      <Image
+                        width={110}
+                        height={110}
+                        src={URL.createObjectURL(image) || "/placeholder.svg"}
+                        alt={`Product image ${index + 1}`}
+                        className='w-full h-full object-cover'
+                      />
                     </div>
                     <button
                       type='button'

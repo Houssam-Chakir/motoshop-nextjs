@@ -5,6 +5,7 @@ import convertToSerializableObject from "@/utils/convertToObj";
 import Type from "@/models/Type";
 import Category from "@/models/Category";
 import ProductAddForm from "@/components/forms/ProductAddForm";
+import { getSessionUser } from "@/utils/getSessionUser";
 /**
  * Fetches and caches the list of brands.
  * Uses nextCache for deduplication across requests and provides tagging for on-demand revalidation.
@@ -34,7 +35,6 @@ export const getCachedTypes = nextCache(
     await connectDB();
     const TypesDoc = await Type.find({}).lean().exec();
     const Types = convertToSerializableObject(TypesDoc) as { _id: string; name: string }[];
-    console.log("Types: ", Types);
 
     // Ensure the data is plain JSON-serializable for the cache
     // .lean() helps, but Mongoose models can still have methods.
@@ -54,7 +54,6 @@ export const getCachedCategories = nextCache(
     await connectDB();
     const categoriesDoc = await Category.find({}).lean().exec();
     const categories = convertToSerializableObject(categoriesDoc) as { _id: string; name: string }[];
-    console.log("Categories: ", categories);
 
     // Ensure the data is plain JSON-serializable for the cache
     // .lean() helps, but Mongoose models can still have methods.
@@ -70,6 +69,7 @@ export const getCachedCategories = nextCache(
 );
 
 const AddProduct = async () => {
+  await getSessionUser();
   const brands = (await getCachedBrands()) as [{ _id: string; name: string }];
   const types = (await getCachedTypes()) as [{ _id: string; name: string }];
   const categories = (await getCachedCategories()) as [{ _id: string; name: string }];

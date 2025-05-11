@@ -237,11 +237,8 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
     // Here you would typically send the form data to your API
     // Find the full objects for the selected IDs
     const selectedBrand = brands.find((b) => b._id === values.brand);
-    console.log('selectedBrand: ', selectedBrand);
     const selectedCategory = categories.find((c) => c._id === values.category);
-    console.log('selectedCategory: ', selectedCategory);
     const selectedType = types.find((t) => t._id === values.type);
-    console.log('selectedType: ', selectedType);
 
     const formData = {
       ...values,
@@ -253,7 +250,6 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
     };
 
     addNewProduct(formData);
-    console.log("formData: ", formData);
     toast.success("Product created successfully!");
   }
 

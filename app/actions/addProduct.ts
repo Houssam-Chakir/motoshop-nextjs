@@ -6,12 +6,11 @@ import User from "@/models/User";
 import { getSessionUser } from "@/utils/getSessionUser";
 import mongoose from "mongoose";
 import Product from "../../models/Product";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 interface AddProductValues {
   brand: mongoose.Types.ObjectId;
-  model: string;
+  slug: string;
+  productModel: string;
   title: string;
   identifiers: { brand: string; categoryType: string; category: string };
   category: mongoose.Types.ObjectId;
@@ -21,11 +20,12 @@ interface AddProductValues {
   retailPrice: number;
   stock: mongoose.Types.ObjectId; // Replace `any` with a more specific type if available
   description: string;
-  specification: any; // Replace `any` with a more specific type if available
-  images: { name: string }[];
+  specs: { name: string; description: string }; // Replace `any` with a more specific type if available
+  images: { name: string }[] | { url: string; altText: string };
 }
 
 export default async function addNewProduct(values: AddProductValues): Promise<void> {
+  //TODO create stock for product and link them
   await connectDB();
 
   // get session user
@@ -42,8 +42,7 @@ export default async function addNewProduct(values: AddProductValues): Promise<v
   const { identifiers, brand, model: productModel, title, category, type, season, wholesalePrice, retailPrice, description, specification: specs, images: imageFiles } = values;
   const images = imageFiles.filter((image: { name: string }) => image.name !== "").map((image: { name: string }) => ({ url: image.name, altText: image.name }));
 
-
-  const productData = {
+  const productData: AddProductValues = {
     brand,
     productModel,
     identifiers,
@@ -63,11 +62,10 @@ export default async function addNewProduct(values: AddProductValues): Promise<v
     createdAt: new Date(), // Example creation date
     updatedAt: new Date(), // Example update date
   };
-  console.log('productData: look for identifiers before new Product', productData);
+  console.log("productData: look for identifiers before new Product", productData);
   const newProduct = new Product(productData);
   newProduct.save();
 
-  revalidatePath("/", "layout");
   // redirect(`/products/${newProduct._id}`)
   // validate session
   // data formating and validation

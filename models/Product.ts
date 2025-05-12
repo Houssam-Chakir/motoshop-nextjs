@@ -6,8 +6,8 @@ mongoose.plugin(slug);
 
 // Define interfaces first, within the same file
 interface ProductSpec {
-  title: string;
-  body: string;
+  name: string;
+  description: string;
 }
 
 interface ProductReview {
@@ -41,7 +41,7 @@ export interface ProductDocument extends Document {
   type: mongoose.Types.ObjectId;
   stock?: mongoose.Types.ObjectId;
 
-  specs: ProductSpec[];
+  specifications: ProductSpec[];
   reviews: ProductReview[];
   images: ProductImage[];
 
@@ -56,11 +56,13 @@ const ProductSchema: Schema = new Schema(
     barcode: { type: String, required: true, unique: true, default: () => nanoid(12), index: true },
     sku: { type: String, trim: true, required: [true, "Please provide a sku"], index: true },
     title: { type: String, required: [true, "Please provide a title"], trim: true, index: true },
-    identifiers: {type: {
-      brand: String,
-      categoryType: String,
-      category: String,
-    }},
+    identifiers: {
+      type: {
+        brand: String,
+        categoryType: String,
+        category: String,
+      },
+    },
     slug: { type: String, slug: "title", required: true, unique: true, index: true },
     productModel: { type: String, required: [true, "Please provide a model"], trim: true, index: true },
     brand: { type: Schema.Types.ObjectId, ref: "Brand", required: [true, "Please provide a brand"], index: true },
@@ -78,16 +80,14 @@ const ProductSchema: Schema = new Schema(
     category: { type: Schema.Types.ObjectId, ref: "Category", required: [true, "Please choose a category"], index: true },
     type: { type: Schema.Types.ObjectId, ref: "Type", required: [true, "Please choose a type"], index: true },
 
-    stock: {
-      type: mongoose.Types.ObjectId,
-      // required: true,
-    },
-    specs: [
+    stock: { type: mongoose.Types.ObjectId },
+    specifications: [
       {
-        title: { type: String, required: [true, "Please provide a name for the spec"] },
-        body: { type: String, required: [true, "Please provide information about the spec"] },
+        name: { type: String, required: [true, "Please provide a name for the spec"] },
+        description: { type: String, required: [true, "Please provide information about the spec"] },
       },
     ],
+
     reviews: [{ type: mongoose.Types.ObjectId }],
     likes: { type: Number, default: 0, min: 0 },
   },
@@ -117,7 +117,7 @@ ProductSchema.pre("validate", function (this: ProductDocument, next) {
 
   // Modified condition: Check if it's a new document AND if `sku` is not already truthy (i.e., not set or empty)
 
-  console.log('this: ', this);
+  console.log("this: ", this);
   if (this.isNew && !this.sku) {
     // Using !this.sku as an alternative to !this.isSet("sku")
     console.log("PRE-VALIDATE HOOK: Conditions met for SKU generation (isNew=true, SKU is falsy).");

@@ -250,6 +250,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
     };
 
     addNewProduct(formData);
+    console.log('formData: ', formData);
     toast.success("Product created successfully!");
   }
 

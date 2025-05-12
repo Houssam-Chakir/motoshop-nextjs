@@ -125,6 +125,7 @@ export default async function addNewProduct(values: ProductValues): Promise<void
     console.log("Server Action: Product creation complete.");
 
     revalidatePath('/', 'layout')
+    // redirect(`/products/${newProduct._id}`)
   } catch (error) {
     console.error("Server Action: Error during product/stock creation:", error);
     if (error instanceof Error) {
@@ -133,11 +134,4 @@ export default async function addNewProduct(values: ProductValues): Promise<void
       throw new Error("An unknown error occurred");
     }
   }
-
-  // redirect(`/products/${newProduct._id}`)
-  // validate session
-  // data formating and validation
-  // make sure all ids refere to existing documents
-  //generate SKU, BARCODE
-  // validate images and upload them , TODO later
 }

@@ -80,7 +80,7 @@ const ProductSchema: Schema = new Schema(
     category: { type: Schema.Types.ObjectId, ref: "Category", required: [true, "Please choose a category"], index: true },
     type: { type: Schema.Types.ObjectId, ref: "Type", required: [true, "Please choose a type"], index: true },
 
-    stock: { type: mongoose.Types.ObjectId },
+    stock: { type: mongoose.Types.ObjectId, unique: true },
     specifications: [
       {
         name: { type: String, required: [true, "Please provide a name for the spec"] },

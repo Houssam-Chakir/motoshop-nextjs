@@ -4,6 +4,7 @@ import { ProductDocument } from "@/models/Product";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import deleteProduct from "@/app/actions/deleteProduct";
+import { toast } from "react-toastify";
 // import Image from "next/image";
 
 const ProductCard = ({ product }) => {
@@ -12,6 +13,7 @@ const ProductCard = ({ product }) => {
     if (isConfirmed) {
       await deleteProduct(product._id);
       console.log('product deleted successfully');
+      toast.success('product deleted successfully')
     }
   };
 

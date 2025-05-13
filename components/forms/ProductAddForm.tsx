@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import addNewProduct from "@/app/actions/addProduct";
 import { toast } from "react-toastify";
-import Category from "@/models/Category";
 
 // Define the stock item schema
 const stockItemSchema = z.object({
@@ -186,7 +185,8 @@ interface ProductFormProps {
   categories: { _id: string; name: string }[];
 }
 
-export default function ProductForm({ brands, types, categories }: ProductFormProps) {
+export default function ProductForm({ brands, types, categories, product = null }: ProductFormProps) {
+
   const [images, setImages] = useState<File[]>([]);
   const [imageError, setImageError] = useState("");
   const [availableSizes, setAvailableSizes] = useState<string[]>(["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44"]);
@@ -295,7 +295,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
               <FormItem>
                 <FormLabel>Brand</FormLabel>
                 <FormControl>
-                  <SearchableSelect options={brands} placeholder='Select brand' value={field.value} onChange={field.onChange} />
+                  <SearchableSelect options={brands} placeholder='Select brand' value={ product.identifiers.brand || field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import Product from "../../models/Product";
 import Stock from "@/models/Stock";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 interface ProductValues {
   brand: mongoose.Types.ObjectId;
@@ -125,7 +126,7 @@ export default async function addNewProduct(values: ProductValues): Promise<void
     console.log("Server Action: Product creation complete.");
 
     revalidatePath('/', 'layout')
-    // redirect(`/products/${newProduct._id}`)
+    redirect(`/dashboard/inventory`)
   } catch (error) {
     console.error("Server Action: Error during product/stock creation:", error);
     if (error instanceof Error) {

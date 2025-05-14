@@ -28,7 +28,7 @@ export interface ProductDocument extends Document {
   sku: string;
   title: string;
   identifiers: { brand: string; categoryType: string; category: string };
-  slug: string;
+  slug?: string;
   productModel: string;
   brand: mongoose.Types.ObjectId;
   description: string;
@@ -63,7 +63,7 @@ const ProductSchema: Schema = new Schema(
         category: String,
       },
     },
-    slug: { type: String, slug: "title", required: true, unique: true, index: true },
+    slug: { type: String, slug: "title", unique: true, index: true },
     productModel: { type: String, required: [true, "Please provide a model"], trim: true, index: true },
     brand: { type: Schema.Types.ObjectId, ref: "Brand", required: [true, "Please provide a brand"], index: true },
     description: { type: String, required: [true, "Please provide a description"], trim: true },

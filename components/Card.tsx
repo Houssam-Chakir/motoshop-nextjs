@@ -11,7 +11,7 @@ const ProductCard = ({ product }) => {
   const handleDeleteProduct = async () => {
     const isConfirmed = confirm("Are you sure you want to delete this product");
     if (isConfirmed) {
-      await deleteProduct(product._id);
+      await deleteProduct(product._id.toString());
       console.log('product deleted successfully');
       toast.success('product deleted successfully')
     }

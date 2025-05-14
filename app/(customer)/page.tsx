@@ -6,7 +6,7 @@ export default async function Home() {
       <div>Links</div>
       <Link href="/products">Products page</Link>
       <div>admin</div>
-      <Link href="/inventory/product/add">add product</Link>
+      <Link href="dashboard/inventory">inventory</Link>
     </>
   );
 }

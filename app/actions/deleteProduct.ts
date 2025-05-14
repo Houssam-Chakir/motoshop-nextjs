@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 // Import mongoose to use transactions
 import mongoose from "mongoose";
 
-const deleteProduct = async (productId: mongoose.Types.ObjectId) => {
+const deleteProduct = async (productId: string) => {
   // Validate productId (important for security and preventing errors)
   if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
     console.error("Invalid or missing Product ID:", productId);
@@ -47,7 +47,7 @@ const deleteProduct = async (productId: mongoose.Types.ObjectId) => {
     revalidatePath("/", "layout");
 
     // return a success status or the deleted items
-    return { success: true, deletedProductId: product._id, deletedStockId: stock?._id };
+    return { success: true, deletedProductId: product._id.toString(), deletedStockId: stock?._id.toString() || null };
   } catch (error) {
     // If any error occurs, abort the transaction
     if (session.inTransaction()) {

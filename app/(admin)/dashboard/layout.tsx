@@ -5,11 +5,13 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { DashboardSidebar } from "@/components/adminUI/Sidebar";
 import NavBar from "@/components/Navbar";
 import AuthProvider from "@/components/authentication/AuthProvider";
+import { ToastContainer } from "react-toastify";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en'>
       <body>
+        <ToastContainer/>
         <AuthProvider>
           <SidebarProvider>
             <div className='flex min-h-screen'>

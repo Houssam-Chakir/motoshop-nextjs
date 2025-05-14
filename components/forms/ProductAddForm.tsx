@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import addNewProduct from "@/app/actions/addProduct";
 import { toast } from "react-toastify";
+import { redirect } from "next/navigation";
 
 // Define the stock item schema
 const stockItemSchema = z.object({
@@ -33,7 +34,7 @@ const specificationSchema = z.object({
 // Update the form schema to use an array of stock items and specifications
 const formSchema = z.object({
   brand: z.string().min(1, { message: "Brand is required" }),
-  model: z.string().min(1, { message: "Model is required" }),
+  productModel: z.string().min(1, { message: "Model is required" }),
   title: z.string().min(1, { message: "Title is required" }),
   category: z.string().min(1, { message: "Category is required" }),
   type: z.string().min(1, { message: "Type is required" }),
@@ -185,7 +186,7 @@ interface ProductFormProps {
   categories: { _id: string; name: string }[];
 }
 
-export default function ProductForm({ brands, types, categories, product = null }: ProductFormProps) {
+export default function ProductForm({ brands, types, categories }: ProductFormProps) {
 
   const [images, setImages] = useState<File[]>([]);
   const [imageError, setImageError] = useState("");
@@ -195,7 +196,7 @@ export default function ProductForm({ brands, types, categories, product = null 
     resolver: zodResolver(formSchema),
     defaultValues: {
       brand: "",
-      model: "",
+      productModel: "",
       title: "",
       category: "",
       type: "",
@@ -252,6 +253,7 @@ export default function ProductForm({ brands, types, categories, product = null 
     addNewProduct(formData);
     console.log('formData: ', formData);
     toast.success("Product created successfully!");
+    // redirect('/dashboard/inventory')
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -295,7 +297,7 @@ export default function ProductForm({ brands, types, categories, product = null 
               <FormItem>
                 <FormLabel>Brand</FormLabel>
                 <FormControl>
-                  <SearchableSelect options={brands} placeholder='Select brand' value={ product.identifiers.brand || field.value} onChange={field.onChange} />
+                  <SearchableSelect options={brands} placeholder='Select brand' value={ field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -303,7 +305,7 @@ export default function ProductForm({ brands, types, categories, product = null 
           />
           <FormField
             control={form.control}
-            name='model'
+            name='productModel'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Model</FormLabel>

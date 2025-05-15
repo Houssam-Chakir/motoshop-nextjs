@@ -8,6 +8,7 @@ const ProductDetailsPage = async({params}: { params: { id: string } }) => {
   const {id} = await params
   const productDoc = await Product.findById(id).lean()
   const product = makeSerializable(productDoc)
+  console.log('product: ', product);
   return (
     <div className='w-full max-w-sm px-4 py-3 bg-white rounded-md shadow-md dark:bg-gray-800'>
       <div className='flex items-center justify-between'>
@@ -26,6 +27,9 @@ const ProductDetailsPage = async({params}: { params: { id: string } }) => {
           <Link href={`/products/${product._id}`} className='mx-2 text-blue-600 cursor-pointer dark:text-blue-400 hover:underline' tabIndex={0} role='link'>
             details
           </Link>
+        </div>
+        <div>
+          <img src={product.images[0]} alt="product image" />
         </div>
 
         <div className='flex items-center justify-center mt-4'>

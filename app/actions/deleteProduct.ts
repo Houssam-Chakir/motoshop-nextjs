@@ -4,8 +4,16 @@ import Stock from "@/models/Stock";
 import { revalidatePath } from "next/cache";
 // Import mongoose to use transactions
 import mongoose from "mongoose";
+import connectDB from "@/config/database";
+import isUserAuthorized from "@/utils/isUserAuthorized";
 
 const deleteProduct = async (productId: string) => {
+  await connectDB();
+
+  // --- Authentication/Authorization -----------------
+  const requiredRole = 'admin'
+  await isUserAuthorized(requiredRole)
+
   // Validate productId (important for security and preventing errors)
   if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
     console.error("Invalid or missing Product ID:", productId);

@@ -250,8 +250,9 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
       images,
     };
 
-    addNewProduct(formData);
+    const status = addNewProduct(formData);
     console.log('formData: ', formData);
+    if (!status) toast.error('Something went wrong')
     toast.success("Product created successfully!");
     // redirect('/dashboard/inventory')
   }

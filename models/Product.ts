@@ -17,10 +17,7 @@ interface ProductReview {
   createdAt: Date;
 }
 
-interface ProductImage {
-  url: string;
-  altText: string;
-}
+
 
 // Main Product interface that extends Document
 export interface ProductDocument extends Document {
@@ -43,7 +40,7 @@ export interface ProductDocument extends Document {
 
   specifications: ProductSpec[];
   reviews: ProductReview[];
-  images: ProductImage[];
+  images: string[];
 
   likes: number;
 
@@ -72,8 +69,7 @@ const ProductSchema: Schema = new Schema(
     saleInfo: { type: Schema.Types.ObjectId, ref: "Sale", index: true },
     season: { type: String, enum: ["All seasons", "Summer", "Winter", "Spring/Fall"], default: "All seasons" },
     images: {
-      type: [{ url: String, altText: String }],
-      validate: [(val: ProductImage[]) => val.length > 0, "Please provide at least 1 image"],
+      type: [{ type: String}],
       required: true,
     },
 

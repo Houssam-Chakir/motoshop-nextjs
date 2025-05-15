@@ -1,12 +1,14 @@
 "use server";
 
 import connectDB from "@/config/database";
-import User from "@/models/User";
 import { getSessionUser } from "@/utils/getSessionUser";
 import mongoose from "mongoose";
 import Product from "../../models/Product";
 import Stock from "@/models/Stock";
 import { revalidatePath } from "next/cache";
+import imageUploader from "@/utils/imageUploadCloudinary";
+import isUserAdmin from "@/utils/isUserAuthorized";
+import isUserAuthorized from "@/utils/isUserAuthorized";
 
 interface ProductValues {
   brand: mongoose.Types.ObjectId;
@@ -39,7 +41,7 @@ interface ProductObject {
   stock?: mongoose.Types.ObjectId; // Replace `any` with a more specific type if available
   description: string; // Replace `any` with a more specific type if available
   specifications?: { name: string; description: string }; // Replace `any` with a more specific type if available
-  images: { url: string; altText: string }[];
+  images: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -54,28 +56,21 @@ interface StockValues {
   sizes: SizeValues[];
 }
 
+//f/ ADD NEW PRODUCT FUNCTION ---------------------------------------------------
 export default async function addNewProduct(values: ProductValues): Promise<void> {
   try {
     await connectDB();
 
-    // --- Authentication/Authorization ---
-    const sessionUser = await getSessionUser();
-    if (!sessionUser || !sessionUser.userId) {
-      throw new Error("User session not found or invalid");
-    }
-    const { userId } = sessionUser;
-    const user = await User.findById(userId);
-    if (!user || user.role !== "admin") {
-      throw new Error("Unauthorized: Admin privileges required");
-    }
+    // --- Authentication/Authorization -----------------
+    const requiredRole = 'admin'
+    await isUserAuthorized(requiredRole)
 
     console.log("Server Action: Received values: ", values);
 
     const { stockItems, identifiers, brand, productModel, title, category, type, season, wholesalePrice, retailPrice, description, specifications, images: imageFiles } = values;
-    console.log("specifications: ", specifications);
-    const images = imageFiles.filter((image: { name: string }) => image.name !== "").map((image: { name: string }) => ({ url: image.name, altText: image.name }));
+    const images = imageFiles.filter((image: { name: string }) => image.name !== "");
 
-    // -- Create new product
+    // -- Create new product data -----------------------
     const productData: ProductObject = {
       brand,
       productModel,
@@ -89,12 +84,17 @@ export default async function addNewProduct(values: ProductValues): Promise<void
       // stock: should have newly created stock id
       description,
       specifications,
-      // images cloudinary urls, for now just simple names
-      images,
+      images: [], // Initialize images as an empty array
       createdAt: new Date(), // Example creation date
       updatedAt: new Date(), // Example update date
     };
+
+    // -- Upload images to cloudinary and add secure urls array to productData --------
+    productData.images = await imageUploader(images);
+    //TODO Delete images incase of product saving error
+
     console.log("productData:", productData);
+    // -- Create new product to DB
     const newProduct = new Product(productData);
     await newProduct.save();
 

@@ -21,6 +21,7 @@ export default function Error({
         <h1 className="text-4xl font-bold text-gray-900">Something went wrong!</h1>
         <p className="text-gray-600">We apologize for the inconvenience. An unexpected error has occurred.</p>
         {error.digest && <p className="text-sm text-gray-500">Error ID: {error.digest}</p>}
+        {error.digest && <p className="text-sm text-gray-500">Error Message: {error.message}</p>}
         <Button onClick={() => reset()}>Try again</Button>
       </div>
     </div>

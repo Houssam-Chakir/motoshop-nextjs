@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -184,33 +182,31 @@ interface ProductFormProps {
   brands: { _id: string; name: string }[];
   types: { _id: string; name: string }[];
   categories: { _id: string; name: string }[];
-  editProduct: ProductType | null
+  editProduct: ProductType | null;
 }
 
-export default function ProductForm({ brands, types, categories, editProduct = null }: ProductFormProps) {
-
+export default function ProductEditForm({ brands, types, categories, editProduct, productStock = null }: ProductFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const [imageError, setImageError] = useState("");
-  const [availableSizes, setAvailableSizes] = useState<string[]>(["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44"]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>(["XXS", "XS", "S", "M", "L", "XL", "XXL"]);
 
-  if(!editProduct) throw new Error('Error recieving the product info')
-
-
+  if (!editProduct) throw new Error("Error recieving the product info");
+  if (!productStock) toast.warning('cant find any stock document related to this product!')
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      brand: editProduct.brand ||  "",
-      productModel: editProduct.productModel ||   "",
-      title: editProduct.title ||   "",
-      category: editProduct.identifiers.category ||   "",
-      type: editProduct.identifiers.categoryType ||   "",
-      season: editProduct.season ||   "",
-      wholesalePrice: editProduct.wholesalePrice ||   undefined,
-      retailPrice: editProduct.retailPrice ||   undefined,
-      stockItems: [{ size: "", quantity: 0 }],
-      description: editProduct.description ||   "",
-      specifications: editProduct.specifications ||   [{ name: "", description: "" }],
+      brand: editProduct.brand.toString() || "",
+      productModel: editProduct.productModel || "",
+      title: editProduct.title || "",
+      category: editProduct.category.toString() || "",
+      type: editProduct.type.toString() || "",
+      season: editProduct.season || "",
+      wholesalePrice: editProduct.wholesalePrice || undefined,
+      retailPrice: editProduct.retailPrice || undefined,
+      stockItems: productStock || [{ size: "", quantity: 0 }],
+      description: editProduct.description || "",
+      specifications: editProduct.specifications || [{ name: "", description: "" }],
     },
   });
 
@@ -255,9 +251,9 @@ export default function ProductForm({ brands, types, categories, editProduct = n
       images,
     };
 
-    const status = addNewProduct(formData);
-    console.log('formData: ', formData);
-    if (!status) toast.error('Something went wrong')
+    
+    console.log("formData: ", formData);
+    if (!status) toast.error("Something went wrong");
     toast.success("Product created successfully!");
     // redirect('/dashboard/inventory')
   }
@@ -303,7 +299,7 @@ export default function ProductForm({ brands, types, categories, editProduct = n
               <FormItem>
                 <FormLabel>Brand</FormLabel>
                 <FormControl>
-                  <SearchableSelect options={brands} placeholder='Select brand' value={ field.value} onChange={field.onChange} />
+                  <SearchableSelect options={brands} placeholder='Select brand' value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -56,7 +56,7 @@ interface StockValues {
 }
 
 //f/ ADD NEW PRODUCT FUNCTION ---------------------------------------------------
-export default async function addNewProduct(values: ProductValues): Promise<void> {
+export default async function addNewProduct(values: ProductValues): Promise<{ status: boolean; slug: string }> {
   let uploadedImagesData: { public_id: string; secure_url: string }[] = [];
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -135,6 +135,8 @@ export default async function addNewProduct(values: ProductValues): Promise<void
 
     await session.commitTransaction();
     revalidatePath("/", "layout");
+    return { status: true, slug: updatedProduct.slug };
+    //
   } catch (error) {
     if (session.inTransaction()) {
       // Check if a transaction is active before trying to abort

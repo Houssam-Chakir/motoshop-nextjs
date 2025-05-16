@@ -12,8 +12,8 @@ const ProductCard = ({ product }) => {
     const isConfirmed = confirm("Are you sure you want to delete this product");
     if (isConfirmed) {
       await deleteProduct(product._id.toString());
-      console.log('product deleted successfully');
-      toast.success('product deleted successfully')
+      console.log("product deleted successfully");
+      toast.success("product deleted successfully");
     }
   };
 
@@ -36,10 +36,13 @@ const ProductCard = ({ product }) => {
             details
           </Link>
         </div>
-        <div>
+        <div className='flex gap-2'>
           <Button onClick={handleDeleteProduct} variant='destructive'>
             delete
           </Button>
+          <Link href={`/dashboard/inventory/product/edit/${product._id}`}>
+            <Button variant='outline'>Edit</Button>
+          </Link>
         </div>
       </div>
     </div>

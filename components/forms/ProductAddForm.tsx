@@ -180,6 +180,15 @@ function SizeInput({
   );
 }
 
+async function handleAddProduct(formData) {
+  const res = await addNewProduct(formData);
+  console.log("status: ", res.status);
+  if (res.status) {
+    toast.success("Product created successfully!");
+    redirect(`/products/${res.slug}`)
+  } else toast.error("Error creating a new product");
+}
+
 interface ProductFormProps {
   brands: { _id: string; name: string }[];
   types: { _id: string; name: string }[];
@@ -187,7 +196,6 @@ interface ProductFormProps {
 }
 
 export default function ProductForm({ brands, types, categories }: ProductFormProps) {
-
   const [images, setImages] = useState<File[]>([]);
   const [imageError, setImageError] = useState("");
   const [availableSizes, setAvailableSizes] = useState<string[]>(["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44"]);
@@ -250,11 +258,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
       images,
     };
 
-    const status = addNewProduct(formData);
-    console.log('formData: ', formData);
-    if (!status) toast.error('Something went wrong')
-    toast.success("Product created successfully!");
-    // redirect('/dashboard/inventory')
+    handleAddProduct(formData);
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -298,7 +302,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
               <FormItem>
                 <FormLabel>Brand</FormLabel>
                 <FormControl>
-                  <SearchableSelect options={brands} placeholder='Select brand' value={ field.value} onChange={field.onChange} />
+                  <SearchableSelect options={brands} placeholder='Select brand' value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

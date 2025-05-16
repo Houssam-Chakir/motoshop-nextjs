@@ -1,10 +1,12 @@
 
 
+import connectDB from "@/config/database";
 import Product from "@/models/Product";
 import makeSerializable from "@/utils/convertToObj";
 import Link from "next/link";
 
 const ProductDetailsPage = async({params}: { params: { slug: string } }) => {
+  await connectDB()
   const {slug} = await params
   const productDoc = await Product.findOne({slug: slug}).lean()
   const product = makeSerializable(productDoc)

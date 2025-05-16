@@ -32,7 +32,7 @@ const ProductCard = ({ product }) => {
       <div>
         <div className='flex items-center mt-2 text-gray-700 dark:text-gray-200'>
           <span>Go to:</span>
-          <Link href={`/products/${product._id}`} className='mx-2 text-blue-600 cursor-pointer dark:text-blue-400 hover:underline' tabIndex={0} role='link'>
+          <Link href={`/products/${product.slug}`} className='mx-2 text-blue-600 cursor-pointer dark:text-blue-400 hover:underline' tabIndex={0} role='link'>
             details
           </Link>
         </div>

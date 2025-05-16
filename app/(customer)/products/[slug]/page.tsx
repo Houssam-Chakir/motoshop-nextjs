@@ -4,9 +4,9 @@ import Product from "@/models/Product";
 import makeSerializable from "@/utils/convertToObj";
 import Link from "next/link";
 
-const ProductDetailsPage = async({params}: { params: { id: string } }) => {
-  const {id} = await params
-  const productDoc = await Product.findById(id).lean()
+const ProductDetailsPage = async({params}: { params: { slug: string } }) => {
+  const {slug} = await params
+  const productDoc = await Product.findOne({slug: slug}).lean()
   const product = makeSerializable(productDoc)
   console.log('product: ', product);
   return (

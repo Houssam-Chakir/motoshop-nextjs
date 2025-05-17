@@ -40,7 +40,7 @@ export interface ProductDocument extends Document {
 
   specifications: ProductSpec[];
   reviews: ProductReview[];
-  images: string[];
+  images: {secure_url: string, public_id: string}[];
 
   likes: number;
 
@@ -69,7 +69,7 @@ const ProductSchema: Schema = new Schema(
     saleInfo: { type: Schema.Types.ObjectId, ref: "Sale", index: true },
     season: { type: String, enum: ["All seasons", "Summer", "Winter", "Spring/Fall"], default: "All seasons" },
     images: {
-      type: [{ type: String}],
+      type: [{ secure_url: String, public_id: String}],
       required: true,
     },
 

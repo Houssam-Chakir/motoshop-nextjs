@@ -5,7 +5,7 @@ import { getSessionUser } from "@/utils/getSessionUser";
 
 import ProductEditForm from "@/components/forms/ProductEditForm";
 import { getCachedBrands, getCachedCategories, getCachedTypes } from "@/utils/getCachedLists";
-import Stock, { StockDocument, StockType } from "@/models/Stock";
+import Stock, { StockDocument } from "@/models/Stock";
 
 const ProductEditPage = async ({ params }: { params: { id: string } }) => {
   // Connect to DB and get user session
@@ -17,8 +17,9 @@ const ProductEditPage = async ({ params }: { params: { id: string } }) => {
   const product = makeSerializable(productDoc) as ProductType;
   // Get stock document using product id
   const stockDoc = await Stock.findOne({ productId: id }).lean() as StockDocument | null;
-  const stock = stockDoc?.sizes as { size: string; quantity: number }[];
+  const stock = makeSerializable(stockDoc)
   console.log('stock: ', stock);
+
 
 
 

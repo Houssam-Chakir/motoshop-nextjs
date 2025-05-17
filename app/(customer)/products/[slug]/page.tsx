@@ -31,7 +31,7 @@ const ProductDetailsPage = async({params}: { params: { slug: string } }) => {
           </Link>
         </div>
         <div>
-          <img src={product.images[0]} alt="product image" />
+          <img src={product.images[0].secure_url} alt="product image" />
         </div>
 
         <div className='flex items-center justify-center mt-4'>

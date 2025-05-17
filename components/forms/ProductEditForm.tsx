@@ -13,9 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import addNewProduct from "@/app/actions/addProduct";
 import { toast } from "react-toastify";
 import { ProductType } from "@/models/Product";
+import updateProduct from "@/app/actions/updateProduct";
+import { StockType } from "@/models/Stock";
+import { redirect } from "next/navigation";
 
 // Define the stock item schema
 const stockItemSchema = z.object({
@@ -178,20 +180,41 @@ function SizeInput({
   );
 }
 
+async function handleUpdateProduct(formData) {
+  const res = await updateProduct(formData);
+  console.log("res: ", res);
+  if (res.status) {
+    toast.success("Product edited successfully!");
+    redirect(`/products/${res.slug}`);
+  } else toast.error("Error editing product");
+}
+
 interface ProductFormProps {
   brands: { _id: string; name: string }[];
   types: { _id: string; name: string }[];
   categories: { _id: string; name: string }[];
-  editProduct: ProductType | null;
+  editProduct: ProductType & { _id: string };
+  productStock?: { _id: string; sizes: { size: string; quantity: number }[] };
 }
 
-export default function ProductEditForm({ brands, types, categories, editProduct, productStock = null }: ProductFormProps) {
-  const [images, setImages] = useState<File[]>([]);
+export interface images {
+  secure_url: string;
+  public_id: string;
+}
+
+export default function ProductEditForm({ brands, types, categories, editProduct, productStock }: ProductFormProps) {
+  if (!editProduct) {
+    throw new Error("Error recieving the product info");
+  }
+  if (!productStock) toast.warning("cant find any stock document related to this product!");
+  console.log("productStock: ", productStock);
+
+  const [images, setImages] = useState<images[]>(editProduct.images || []);
+  const [imagesToDelete, setImagesToDelete] = useState<images[]>([]);
+  const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
+  //TODO Create image uploading logic, image ui displaying of files along side cloudinary urls aswell.
   const [imageError, setImageError] = useState("");
   const [availableSizes, setAvailableSizes] = useState<string[]>(["XXS", "XS", "S", "M", "L", "XL", "XXL"]);
-
-  if (!editProduct) throw new Error("Error recieving the product info");
-  if (!productStock) toast.warning('cant find any stock document related to this product!')
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -204,7 +227,7 @@ export default function ProductEditForm({ brands, types, categories, editProduct
       season: editProduct.season || "",
       wholesalePrice: editProduct.wholesalePrice || undefined,
       retailPrice: editProduct.retailPrice || undefined,
-      stockItems: productStock || [{ size: "", quantity: 0 }],
+      stockItems: productStock?.sizes || [{ size: "", quantity: 0 }],
       description: editProduct.description || "",
       specifications: editProduct.specifications || [{ name: "", description: "" }],
     },
@@ -242,19 +265,24 @@ export default function ProductEditForm({ brands, types, categories, editProduct
     const selectedCategory = categories.find((c) => c._id === values.category);
     const selectedType = types.find((t) => t._id === values.type);
 
+    const productId = editProduct._id;
+
     const formData = {
       ...values,
-      brand: selectedBrand?._id,
-      category: selectedCategory?._id,
-      type: selectedType?._id,
+      // productId and stockId to find both
+      productId,
+      stockId: productStock ? productStock._id : null,
+      brand: selectedBrand?._id.toString(),
+      category: selectedCategory?._id.toString(),
+      type: selectedType?._id.toString(),
       identifiers: { brand: selectedBrand?.name, categoryType: selectedType?.name, category: selectedCategory?.name },
       images,
+      imagesToDelete,
+      imagesToUpload,
     };
 
-    
     console.log("formData: ", formData);
-    if (!status) toast.error("Something went wrong");
-    toast.success("Product created successfully!");
+    const status = handleUpdateProduct(formData);
     // redirect('/dashboard/inventory')
   }
 
@@ -262,14 +290,17 @@ export default function ProductEditForm({ brands, types, categories, editProduct
     setImageError("");
     if (e.target.files && e.target.files.length > 0) {
       const newImages = Array.from(e.target.files);
-      setImages([...images, ...newImages]);
+      setImagesToUpload([...newImages]);
     }
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = (index: number, imageObj: images) => {
+    // removes image url from images
     const newImages = [...images];
     newImages.splice(index, 1);
     setImages(newImages);
+    // add image url to images to delete array
+    setImagesToDelete((prev) => [...prev, imageObj]);
   };
 
   // Update available sizes when a new custom size is added
@@ -559,22 +590,16 @@ export default function ProductEditForm({ brands, types, categories, editProduct
           {/* Preview uploaded images */}
           {images.length > 0 && (
             <div className='mt-4'>
-              <p className='text-sm font-medium mb-2'>Uploaded Images ({images.length})</p>
+              <p className='text-sm font-medium mb-2'>Product Images ({images.length})</p>
               <div className='grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2 w-full'>
                 {images.map((image, index) => (
                   <div key={index} className='relative group w-[100px]'>
                     <div className='aspect-square rounded-md overflow-hidden border'>
-                      <Image
-                        width={110}
-                        height={110}
-                        src={URL.createObjectURL(image) || "/placeholder.svg"}
-                        alt={`Product image ${index + 1}`}
-                        className='w-full h-full object-cover'
-                      />
+                      <Image width={110} height={110} src={image.secure_url || "/placeholder.svg"} alt={`Product image ${index + 1}`} className='w-full h-full object-cover' />
                     </div>
                     <button
                       type='button'
-                      onClick={() => removeImage(index)}
+                      onClick={() => removeImage(index, image)}
                       className='absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity'
                     >
                       <X className='h-4 w-4' />

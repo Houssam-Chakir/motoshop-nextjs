@@ -40,7 +40,7 @@ interface ProductObject {
   stock?: mongoose.Types.ObjectId; // Replace `any` with a more specific type if available
   description: string; // Replace `any` with a more specific type if available
   specifications?: { name: string; description: string }; // Replace `any` with a more specific type if available
-  images: string[];
+  images: {secure_url: string, public_id: string}[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -92,11 +92,11 @@ export default async function addNewProduct(values: ProductValues): Promise<{ st
       updatedAt: new Date(), // Example update date
     };
 
-    // -- Upload images to cloudinary and add secure urls array to productData --------
+    // -- Upload images to cloudinary and add secure urls and public ids objetcs array to productData --------
     // returns objects array or secure url and public id
     uploadedImagesData = await imageUploader(images);
     // extract secure urls for images field
-    productData.images = uploadedImagesData.map((image) => image.secure_url);
+    productData.images = uploadedImagesData
 
     const sessionOptions = { session };
 

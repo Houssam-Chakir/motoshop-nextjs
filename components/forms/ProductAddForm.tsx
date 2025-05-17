@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -39,8 +39,12 @@ const formSchema = z.object({
   category: z.string().min(1, { message: "Category is required" }),
   type: z.string().min(1, { message: "Type is required" }),
   season: z.string().min(1, { message: "Season is required" }),
-  wholesalePrice: z.coerce.number().positive({ message: "Wholesale price must be positive" }),
-  retailPrice: z.coerce.number().positive({ message: "Retail price must be positive" }),
+  wholesalePrice: z.string().refine((val) => !isNaN(Number.parseFloat(val)) && Number.parseFloat(val) > 0, {
+    message: "Wholesale price must be positive",
+  }),
+  retailPrice: z.string().refine((val) => !isNaN(Number.parseFloat(val)) && Number.parseFloat(val) > 0, {
+    message: "Retail price must be positive",
+  }),
   stockItems: z.array(stockItemSchema).min(1, { message: "At least one size and quantity is required" }),
   description: z.string().min(1, { message: "Description is required" }),
   specifications: z.array(specificationSchema),
@@ -67,38 +71,152 @@ function SearchableSelect({
   valueKey?: string;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const filteredOptions = options.filter((option) => option[displayKey].toLowerCase().includes(searchQuery.toLowerCase()));
 
+  // Find the selected option
+  const selectedOption = options.find((option) => option[valueKey] === value);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    // Keep the dropdown open while typing
+    setIsOpen(true);
+  };
+
+  const handleOptionSelect = (optionValue: string) => {
+    onChange(optionValue);
+    setIsOpen(false);
+    setSearchQuery("");
+  };
+
+  const handleTriggerClick = () => {
+    setIsOpen(!isOpen);
+    // Reset search when opening
+    if (!isOpen) {
+      setSearchQuery("");
+      // Focus the input after a short delay to ensure the dropdown is open
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 10);
+    }
+  };
+
+  // Handle clicks outside to close the dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        <div className='flex items-center border-b px-3 py-2'>
-          <Search className='h-4 w-4 mr-2 opacity-50' />
-          <input
-            className='flex h-8 w-full rounded-md bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
-            placeholder='Search...'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-        <div className={cn("max-h-[200px] overflow-y-auto", filteredOptions.length === 0 && "py-6 text-center text-sm")}>
-          {filteredOptions.length === 0 ? (
-            <p className='text-muted-foreground'>No results found</p>
+    <div className="relative w-full" ref={containerRef}>
+      {/* Custom trigger button */}
+      <button
+        type="button"
+        onClick={handleTriggerClick}
+        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className="flex-1 text-left truncate">{selectedOption ? selectedOption[displayKey] : placeholder}</span>
+        <span className="ml-2">
+          {isOpen ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4 opacity-50"
+            >
+              <path d="m18 15-6-6-6 6" />
+            </svg>
           ) : (
-            filteredOptions.map((option) => (
-              <SelectItem key={option[valueKey]} value={option[valueKey]}>
-                {option[displayKey]}
-              </SelectItem>
-            ))
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4 opacity-50"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           )}
+        </span>
+      </button>
+
+      {/* Dropdown content */}
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95">
+          <div className="flex items-center border-b px-3 py-2">
+            <Search className="h-4 w-4 mr-2 opacity-50" />
+            <input
+              ref={inputRef}
+              className="flex h-8 w-full rounded-md bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={handleInputChange}
+              autoFocus
+            />
+          </div>
+          <div
+            className={cn("max-h-[200px] overflow-y-auto", filteredOptions.length === 0 && "py-6 text-center text-sm")}
+          >
+            {filteredOptions.length === 0 ? (
+              <p className="text-muted-foreground p-2">No results found</p>
+            ) : (
+              filteredOptions.map((option) => (
+                <div
+                  key={option[valueKey]}
+                  className={cn(
+                    "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                    option[valueKey] === value && "bg-accent text-accent-foreground",
+                  )}
+                  onClick={() => handleOptionSelect(option[valueKey])}
+                >
+                  {option[valueKey] === value && (
+                    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </span>
+                  )}
+                  {option[displayKey]}
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </SelectContent>
-    </Select>
+      )}
+    </div>
   );
 }
 
@@ -116,7 +234,7 @@ function SizeInput({
 }) {
   const [isCustomSize, setIsCustomSize] = useState(false);
   const [customSize, setCustomSize] = useState("");
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
 
   // Check if the current value is in the existing sizes
   useEffect(() => {
@@ -145,21 +263,21 @@ function SizeInput({
   };
 
   const handleCustomSizeBlur = () => {
-    setIsEditing(false)
+    setIsEditing(false);
     if (customSize.trim()) {
-      onChange(customSize.trim())
+      onChange(customSize.trim());
     }
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      e.preventDefault()
-      setIsEditing(false)
+      e.preventDefault();
+      setIsEditing(false);
       if (customSize.trim()) {
-        onChange(customSize.trim())
+        onChange(customSize.trim());
       }
     }
-  }
+  };
 
   return (
     <div className='w-full'>
@@ -179,7 +297,15 @@ function SizeInput({
         </Select>
       ) : (
         <div className='flex items-center space-x-2'>
-          <Input value={customSize} onChange={handleCustomSizeChange} onBlur={handleCustomSizeBlur} onKeyDown={handleKeyDown} autoFocus={isEditing} placeholder='Enter size (e.g., S, M, L, 42, 10.5)' className='flex-1' />
+          <Input
+            value={customSize}
+            onChange={handleCustomSizeChange}
+            onBlur={handleCustomSizeBlur}
+            onKeyDown={handleKeyDown}
+            autoFocus={isEditing}
+            placeholder='Enter size (e.g., S, M, L, 42, 10.5)'
+            className='flex-1'
+          />
           <Button
             type='button'
             variant='ghost'
@@ -202,7 +328,7 @@ async function handleAddProduct(formData) {
   console.log("status: ", res.status);
   if (res.status) {
     toast.success("Product created successfully!");
-    redirect(`/products/${res.slug}`)
+    redirect(`/products/${res.slug}`);
   } else toast.error("Error creating a new product");
 }
 
@@ -226,8 +352,8 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
       category: "",
       type: "",
       season: "",
-      wholesalePrice: undefined,
-      retailPrice: undefined,
+      wholesalePrice: "",
+      retailPrice: "",
       stockItems: [{ size: "", quantity: 0 }],
       description: "",
       specifications: [{ name: "", description: "" }],
@@ -268,6 +394,8 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
 
     const formData = {
       ...values,
+      wholesalePrice: Number.parseFloat(values.wholesalePrice),
+      retailPrice: Number.parseFloat(values.retailPrice),
       brand: selectedBrand?._id,
       category: selectedCategory?._id,
       type: selectedType?._id,
@@ -420,7 +548,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
               <FormItem>
                 <FormLabel>Wholesale Price</FormLabel>
                 <FormControl>
-                  <Input type='number' step='0.01' placeholder='0.00' {...field} />
+                  <Input type='number' step='0.01' placeholder='0.00' {...field} onChange={(e) => field.onChange(e.target.value)} value={field.value} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -433,7 +561,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
               <FormItem>
                 <FormLabel>Retail Price</FormLabel>
                 <FormControl>
-                  <Input type='number' step='0.01' placeholder='0.00' {...field} />
+                  <Input type='number' step='0.01' placeholder='0.00' {...field} onChange={(e) => field.onChange(e.target.value)} value={field.value} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

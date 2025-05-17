@@ -1,18 +1,26 @@
 "use server";
 
 import connectDB from "@/config/database";
-import mongoose from "mongoose";
-import Product from "../../models/Product";
-import Stock from "@/models/Stock";
+import mongoose, { ClientSession } from "mongoose";
+
 import { revalidatePath } from "next/cache";
 import imageUploader from "@/utils/imageUploadCloudinary";
 import isUserAuthorized from "@/utils/isUserAuthorized";
-import deleteImages from "@/utils/imageDeleteCloudinary";
-import { images } from "@/components/forms/ProductEditForm";
+import deleteImagesCloudinary from "@/utils/imageDeleteCloudinary"; // Renamed for clarity
+import { images as ImageDataType } from "@/components/forms/ProductEditForm"; // Type for image objects
+import Stock from "@/models/Stock";
+import Product from "@/models/Product";
 
+// Interface for 'stockItems' coming from the form
+interface FormStockItem {
+  size: string;
+  quantity: string; // Form typically sends numbers as strings
+}
+
+// Interface for values received by the action
 interface ProductValues {
   productId: string;
-  stockId?: string | null;
+  stockId?: string | null; // The original stockId associated with the product being edited
   brand: mongoose.Types.ObjectId;
   productModel: string;
   title: string;
@@ -22,17 +30,16 @@ interface ProductValues {
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
   wholesalePrice: number;
   retailPrice: number;
-  stockItems: SizeValues[]; // Replace `any` with a more specific type if available
-  description: string; // Replace `any` with a more specific type if available
-  specifications?: { name: string; description: string }; // Replace `any` with a more specific type if available
-  images: images[];
+  stockItems: FormStockItem[];
+  description: string;
+  specifications?: { name: string; description: string }[]; // Assuming array for multiple specifications
+  images: ImageDataType[]; // Images currently on the product (from form state)
   imagesToUpload: File[];
-  imagesToDelete: images[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  imagesToDelete: ImageDataType[];
 }
 
-interface ProductObject {
+// Interface for the data structure used to update the Product model (excluding stock linkage initially)
+interface ProductObjectToSave {
   brand: mongoose.Types.ObjectId;
   productModel: string;
   title: string;
@@ -42,44 +49,35 @@ interface ProductObject {
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
   wholesalePrice: number;
   retailPrice: number;
-  stock?: mongoose.Types.ObjectId; // Replace `any` with a more specific type if available
-  description: string; // Replace `any` with a more specific type if available
-  specifications?: { name: string; description: string }; // Replace `any` with a more specific type if available
-  images: images[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  description: string;
+  specifications?: { name: string; description: string }[];
+  images: ImageDataType[];
+  // 'stock' field will be handled separately
+  // Mongoose timestamps will handle 'updatedAt'. 'createdAt' should not be set here.
 }
 
-interface SizeValues {
-  size: string;
-  quantity: string;
-}
-
-interface StockValues {
-  productId: mongoose.Types.ObjectId;
-  sizes: SizeValues[];
-}
-
-//f/ UPDATE PRODUCT FUNCTION ---------------------------------------------------
-export default async function updateProduct(values: ProductValues): Promise<{ status: boolean; slug: string }> {
+export default async function updateProduct(values: ProductValues): Promise<{ status: boolean; slug?: string; error?: string }> {
   let uploadedImagesData: { public_id: string; secure_url: string }[] = [];
-  // -- starting a transaction session
-  const session = await mongoose.startSession();
+  const session: ClientSession = await mongoose.startSession();
   session.startTransaction();
 
   try {
     await connectDB();
 
-    // --- Authentication/Authorization -----------------
-    const requiredRole = "admin";
-    await isUserAuthorized(requiredRole);
+    const requiredRole = "admin"; // Or your desired role
+    await isUserAuthorized(requiredRole); // This should throw an error if not authorized
 
-    console.log("Server Action: Received values: ", values);
+    console.log("Server Action: updateProduct - Received values: ", {
+      ...values,
+      imagesToUpload: `${values.imagesToUpload?.length || 0} files to upload`,
+      imagesToDelete: `${values.imagesToDelete?.length || 0} images to delete`,
+      stockItemsCount: values.stockItems?.length || 0,
+    });
 
     const {
       productId,
-      stockId,
-      stockItems,
+      stockId: inputStockId, // The stock ID from the form, might be outdated or null
+      stockItems: formStockItems,
       identifiers,
       brand,
       productModel,
@@ -91,13 +89,13 @@ export default async function updateProduct(values: ProductValues): Promise<{ st
       retailPrice,
       description,
       specifications,
-      images,
+      images: currentImagesOnForm, // Images present in the form state (mix of old and newly kept)
       imagesToDelete,
       imagesToUpload,
     } = values;
 
-    // -- update product -----------------------
-    const productUpdatedData: ProductObject = {
+    // --- 1. Prepare Product Data (excluding stock link initially) ---
+    const productUpdateData: ProductObjectToSave = {
       brand,
       productModel,
       identifiers,
@@ -107,133 +105,188 @@ export default async function updateProduct(values: ProductValues): Promise<{ st
       season,
       wholesalePrice,
       retailPrice,
-      // stock: done later
       description,
-      specifications,
-      images,
-      createdAt: new Date(),
+      specifications, // Ensure this matches your schema (array or single object)
+      images: [...currentImagesOnForm], // Start with images passed from form (already reflecting user's choices for existing images)
     };
 
-    // -- Upload New images to cloudinary and add secure urls array to productData --------
-    // returns objects array or secure url and public id
-    if (imagesToUpload.length > 0) {
-      uploadedImagesData = await imageUploader(imagesToUpload);
-      // extract secure urls for images field and add them to images array or existing images urls
-      productUpdatedData.images.push(...uploadedImagesData);
+    // --- 2. Handle New Image Uploads ---
+    if (imagesToUpload && imagesToUpload.length > 0) {
+      console.log(`Uploading ${imagesToUpload.length} new image(s) to Cloudinary...`);
+      const newCloudinaryImages = await imageUploader(imagesToUpload);
+      productUpdateData.images.push(...newCloudinaryImages); // Add new images to the product's image list
+      uploadedImagesData = newCloudinaryImages; // Track for potential rollback on error
+      console.log("New images uploaded successfully.");
     }
 
-    // -- Delete removed images from cloudinary
-    if (imagesToDelete.length > 0) {
-      console.log("Deleting uploaded images from Cloudinary...");
-      const imagesPublicIds = imagesToDelete.map((image) => image.public_id);
+    // --- 3. Handle Cloudinary Image Deletions ---
+    // These are images the user explicitly marked for removal.
+    // The productUpdateData.images list should already NOT contain these if your form logic is correct
+    // by removing them from `currentImagesOnForm` when `imagesToDelete` is populated.
+    // This step is purely for deleting from Cloudinary.
+    if (imagesToDelete && imagesToDelete.length > 0) {
+      const imagesToDeletePublicIds = imagesToDelete.map((img) => img.public_id);
+      console.log(`Deleting ${imagesToDeletePublicIds.length} image(s) from Cloudinary:`, imagesToDeletePublicIds);
       try {
-        await deleteImages(imagesPublicIds);
-        console.log("Image deletion completed.");
+        await deleteImagesCloudinary(imagesToDeletePublicIds);
+        console.log("Image deletion from Cloudinary completed for marked images.");
       } catch (deleteError) {
-        console.error("An error occurred during the image deletion process:", deleteError);
+        console.error("An error occurred during Cloudinary image deletion for marked images. Transaction will continue.", deleteError);
+        // Decide if this is a critical failure. For now, we log and proceed.
       }
     }
 
-    // transaction session options
-    const sessionOptions = { session };
+    // --- 4. Update Product Document (First Pass - Main Details) ---
+    const initiallyUpdatedProduct = await Product.findByIdAndUpdate(productId, { $set: productUpdateData }, { new: true, runValidators: true, session });
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      { $set: productUpdatedData },
-      // `new: true` returns the modified document
-      // `runValidators: true` ensures schema validations are run
-      { new: true, runValidators: true }
-    ).session(session);
-
-    // check if product was updated
-    if (!updatedProduct) {
-      throw new Error("Server action: Error updating product info");
-    } else {
-      console.log("Server action: Initial product updated successful");
+    if (!initiallyUpdatedProduct) {
+      throw new Error(`Product with ID '${productId}' not found or failed to update initially.`);
     }
-    console.log('updatedProduct: ------------------', updatedProduct);
+    console.log("Server Action: Product main details updated. ID:", initiallyUpdatedProduct._id);
 
-    //-- Update or Create new Stock -----------
-    // check if stock exists and same in product
-    // -- Create new stock for product
-    if (!updatedProduct.stock || updatedProduct.stock.toString() !== stockId) {
-      console.log('updatedProduct.stock.toString(): ', updatedProduct.stock.toString());
-      console.log('stockId: ', stockId);
-      const stockData: StockValues = {
-        productId: updatedProduct._id,
-        sizes: stockItems,
-      };
-      const newStock = new Stock(stockData);
-      await newStock.save(sessionOptions);
-      console.log("Server Action: Stock saved. ID:", newStock._id);
+    // --- 5. Prepare Stock Items (Parse quantities) ---
+    const parsedStockItems = formStockItems.map((item) => ({
+      size: item.size,
+      quantity: parseInt(item.quantity, 10) || 0, // Ensure quantity is a number; default to 0 if parsing fails
+    }));
 
-      // --- Update Product with Stock ID ---
-      const updatedProductWithStock = await Product.findByIdAndUpdate(
-        productId,
-        { $set: { stock: newStock._id } }, // Use $set to update only the stock field
-        { new: true } // Return the updated document
-      ).session(session);
+    // --- 6. Handle Stock Document (Update or Create) ---
+    let finalStockId: mongoose.Types.ObjectId | undefined = undefined;
 
-      if (!updatedProductWithStock) {
-        // in case the product couldn't be found right after creation
-        console.error("Server Action: Failed to find and update product with stock ID. Product ID:", updatedProductWithStock._id);
-        // delete stock if updated product not found
-        await Stock.deleteOne({ _id: newStock._id }, sessionOptions);
-        throw new Error("Failed to link stock to product after creation.");
-      }
-    }
+    if (inputStockId) {
+      console.log(`Form provided stockId: '${inputStockId}'. Attempting to find and update.`);
+      const existingStockDoc = await Stock.findById(inputStockId).session(session);
 
-    // -- Update existing stock
-    console.log('// -- Update existing stock');
-    if (updatedProduct.stock) {
-      const updatedStock = await Stock.findByIdAndUpdate(
-        stockId,
-        { $set: {sizes: stockItems} },
-        // `new: true` returns the modified document
-        // `runValidators: true` ensures schema validations are run
-        { new: true, runValidators: true }
-      ).session(session);
-      if (!updatedStock) {
-        console.log('Server action: Error updating stock info');
-        throw new Error("Server action: Error updating stock info");
+      if (existingStockDoc) {
+        console.log(`Found existing stock document (ID: '${inputStockId}'). Updating its items.`);
+        const updatedStock = await Stock.findByIdAndUpdate(
+          inputStockId,
+          { $set: { sizes: parsedStockItems, productId: initiallyUpdatedProduct._id } }, // Ensure productId is linked
+          { new: true, runValidators: true, session }
+        );
+        if (!updatedStock) {
+          // This is unlikely if findById just found it, but could be due to concurrent modification or validation hook failure.
+          console.error(`Failed to update existing stock (ID: '${inputStockId}'), despite it being found. Will proceed to create a new stock as a fallback.`);
+          // finalStockId remains undefined, leading to new stock creation.
+        } else {
+          finalStockId = updatedStock._id;
+          console.log("Existing stock updated successfully:", finalStockId);
+        }
       } else {
-        console.log("Server action: stock updated successful");
+        // This is the scenario: inputStockId was provided (e.g., from an old product link), but it's GONE.
+        console.log(`Input stockId '${inputStockId}' provided, but no corresponding stock document found. A new stock will be created.`);
+        // finalStockId remains undefined, leading to new stock creation.
       }
-    }
-
-    console.log("Server Action: Product updated with Stock ID:", updatedProduct.stock);
-    console.log("Server Action: Product update complete.");
-
-    await session.commitTransaction();
-    revalidatePath("/", "layout");
-    return { status: true, slug: updatedProduct.slug };
-    //
-  } catch (error) {
-    if (session.inTransaction()) {
-      // Check if a transaction is active before trying to abort
-      await session.abortTransaction();
-    }
-
-    if (uploadedImagesData.length > 0) {
-      console.log("Rolling back: Deleting uploaded images from Cloudinary...");
-      const imagesPublicIds = uploadedImagesData.map((image) => image.public_id);
-      try {
-        await deleteImages(imagesPublicIds);
-        console.log("Image rollback completed.");
-      } catch (deleteError) {
-        console.error("An error occurred during the image deletion process:", deleteError);
-      }
-    }
-
-    console.error("Server Action: Error during product/stock creation:", error);
-    if (error instanceof Error) {
-      throw new Error(error.message);
     } else {
-      throw new Error("An unknown error occurred");
+      // No stockId provided by the form.
+      // This could mean it's a new product (not this action's concern) or the product didn't have stock.
+      // For an update action, if product *had* a stock previously, we should try to update it.
+      // However, `initiallyUpdatedProduct.stock` holds the stockId *before* this update sequence.
+      // The logic below handles creating new if no other path sets finalStockId.
+      console.log("No stockId provided by the form. Will create a new stock if product isn't linked to a valid one or if a new one is needed.");
+      if (initiallyUpdatedProduct.stock) {
+        console.log(`Product was previously linked to stock '${initiallyUpdatedProduct.stock}'. Verifying if it exists to update, otherwise creating new.`);
+        const productsCurrentStockDoc = await Stock.findById(initiallyUpdatedProduct.stock).session(session);
+        if (productsCurrentStockDoc) {
+          console.log(`Product's existing stock '${initiallyUpdatedProduct.stock}' found. Updating it.`);
+          const updatedCurrentStock = await Stock.findByIdAndUpdate(
+            initiallyUpdatedProduct.stock,
+            { $set: { sizes: parsedStockItems, productId: initiallyUpdatedProduct._id } },
+            { new: true, runValidators: true, session }
+          );
+          if (!updatedCurrentStock) {
+            console.error(`Failed to update product's current stock (ID: ${initiallyUpdatedProduct.stock}) despite finding it. Will create a new one.`);
+          } else {
+            finalStockId = updatedCurrentStock._id;
+            console.log("Product's current stock updated successfully:", finalStockId);
+          }
+        } else {
+          console.log(`Product was linked to stock '${initiallyUpdatedProduct.stock}', but it's no longer found. A new stock will be created.`);
+        }
+      }
     }
+
+    // If no existing stock was successfully updated or determined to be the target, create a new one.
+    if (!finalStockId) {
+      console.log("Creating a new stock document.");
+      const stockDataForDB = {
+        // Ensure this matches your Stock schema requirements
+        productId: initiallyUpdatedProduct._id,
+        sizes: parsedStockItems,
+      };
+      const newStock = new Stock(stockDataForDB);
+      await newStock.save({ session });
+      finalStockId = newStock._id; // `_id` is automatically generated by Mongoose/MongoDB
+      console.log("Server Action: New stock document saved. ID:", finalStockId);
+    }
+
+    // --- 7. Link Product to the Definitive Stock ID (if changed or not set) ---
+    let productFinalState = initiallyUpdatedProduct; // Start with the product state after image/detail updates
+
+    if (initiallyUpdatedProduct.stock?.toString() !== finalStockId?.toString()) {
+      console.log(`Updating product's stock reference. Old: '${initiallyUpdatedProduct.stock}', New: '${finalStockId}'.`);
+      const productLinkedToStock = await Product.findByIdAndUpdate(
+        initiallyUpdatedProduct._id, // Use ID from the already updated product
+        { $set: { stock: finalStockId } }, // Link to the determined stockId
+        { new: true, runValidators: true, session }
+      );
+      if (!productLinkedToStock) {
+        // This is a critical internal error. If a new stock was created, it needs rollback.
+        if (finalStockId && (!inputStockId || !(await Stock.findById(inputStockId).session(session)))) {
+          // i.e. if the finalStockId is for a newly created stock
+          console.error(`Failed to link product to stock. CRITICAL. Rolling back creation of new stock ID: ${finalStockId}`);
+          await Stock.findByIdAndDelete(finalStockId, { session }); // Use findByIdAndDelete
+        }
+        throw new Error("CRITICAL: Failed to link product to the new/updated stock after stock operations.");
+      }
+      productFinalState = productLinkedToStock; // This is the most up-to-date product state
+      console.log("Product successfully linked/re-linked to stock ID:", productFinalState.stock);
+    } else {
+      console.log(`Product's stock link ('${productFinalState.stock}') is already correct or no stock change was needed.`);
+    }
+
+    // --- 8. Commit Transaction ---
+    await session.commitTransaction();
+    console.log("Server Action: Transaction committed successfully.");
+
+    // --- 9. Revalidate Cache ---
+    revalidatePath("/", "layout"); // Broad revalidation
+    if (productFinalState.slug) {
+      revalidatePath(`/products/${productFinalState.slug}`); // Specific product page
+    }
+    revalidatePath("/dashboard/inventory"); // Inventory page
+
+    return { status: true, slug: productFinalState.slug };
+  } catch (error: any) {
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+      console.log("Server Action: Transaction aborted due to error.");
+    }
+
+    // Rollback newly uploaded images from Cloudinary if any were part of this failed transaction
+    if (uploadedImagesData.length > 0) {
+      console.log("Rolling back: Attempting to delete newly uploaded images from Cloudinary...");
+      const imagesPublicIdsToRollback = uploadedImagesData.map((image) => image.public_id);
+      try {
+        await deleteImagesCloudinary(imagesPublicIdsToRollback);
+        console.log("Cloudinary image rollback successful for newly uploaded images.");
+      } catch (deleteError) {
+        console.error("An error occurred during the Cloudinary image deletion rollback:", deleteError);
+      }
+    }
+
+    console.error("Server Action: Error during product/stock update processing:", error);
+    return {
+      status: false,
+      error: error instanceof Error ? error.message : "An unknown error occurred during product update.",
+    };
   } finally {
-    // end the session in a finally block to ensure it's closed
-    // whether the transaction succeeded or failed.
+    if (session && session.inTransaction()) {
+      // Ensure session is active before trying to end
+      await session.abortTransaction(); // Abort if not committed due to an unhandled error in finally
+      console.log("Server Action: Transaction aborted in finally block.");
+    }
     session.endSession();
+    console.log("Server Action: Mongoose session ended.");
   }
 }

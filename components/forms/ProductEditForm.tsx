@@ -116,6 +116,7 @@ function SizeInput({
 }) {
   const [isCustomSize, setIsCustomSize] = useState(false);
   const [customSize, setCustomSize] = useState("");
+  const [isEditing, setIsEditing] = useState(false)
 
   // Check if the current value is in the existing sizes
   useEffect(() => {
@@ -131,7 +132,7 @@ function SizeInput({
     if (selectedValue === "custom") {
       setIsCustomSize(true);
       setCustomSize("");
-      onChange("");
+      setIsEditing(true)
     } else {
       setIsCustomSize(false);
       onChange(selectedValue);
@@ -141,8 +142,24 @@ function SizeInput({
   const handleCustomSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setCustomSize(newValue);
-    onChange(newValue);
   };
+
+  const handleCustomSizeBlur = () => {
+    setIsEditing(false)
+    if (customSize.trim()) {
+      onChange(customSize.trim())
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      setIsEditing(false)
+      if (customSize.trim()) {
+        onChange(customSize.trim())
+      }
+    }
+  }
 
   return (
     <div className='w-full'>
@@ -162,7 +179,7 @@ function SizeInput({
         </Select>
       ) : (
         <div className='flex items-center space-x-2'>
-          <Input value={customSize} onChange={handleCustomSizeChange} placeholder='Enter size (e.g., S, M, L, 42, 10.5)' className='flex-1' />
+          <Input value={customSize} onChange={handleCustomSizeChange} onBlur={handleCustomSizeBlur} onKeyDown={handleKeyDown} autoFocus={isEditing} placeholder='Enter size (e.g., S, M, L, 42, 10.5)' className='flex-1' />
           <Button
             type='button'
             variant='ghost'

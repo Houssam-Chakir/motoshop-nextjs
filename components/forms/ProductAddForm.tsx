@@ -119,44 +119,44 @@ function SearchableSelect({
   }, []);
 
   return (
-    <div className="relative w-full" ref={containerRef}>
+    <div className='relative w-full' ref={containerRef}>
       {/* Custom trigger button */}
       <button
-        type="button"
+        type='button'
         onClick={handleTriggerClick}
-        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
       >
-        <span className="flex-1 text-left truncate">{selectedOption ? selectedOption[displayKey] : placeholder}</span>
-        <span className="ml-2">
+        <span className='flex-1 text-left truncate'>{selectedOption ? selectedOption[displayKey] : placeholder}</span>
+        <span className='ml-2'>
           {isOpen ? (
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4 opacity-50"
+              xmlns='http://www.w3.org/2000/svg'
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              className='h-4 w-4 opacity-50'
             >
-              <path d="m18 15-6-6-6 6" />
+              <path d='m18 15-6-6-6 6' />
             </svg>
           ) : (
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4 opacity-50"
+              xmlns='http://www.w3.org/2000/svg'
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              className='h-4 w-4 opacity-50'
             >
-              <path d="m6 9 6 6 6-6" />
+              <path d='m6 9 6 6 6-6' />
             </svg>
           )}
         </span>
@@ -164,48 +164,46 @@ function SearchableSelect({
 
       {/* Dropdown content */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95">
-          <div className="flex items-center border-b px-3 py-2">
-            <Search className="h-4 w-4 mr-2 opacity-50" />
+        <div className='absolute z-50 w-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95'>
+          <div className='flex items-center border-b px-3 py-2'>
+            <Search className='h-4 w-4 mr-2 opacity-50' />
             <input
               ref={inputRef}
-              className="flex h-8 w-full rounded-md bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="Search..."
+              className='flex h-8 w-full rounded-md bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
+              placeholder='Search...'
               value={searchQuery}
               onChange={handleInputChange}
               autoFocus
             />
           </div>
-          <div
-            className={cn("max-h-[200px] overflow-y-auto", filteredOptions.length === 0 && "py-6 text-center text-sm")}
-          >
+          <div className={cn("max-h-[200px] overflow-y-auto", filteredOptions.length === 0 && "py-6 text-center text-sm")}>
             {filteredOptions.length === 0 ? (
-              <p className="text-muted-foreground p-2">No results found</p>
+              <p className='text-muted-foreground p-2'>No results found</p>
             ) : (
               filteredOptions.map((option) => (
                 <div
                   key={option[valueKey]}
                   className={cn(
                     "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
-                    option[valueKey] === value && "bg-accent text-accent-foreground",
+                    option[valueKey] === value && "bg-accent text-accent-foreground"
                   )}
                   onClick={() => handleOptionSelect(option[valueKey])}
                 >
                   {option[valueKey] === value && (
-                    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                    <span className='absolute left-2 flex h-3.5 w-3.5 items-center justify-center'>
                       <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-4 w-4"
+                        xmlns='http://www.w3.org/2000/svg'
+                        width='24'
+                        height='24'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        className='h-4 w-4'
                       >
-                        <polyline points="20 6 9 17 4 12" />
+                        <polyline points='20 6 9 17 4 12' />
                       </svg>
                     </span>
                   )}
@@ -548,7 +546,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
               <FormItem>
                 <FormLabel>Wholesale Price</FormLabel>
                 <FormControl>
-                  <Input type='number' step='0.01' placeholder='0.00' {...field} onChange={(e) => field.onChange(e.target.value)} value={field.value} />
+                  <Input type='text' step='0.01' placeholder='0.00' {...field} onChange={(e) => field.onChange(e.target.value)} value={field.value} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -561,7 +559,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
               <FormItem>
                 <FormLabel>Retail Price</FormLabel>
                 <FormControl>
-                  <Input type='number' step='0.01' placeholder='0.00' {...field} onChange={(e) => field.onChange(e.target.value)} value={field.value} />
+                  <Input type='text' step='0.01' placeholder='0.00' {...field} onChange={(e) => field.onChange(e.target.value)} value={field.value} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -605,7 +603,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input type='number' placeholder='Quantity' {...field} />
+                        <Input type='text' placeholder='Quantity' {...field} onChange={(e) => field.onChange(e.target.value)} value={field.value} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

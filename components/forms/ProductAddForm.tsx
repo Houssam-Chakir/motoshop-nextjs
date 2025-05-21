@@ -19,6 +19,7 @@ import addNewProduct from "@/app/actions/addProduct";
 import { toast } from "react-toastify";
 import { redirect } from "next/navigation";
 
+
 // Define the stock item schema
 const stockItemSchema = z.object({
   size: z.string().min(1, { message: "Size is required" }),
@@ -340,6 +341,9 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
   const [images, setImages] = useState<File[]>([]);
   const [imageError, setImageError] = useState("");
   const [availableSizes, setAvailableSizes] = useState<string[]>(["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44"]);
+
+  // AutoAnimate Hook
+  aut
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

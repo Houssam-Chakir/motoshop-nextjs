@@ -49,6 +49,21 @@ export const getCachedCategories = nextCache(
     await connectDB();
     const categoriesDoc = await Category.find({}).lean().exec();
     const categories = convertToSerializableObject(categoriesDoc) as { _id: string; name: string }[];
+    await Category.populate(categories, { path: "applicableTypes" });
+
+    categories.forEach((category) => {
+      category.applicableTypes = category.applicableTypes.map((type) => {
+        // Ensure type._doc exists or adjust based on actual object structure
+        const originalDoc = type._doc || type;
+        return {
+          category: originalDoc.category?.toString(),
+          name: originalDoc.name,
+          slug: originalDoc.slug,
+          icon: originalDoc.icon,
+          _id: originalDoc._id?.toString(),
+        };
+      });
+    });
 
     return categories;
   },

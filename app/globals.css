@@ -4,35 +4,72 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Fonts */
   --font-sans: var(--font-inter);    /* Makes Inter the default sans-serif font */
   --font-display: var(--font-oxanium); /* Creates a new utility for Oxanium */
+
+  /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Base Semantic Colors (Keep these if they map to abstract vars like --background, --foreground in :root) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
+  --color-accent: var(--accent); /* Keep if --accent is defined in :root */
+  --color-accent-foreground: var(--accent-foreground); /* Keep if --accent-foreground is defined in :root */
+  --color-destructive: var(--destructive); /* Keep if --destructive is defined in :root */
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* Primary Colors */
+  --color-primary-light: var(--primary-light); /* NEW (from your list) */
+  --color-primary: var(--primary);             /* Existing */
+  --color-primary-dark: var(--primary-dark);   /* NEW (from your list - fixes your original issue) */
+  --color-primary-foreground: var(--primary-foreground); /* Existing */
+
+  /* Secondary Colors */
+  --color-secondary-light: var(--secondary-light); /* NEW (from your list) */
+  --color-secondary: var(--secondary);             /* Existing */
+  --color-secondary-foreground: var(--secondary-foreground); /* Existing */
+
+  /* Blues */
+  --color-blue: var(--blue);                       /* NEW (from your list) */
+  --color-blue-sky: var(--blue-sky);               /* NEW (from your list) */
+  --color-blue-sky-light: var(--blue-sky-light);   /* NEW (from your list) */
+
+  /* Greys */
+  --color-grey: var(--grey);                       /* NEW (from your list) */
+  --color-grey-light: var(--grey-light);           /* NEW (from your list) */
+  --color-grey-medium: var(--grey-medium);         /* NEW (from your list) */
+  --color-grey-dark: var(--grey-dark);             /* NEW (from your list) */
+  --color-grey-darker: var(--grey-darker);         /* NEW (from your list) */
+  --color-grey-blue: var(--grey-blue);             /* NEW (from your list) */
+  --color-grey-blue-baby: var(--grey-blue-baby);   /* NEW (from your list) */
+
+  /* State Colors */
+  --color-success-green: var(--success-green);     /* NEW (from your list) - will generate text-success-green etc. */
+  --color-link: var(--link);                       /* NEW (from your list) */
+
+  /* Misc Colors */
+  --color-admin-blue: var(--admin-blue);           /* NEW (from your list) */
+
+  /* Chart Colors (Existing) */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  /* Sidebar Colors (Existing - Keep if these map to abstract vars like --sidebar, --sidebar-foreground in :root) */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);

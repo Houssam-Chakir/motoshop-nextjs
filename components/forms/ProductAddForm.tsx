@@ -342,9 +342,6 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
   const [imageError, setImageError] = useState("");
   const [availableSizes, setAvailableSizes] = useState<string[]>(["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44"]);
 
-  // AutoAnimate Hook
-  aut
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {

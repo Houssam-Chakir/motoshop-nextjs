@@ -6,7 +6,6 @@ mongoose.plugin(slug);
 export interface TypeDocument extends Document {
   name: string;
   slug: string;
-  icon?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -15,7 +14,6 @@ export interface TypeDocument extends Document {
 const TypeSchema = new Schema({
   name: { type: String, required: true },
   slug: { type: String, required: true, unique: true },
-  icon: { type: String, unique: true },
   // Reference to parent Type
   category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
 });

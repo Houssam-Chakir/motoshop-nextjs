@@ -19,7 +19,7 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
 
   //Menus states
   const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState(null);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(true);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   // const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {

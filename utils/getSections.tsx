@@ -5,13 +5,13 @@ import { getCachedCategories } from "./getCachedLists";
 //f/ Handle Categories by section
 export default async function getSections() {
   const sections = [
+    { section: "Riding Style", categories: [{ name: "Adventure" }, { name: "Racing" }, { name: "Touring" }, { name: "Urban" }, { name: "Enduro" }] },
     { section: "Riding Gear", categories: [] },
     { section: "Motorcycle Parts", categories: [] },
     { section: "Motorcycles", categories: [] },
   ];
 
   const categories = await getCachedCategories();
-
 
   const sectionMap = new Map();
   sections.forEach((s) => {

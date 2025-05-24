@@ -1,4 +1,5 @@
 import Container from "@/components/layout/Container";
+import Link from "next/link";
 
 const CategoryMenu = ({ section, onMouseLeave }) => {
   return (
@@ -29,19 +30,22 @@ function SectionMenu({ section }) {
 // blocks of categories
 function CategoryBlock({ category }) {
   return (
-    <div className='flex gap-4 py-6 pl-6 pr-12'>
+    <div className='flex gap-6 py-6 pl-6 pr-12'>
       <div className=''>
         <img className='h-12' src='/racing-helmet.svg' alt='racing' />
       </div>
-      <div className='flex flex-col'>
-        <h1 className='font-display font-medium text-[20px] text-primary-dark pb-1'>{category.name}</h1>
-        {category.applicableTypes.map((type, i) => {
-          return (
-            <div key={i} className='text-sm font-light'>
-              {type.name}
-            </div>
-          );
-        })}
+      <div className='flex gap-1 flex-col'>
+        <Link href={"#"} className={`hover:text-primary-light font-display font-medium text-[20px] text-primary-dark pb-1 ${!category.applicableTypes ? "pt-2" : ""}`}>
+          {category.name}
+        </Link>
+        {category.applicableTypes &&
+          category.applicableTypes.map((type, i) => {
+            return (
+                <Link href={"#"} key={i} className='relative text-sm font-light hover:tracking-[-0.007rem] hover:font-normal hover:underline duration-100'>
+                  {type.name}
+                </Link>
+            );
+          })}
       </div>
     </div>
   );

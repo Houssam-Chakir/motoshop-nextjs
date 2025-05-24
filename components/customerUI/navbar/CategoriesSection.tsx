@@ -4,11 +4,10 @@ import Container from "@/components/layout/Container";
 import CategoryMenu from "./CategoryMenu";
 
 const CategoriesSection = ({ sections, whichSectionMenuOpen, setWhichSectionMenuOpen }) => {
-  const categories = ["Riding Gear", "Motorcycle Parts", "Motorcycles", "SALES!"];
 
   return (
     <>
-      {categories &&
+      {sections &&
         sections.map((section, i) => {
           return (
             <div key={i} className=''>

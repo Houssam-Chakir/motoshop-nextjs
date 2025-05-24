@@ -13,7 +13,7 @@ const CategoriesSection = ({ sections }) => {
         sections.map((section, i) => {
           return (
             <div key={i} className=''>
-              <CategoryButton onClick={() => setWhichMenuOpen(i)} section={section} />
+              <CategoryButton inFocus={whichMenuOpen === i ? true : false} onClick={() => setWhichMenuOpen((prev) => (prev === i ? null : i))} section={section} />
               {/* Category Menu */}
               {whichMenuOpen === i && <CategoryMenu onMouseLeave={() => setWhichMenuOpen(null)} section={section} />}
             </div>

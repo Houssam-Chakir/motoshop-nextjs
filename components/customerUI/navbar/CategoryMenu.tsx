@@ -34,7 +34,7 @@ function CategoryBlock({ category }) {
         <img className='h-12' src='/racing-helmet.svg' alt='racing' />
       </div>
       <div className='flex flex-col'>
-        <h1 className='font-display font-medium text-[16px] text-primary-dark pb-1'>{category.name}</h1>
+        <h1 className='font-display font-medium text-[20px] text-primary-dark pb-1'>{category.name}</h1>
         {category.applicableTypes.map((type, i) => {
           return (
             <div key={i} className='text-sm font-light'>

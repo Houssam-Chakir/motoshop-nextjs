@@ -65,23 +65,23 @@ function UserButtonsSection() {
     <>
       <div className='flex items-center space-x-6'>
         <div className='flex flex-col items-center group cursor-pointer'>
-          <Heart className='h-6 w-6 text-gray-700 group-hover:text-blue duration-100 group-hover:-translate-y-1' />
-          <span className='text-xs mt-1 group-hover:text-blue'>Wishlist</span>
+          <Heart className='h-6 w-6 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
+          <span className='text-xs mt-1 group-hover:text-primary'>Wishlist</span>
         </div>
 
         <div className='flex flex-col items-center relative group cursor-pointer'>
           <div className='relative '>
-            <ShoppingCart className='h-6 w-6 text-gray-700 group-hover:text-blue duration-100 group-hover:-translate-y-1' />
+            <ShoppingCart className='h-6 w-6 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
             <span className='absolute -top-2 -right-2 bg-secondary-light opacity-80 group-hover:opacity-100 text-white text-sm font-bold rounded-full duration-100 group-hover:-translate-y-1.5 h-5 w-5 flex items-center justify-center'>
               0
             </span>
           </div>
-          <span className='text-xs mt-1 group-hover:text-blue'>Cart</span>
+          <span className='text-xs mt-1 group-hover:text-primary'>Cart</span>
         </div>
 
         <div className='flex flex-col items-center group cursor-pointer'>
-          <User className='h-6 w-6 text-gray-700 group-hover:text-blue duration-100 group-hover:-translate-y-1' />
-          <span className='text-xs mt-1 group-hover:text-blue'>Guest</span>
+          <User className='h-6 w-6 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
+          <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
         </div>
       </div>
     </>

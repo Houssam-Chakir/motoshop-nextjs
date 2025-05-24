@@ -2,16 +2,16 @@ import Container from "@/components/layout/Container";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-const CategoryButton = ({ section, onClick }: { section: string; onClick: () => void }) => {
+const CategoryButton = ({ section, inFocus, onClick }: { section: string; inFocus: boolean; onClick: () => void }) => {
+
   return (
     <>
-      <button onClick={onClick} className='flex items-center group h-14 px-4 hover:bg-primary '>
-        <span className=' group-hover:text-white'>{section.section}</span>
+      <button onClick={onClick} className={`flex items-center group h-14 px-4 ${inFocus ? ('bg-primary'):('')} hover:bg-primary`}>
+        <span className={`${inFocus ? ('text-white'):('')} group-hover:text-white`}>{section.section}</span>
         <span className=''>
-          <ChevronDown className='h-4 group-hover:text-white' />
+          <ChevronDown className={`h-4 ${inFocus ? ('text-white rotate-180 '):('')} group-hover:text-white duration-100`} />
         </span>
       </button>
-
     </>
   );
 };
@@ -37,7 +37,11 @@ function CategoryBlock({ category }) {
       <div className='flex flex-col'>
         <h1 className='font-display font-medium text-[16px] text-primary-dark pb-1'>{category.name}</h1>
         {category.applicableTypes.map((type, i) => {
-          return <div key={i} className='text-sm font-light'>{type.name}</div>;
+          return (
+            <div key={i} className='text-sm font-light'>
+              {type.name}
+            </div>
+          );
         })}
       </div>
     </div>

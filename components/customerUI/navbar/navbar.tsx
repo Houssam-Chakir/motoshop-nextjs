@@ -2,14 +2,16 @@
 
 import { useQueryState } from "nuqs";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { BoxIcon, Heart, LogOut, ShoppingCart, User, UserSearch, X } from "lucide-react";
+import { BoxIcon, Heart, LogIn, LogOut, ShoppingCart, User, UserSearch, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Container from "../../layout/Container";
 import CategoriesSection from "./CategoriesSection";
-import { getProviders, signOut, useSession } from "next-auth/react";
+import { getProviders, signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { Session } from "next-auth";
+import GoogleSignupButton from "@/components/authentication/GoogleSignUpButton";
 
 export default function Navbar({ sections }: { categories: { id: string; name: string }[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
@@ -17,14 +19,14 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
 
   //Menus states
   const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState(null);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(true);
   // const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     if (whichSectionMenuOpen) setIsUserMenuOpen(false);
     if (isUserMenuOpen) {
       setWhichSectionMenuOpen(null);
-      setIsUserMenuOpen(true)
+      setIsUserMenuOpen(true);
     }
   }, [whichSectionMenuOpen, isUserMenuOpen]);
 
@@ -106,9 +108,12 @@ function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, 
           <span className='text-xs mt-1 group-hover:text-primary'>Cart</span>
         </div>
         {!session && (
-          <div className='flex flex-col items-center group cursor-pointer'>
-            <User className='h-6 w-6 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
-            <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
+          <div>
+            <div onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)} className='flex flex-col items-center group cursor-pointer'>
+              <User className='h-6 w-6 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
+              <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
+            </div>
+            {isUserMenuOpen && <UserMenu providers={providers} session={session} onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
           </div>
         )}
         {session && (
@@ -135,7 +140,7 @@ function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, 
               </div>
               <span className={`text-xs mt-1 ${isUserMenuOpen ? "text-primary-dark" : ""} group-hover:text-primary`}>{username}</span>
             </button>
-            {isUserMenuOpen && <UserMenu onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
+            {isUserMenuOpen && <UserMenu providers={providers} session={session} onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
           </div>
         )}
       </div>
@@ -143,25 +148,52 @@ function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, 
   );
 }
 
-function UserMenu({ onMouseLeave }: { onMouseLeave: () => void }) {
+function UserMenu({ providers, session, onMouseLeave }: { session: Session; onMouseLeave: () => void }) {
   return (
-    <div onMouseLeave={onMouseLeave} className=' bg-white absolute w-42 right-0 top-14 border border-grey-dark  shadow-xl'>
+    <div onMouseLeave={onMouseLeave} className=' bg-white absolute w-fit min-w-42 right-0 top-14 border border-grey-dark  shadow-xl'>
       <div className='absolute w-14 h-14 -top-14 right-0'></div>
       <div className='absolute rotate-45 right-5 -top-[7px] w-3 h-3 border-grey-dark border-l-1 border-t-1 bg-white'></div>
-      <h1 className=' p-4 uppercase text-center pb-4 font-bold border-grey-dark border-b'>User menu</h1>
-      <ul className='py-4 *:px-6 *:py-6 *:flex *:gap-4 *:hover:bg-grey *:cursor-default *:items-center [&_*]:h-6'>
-        <li>
-          <UserSearch />
-          <span>Profile</span>
-        </li>
-        <li>
-          <BoxIcon />
-          <span>Orders</span>
-        </li>
-        <li>
-          <LogOut />
-          <span>Logout</span>
-        </li>
+      <h1 className=' p-4 uppercase text-center pb-4 font-bold border-grey-dark border-b'>
+        {session && (
+         'User menu'
+        )}
+        {!session && (
+          'Sign Up'
+        )}
+        </h1>
+      <ul className='w-full py-4 *:text-nowrap *:px-6 *:py-6 *:flex *:gap-4 *:hover:bg-grey *:cursor-default *:items-center [&_*]:h-6'>
+        {session && (
+          <>
+            <li>
+              <UserSearch />
+              <span>Profile</span>
+            </li>
+            <li>
+              <BoxIcon />
+              <span>Orders</span>
+            </li>
+            <li className='hover:text-primary' onClick={() => signOut()}>
+              <LogOut />
+              <span>Logout</span>
+            </li>
+          </>
+        )}
+        {!session && (
+          <div className="hover:!bg-white !h-12 !py-0">
+            {providers &&
+              Object.values(providers).map((provider, i) => {
+                if (provider.id === "google") {
+                  return (
+                    <GoogleSignupButton onSignup={() => signIn(provider.id)} key={i} className=""/>
+                  );
+                }
+              })}
+            {/* <li className='hover:text-primary' onClick={() => signIn()}>
+              <LogIn />
+              <span>SignIn with</span>
+            </li> */}
+          </div>
+        )}
       </ul>
     </div>
   );

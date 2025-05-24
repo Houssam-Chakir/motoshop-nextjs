@@ -14,7 +14,7 @@ const CategoriesSection = ({ sections, whichSectionMenuOpen, setWhichSectionMenu
             <div key={i} className=''>
               <CategoryButton inFocus={whichSectionMenuOpen === i ? true : false} onClick={() => setWhichSectionMenuOpen((prev) => (prev === i ? null : i))} section={section} />
               {/* Category Menu */}
-              {whichSectionMenuOpen === i && <CategoryMenu onMouseLeave={() => setWhichMenuOpen(null)} section={section} />}
+              {whichSectionMenuOpen === i && <CategoryMenu onMouseLeave={() => setWhichSectionMenuOpen(null)} section={section} />}
             </div>
           );
         })}

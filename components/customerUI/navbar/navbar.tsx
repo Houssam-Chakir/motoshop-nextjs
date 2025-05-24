@@ -2,17 +2,43 @@
 
 import { useQueryState } from "nuqs";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Heart, ShoppingCart, User, X } from "lucide-react";
+import { BoxIcon, Heart, LogOut, ShoppingCart, User, UserSearch, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Container from "../../layout/Container";
 import CategoriesSection from "./CategoriesSection";
-import { CategoryType } from "@/models/Category";
+import { getProviders, signOut, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function Navbar({ sections }: { categories: { id: string; name: string }[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
   const [parent] = useAutoAnimate({ duration: 100 });
 
+  //Menus states
+  const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState(null);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  // const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    if (whichSectionMenuOpen) setIsUserMenuOpen(false);
+    if (isUserMenuOpen) {
+      setWhichSectionMenuOpen(null);
+      setIsUserMenuOpen(true)
+    }
+  }, [whichSectionMenuOpen, isUserMenuOpen]);
+
+  const { data: session } = useSession();
+  const [providers, setProviders] = useState<Record<string, { id: string; name: string }> | null>(null);
+  const profileImage = session?.user.image?.toString() as string;
+
+  useEffect(() => {
+    const setAuthProviders = async () => {
+      const res = await getProviders();
+      setProviders(res);
+    };
+    setAuthProviders();
+  }, []);
   return (
     <header className='w-full pt-4  bg-white shadow-xs relative'>
       <Container className=''>
@@ -48,22 +74,23 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
             </div>
           </div>
 
-          {/* Navigation Icons */}
-          <UserButtonsSection />
+          {/* User related buttons */}
+          <UserButtonsSection providers={providers} session={session} profileImage={profileImage} isUserMenuOpen={isUserMenuOpen} setIsUserMenuOpen={setIsUserMenuOpen} />
         </div>
         <div className='flex justify-center'>
           {/* Categories section */}
-          <CategoriesSection sections={sections} />
+          <CategoriesSection whichSectionMenuOpen={whichSectionMenuOpen} setWhichSectionMenuOpen={setWhichSectionMenuOpen} sections={sections} />
         </div>
       </Container>
     </header>
   );
 }
 
-function UserButtonsSection() {
+function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, setIsUserMenuOpen }) {
+  const username = session?.user.name.split(" ").at(0) || "username";
   return (
     <>
-      <div className='flex items-center space-x-6'>
+      <div className='relative flex items-center space-x-6'>
         <div className='flex flex-col items-center group cursor-pointer'>
           <Heart className='h-6 w-6 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
           <span className='text-xs mt-1 group-hover:text-primary'>Wishlist</span>
@@ -78,13 +105,65 @@ function UserButtonsSection() {
           </div>
           <span className='text-xs mt-1 group-hover:text-primary'>Cart</span>
         </div>
-
-        <div className='flex flex-col items-center group cursor-pointer'>
-          <User className='h-6 w-6 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
-          <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
-        </div>
+        {!session && (
+          <div className='flex flex-col items-center group cursor-pointer'>
+            <User className='h-6 w-6 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
+            <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
+          </div>
+        )}
+        {session && (
+          <div>
+            <button
+              onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              type='button'
+              className=' flex flex-col items-center group cursor-pointer'
+              aria-label='toggle profile dropdown'
+            >
+              <div className={` ${isUserMenuOpen ? "group-hover:-translate-y-1" : ""} duration-100 w-6 h-6 overflow-hidden border-2 border-gray-400 rounded-full`}>
+                <Image
+                  src={
+                    profileImage
+                      ? profileImage
+                      : "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
+                  }
+                  className='object-cover w-full h-full '
+                  alt='avatar'
+                  width={0}
+                  height={0}
+                  sizes='100vw'
+                />
+              </div>
+              <span className={`text-xs mt-1 ${isUserMenuOpen ? "text-primary-dark" : ""} group-hover:text-primary`}>{username}</span>
+            </button>
+            {isUserMenuOpen && <UserMenu onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
+          </div>
+        )}
       </div>
     </>
+  );
+}
+
+function UserMenu({ onMouseLeave }: { onMouseLeave: () => void }) {
+  return (
+    <div onMouseLeave={onMouseLeave} className=' bg-white absolute w-42 right-0 top-14 border border-grey-dark  shadow-xl'>
+      <div className='absolute w-14 h-14 -top-14 right-0'></div>
+      <div className='absolute rotate-45 right-5 -top-[7px] w-3 h-3 border-grey-dark border-l-1 border-t-1 bg-white'></div>
+      <h1 className=' p-4 uppercase text-center pb-4 font-bold border-grey-dark border-b'>User menu</h1>
+      <ul className='py-4 *:px-6 *:py-6 *:flex *:gap-4 *:hover:bg-grey *:cursor-default *:items-center [&_*]:h-6'>
+        <li>
+          <UserSearch />
+          <span>Profile</span>
+        </li>
+        <li>
+          <BoxIcon />
+          <span>Orders</span>
+        </li>
+        <li>
+          <LogOut />
+          <span>Logout</span>
+        </li>
+      </ul>
+    </div>
   );
 }
 

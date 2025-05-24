@@ -2,7 +2,7 @@ import Container from "@/components/layout/Container";
 
 const CategoryMenu = ({ section, onMouseLeave }) => {
   return (
-    <div onMouseLeave={onMouseLeave} className='absolute bg-white w-full left-0 border-t-4 border-primary'>
+    <div onMouseLeave={onMouseLeave} className='absolute bg-white w-full left-0 pb-12 border-t-4 border-primary'>
       <div className='w-fill py-6 font-bold'>
         <Container>
           <h1>{section.section.toUpperCase()}:</h1>

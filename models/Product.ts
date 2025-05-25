@@ -34,7 +34,7 @@ export interface ProductDocument extends Document {
   saleInfo?: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
   style: "None"| "Versitile"| "Racing"| "Adventure"| "Enduro"| "Urban"| "Touring";
-  
+
 
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
@@ -148,6 +148,13 @@ ProductSchema.pre("validate", function (this: ProductDocument, next) {
         parts.push(getAttributeCode(this.productModel, 3));
       } else {
         console.warn("SKU Gen: Product model for SKU is missing or invalid. Using XXX.");
+        parts.push("XXX");
+      }
+
+      if (typeof this.style === "string" && this.style) {
+        parts.push(getAttributeCode(this.style, 3));
+      } else {
+        console.warn("SKU Gen: Product style for SKU is missing or invalid. Using XXX.");
         parts.push("XXX");
       }
 

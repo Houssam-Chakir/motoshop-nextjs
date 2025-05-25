@@ -2,7 +2,7 @@
 
 import { useQueryState } from "nuqs";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { BoxIcon, Heart, LogIn, LogOut, ShoppingCart, User, UserSearch, X } from "lucide-react";
+import { AlignJustify, BoxIcon, Heart, LogIn, LogOut, ShoppingCart, User, UserSearch, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Container from "../../layout/Container";
@@ -13,6 +13,7 @@ import Image from "next/image";
 import { Session } from "next-auth";
 import GoogleSignupButton from "@/components/authentication/GoogleSignUpButton";
 import useMediaQuery from "@/hooks/useMediaQuery";
+import SearchInput, { SearchBar } from "./SearchInput";
 
 export default function Navbar({ sections }: { categories: { id: string; name: string }[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
@@ -24,7 +25,7 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
   //Menus states
   const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  // const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     if (whichSectionMenuOpen) setIsUserMenuOpen(false);
@@ -32,6 +33,7 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
       setWhichSectionMenuOpen(null);
       setIsUserMenuOpen(true);
     }
+    
   }, [whichSectionMenuOpen, isUserMenuOpen]);
 
   const { data: session } = useSession();
@@ -50,107 +52,114 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
       <Container className=''>
         {/* Top section */}
         <div className='flex items-center justify-between pb-4'>
-          {/* Logo */}
-          <Logo />
+          <div className='flex gap-4 items-center'>
+            {!isTabletOrLarger && (
+              <>
+                <div className="absolute left-0 w-20 h-12"></div>
+                <AlignJustify />
+              </>
+            )}
+            {/* Logo */}
+            <span className='pt-1'>
+              <Logo />
+            </span>
+          </div>
 
           {/* Search Bar */}
-          {isDesktop && (
-            <div className='relative max-w-[518px] w-full mx-4'>
-              <div ref={parent} className='relative'>
-                <Input
-                  type='text'
-                  placeholder='Search for products...'
-                  className='w-full pl-11 pr-4 h-[42px] text-black text-xs placeholder:text-black focus:placeholder:text-grey-darker placeholder:text-xs rounded-full bg-grey border-xs hover:border-grey-blue duration-100 transition-all shadow-none border-grey-light font-display'
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                  <svg className='h-5 w-5 text-primary-dark' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'>
-                    <path
-                      fillRule='evenodd'
-                      d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z'
-                      clipRule='evenodd'
-                    />
-                  </svg>
-                </div>
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className='absolute cursor-pointer inset-y-0 right-0 pr-4 flex items-center pointer-events-auto'>
-                    <X />
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+          {isDesktop && <SearchInput searchQuery={searchQuery} setSearchQuery={setSearchQuery} isDesktop={isDesktop} />}
 
           {/* User related buttons */}
-          <UserButtonsSection providers={providers} session={session} profileImage={profileImage} isUserMenuOpen={isUserMenuOpen} setIsUserMenuOpen={setIsUserMenuOpen} />
+          <div className='flex items-center space-x-6'>
+            {!isDesktop && (
+              <>
+                <div onClick={() => setIsSearchOpen(!isSearchOpen)}>
+                  <SearchInput searchQuery={searchQuery} setSearchQuery={setSearchQuery} isDesktop={isDesktop} />
+                </div>
+                {isSearchOpen && (
+                  <div className='absolute bg-white w-[100vw] -right-6 top-16 pt-4 pb-6'>
+                    <Container>
+                      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} parent={parent} />
+                    </Container>
+                  </div>
+                )}
+              </>
+            )}
+            <UserButtonsSection
+              isPhoneOrLarger={isPhoneOrLarger}
+              providers={providers}
+              session={session}
+              profileImage={profileImage}
+              isUserMenuOpen={isUserMenuOpen}
+              setIsUserMenuOpen={setIsUserMenuOpen}
+            />
+          </div>
         </div>
         <div className='flex justify-center'>
           {/* Categories section */}
-          <CategoriesSection whichSectionMenuOpen={whichSectionMenuOpen} setWhichSectionMenuOpen={setWhichSectionMenuOpen} sections={sections} />
+          {isTabletOrLarger && <CategoriesSection whichSectionMenuOpen={whichSectionMenuOpen} setWhichSectionMenuOpen={setWhichSectionMenuOpen} sections={sections} />}
         </div>
       </Container>
     </header>
   );
 }
 
-function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, setIsUserMenuOpen }) {
+function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, setIsUserMenuOpen, isPhoneOrLarger }) {
   const [parent] = useAutoAnimate({ duration: 100 });
   const username = session?.user.name.split(" ").at(0) || "username";
   return (
     <>
-      <div className='relative flex items-center space-x-6'>
+      {isPhoneOrLarger && (
         <div className='flex flex-col items-center group cursor-pointer'>
           <Heart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
           <span className='text-xs mt-1 group-hover:text-primary'>Wishlist</span>
         </div>
+      )}
 
-        <div className='flex flex-col items-center relative group cursor-pointer'>
-          <div className='relative '>
-            <ShoppingCart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
-            <span className='absolute -top-1.5 -right-2 bg-secondary-light opacity-80 group-hover:opacity-100 text-white text-sm font-bold rounded-full duration-100 group-hover:-translate-y-1 h-4 w-4 flex items-center justify-center'>
-              0
-            </span>
-          </div>
-          <span className='text-xs mt-1 group-hover:text-primary'>Cart</span>
+      <div className='flex flex-col items-center relative group cursor-pointer'>
+        <div className='relative '>
+          <ShoppingCart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
+          <span className='absolute -top-1.5 -right-2 bg-secondary-light opacity-80 group-hover:opacity-100 text-white text-sm font-bold rounded-full duration-100 group-hover:-translate-y-1 h-4 w-4 flex items-center justify-center'>
+            0
+          </span>
         </div>
-        {!session && (
-          <div ref={parent}>
-            <div onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)} className='flex flex-col items-center group cursor-pointer'>
-              <User className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
-              <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
-            </div>
-            {isUserMenuOpen && <UserMenu providers={providers} session={session} onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
-          </div>
-        )}
-        {session && (
-          <div ref={parent}>
-            <button
-              onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              type='button'
-              className=' flex flex-col items-center group cursor-pointer'
-              aria-label='toggle profile dropdown'
-            >
-              <div className={` ${isUserMenuOpen ? "group-hover:-translate-y-1" : ""} duration-100 w-5 h-5 overflow-hidden border-2 border-gray-400 rounded-full`}>
-                <Image
-                  src={
-                    profileImage
-                      ? profileImage
-                      : "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
-                  }
-                  className='object-cover w-full h-full '
-                  alt='avatar'
-                  width={0}
-                  height={0}
-                  sizes='100vw'
-                />
-              </div>
-              <span className={`text-xs mt-1 ${isUserMenuOpen ? "text-primary-dark" : ""} group-hover:text-primary`}>{username}</span>
-            </button>
-            {isUserMenuOpen && <UserMenu providers={providers} session={session} onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
-          </div>
-        )}
+        <span className='text-xs mt-1 group-hover:text-primary'>Cart</span>
       </div>
+      {!session && (
+        <div ref={parent}>
+          <div onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)} className='flex flex-col items-center group cursor-pointer'>
+            <User className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
+            <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
+          </div>
+          {isUserMenuOpen && <UserMenu providers={providers} session={session} onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
+        </div>
+      )}
+      {session && (
+        <div ref={parent}>
+          <button
+            onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            type='button'
+            className=' flex flex-col items-center group cursor-pointer'
+            aria-label='toggle profile dropdown'
+          >
+            <div className={` ${isUserMenuOpen ? "group-hover:-translate-y-1" : ""} duration-100 w-5 h-5 overflow-hidden border-2 border-gray-400 rounded-full`}>
+              <Image
+                src={
+                  profileImage
+                    ? profileImage
+                    : "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
+                }
+                className='object-cover w-full h-full '
+                alt='avatar'
+                width={0}
+                height={0}
+                sizes='100vw'
+              />
+            </div>
+            <span className={`text-xs mt-1 ${isUserMenuOpen ? "text-primary-dark" : ""} group-hover:text-primary`}>{username}</span>
+          </button>
+          {isUserMenuOpen && <UserMenu providers={providers} session={session} onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
+        </div>
+      )}
     </>
   );
 }

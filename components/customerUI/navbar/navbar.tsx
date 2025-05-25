@@ -2,7 +2,7 @@
 
 import { useQueryState } from "nuqs";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { AlignJustify, BoxIcon, Heart, LogIn, LogOut, ShoppingCart, User, UserSearch, X } from "lucide-react";
+import { AlignJustify, BoxIcon, Heart, LogIn, LogOut, Menu, ShoppingCart, User, UserSearch, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Container from "../../layout/Container";
@@ -14,6 +14,10 @@ import { Session } from "next-auth";
 import GoogleSignupButton from "@/components/authentication/GoogleSignUpButton";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import SearchInput, { SearchBar } from "./SearchInput";
+import { MobileSlider } from "../sideBar/MobileSidebar";
+import { Button } from "@/components/ui/button";
+import { CategoriesSlider } from "../sideBar/SectionsSlider";
+import { categoriesData } from "../sideBar/categories";
 
 export default function Navbar({ sections }: { categories: { id: string; name: string }[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
@@ -33,7 +37,6 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
       setWhichSectionMenuOpen(null);
       setIsUserMenuOpen(true);
     }
-    
   }, [whichSectionMenuOpen, isUserMenuOpen]);
 
   const { data: session } = useSession();
@@ -52,15 +55,32 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
       <Container className=''>
         {/* Top section */}
         <div className='flex items-center justify-between pb-4'>
-          <div className='flex gap-4 items-center'>
+          <div className='flex gap-6'>
             {!isTabletOrLarger && (
-              <>
-                <div className="absolute left-0 w-20 h-12"></div>
-                <AlignJustify />
-              </>
+              <MobileSlider
+                trigger={
+                  <button>
+                    <div className='absolute left-0 w-20 h-12'></div>
+                    <div className='flex flex-col justify-center items-center '>
+                      <AlignJustify className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100' />
+                      <span className='text-xs mt-1 group-hover:text-primary'>Menu</span>
+                    </div>
+                  </button>
+                }
+              >
+                <CategoriesSlider
+                  categories={categoriesData}
+                  onCategorySelect={(category) => {
+                    console.log("Selected category:", category.name);
+                  }}
+                  onTypeSelect={(type, category) => {
+                    console.log(`Selected ${type.name} from ${category.name}`);
+                  }}
+                />
+              </MobileSlider>
             )}
             {/* Logo */}
-            <span className='pt-1'>
+            <span className='pt-2'>
               <Logo />
             </span>
           </div>
@@ -72,15 +92,26 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
           <div className='flex items-center space-x-6'>
             {!isDesktop && (
               <>
+                {/* Mobile search input button */}
                 <div onClick={() => setIsSearchOpen(!isSearchOpen)}>
                   <SearchInput searchQuery={searchQuery} setSearchQuery={setSearchQuery} isDesktop={isDesktop} />
                 </div>
                 {isSearchOpen && (
-                  <div className='absolute bg-white w-[100vw] -right-6 top-16 pt-4 pb-6'>
-                    <Container>
-                      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} parent={parent} />
-                    </Container>
-                  </div>
+                  <>
+                    <div className='absolute bg-white w-[100vw] -right-6 top-16 pt-4 pb-6'>
+                      <Container className=''>
+                        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} parent={parent} />
+                      </Container>
+                      <div
+                        onClick={() => setIsSearchOpen(false)}
+                        id='searchOverlay'
+                        className='fixed h-full inset-x-0 inset-y-[184px] bg-black/50'
+                        role='button'
+                        aria-label='Close search'
+                        aria-hidden='true'
+                      ></div>
+                    </div>
+                  </>
                 )}
               </>
             )}

@@ -55,7 +55,7 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
               <Input
                 type='text'
                 placeholder='Search for products...'
-                className='w-full pl-11 pr-4 h-[42px] text-black text-xs placeholder:text-black focus:placeholder:text-grey-darker placeholder:text-xs rounded-full bg-grey border-xs hover:border-grey-dark duration-100 transition-all shadow-none border-grey-light font-display'
+                className='w-full pl-11 pr-4 h-[42px] text-black text-xs placeholder:text-black focus:placeholder:text-grey-darker placeholder:text-xs rounded-full bg-grey border-xs hover:border-grey-blue duration-100 transition-all shadow-none border-grey-light font-display'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -89,6 +89,7 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
 }
 
 function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, setIsUserMenuOpen }) {
+  const [parent] = useAutoAnimate({ duration: 100 });
   const username = session?.user.name.split(" ").at(0) || "username";
   return (
     <>
@@ -108,7 +109,7 @@ function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, 
           <span className='text-xs mt-1 group-hover:text-primary'>Cart</span>
         </div>
         {!session && (
-          <div>
+          <div ref={parent}>
             <div onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)} className='flex flex-col items-center group cursor-pointer'>
               <User className='h-6 w-6 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
               <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
@@ -117,7 +118,7 @@ function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, 
           </div>
         )}
         {session && (
-          <div>
+          <div ref={parent}>
             <button
               onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)}
               type='button'
@@ -150,10 +151,10 @@ function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, 
 
 function UserMenu({ providers, session, onMouseLeave }: { session: Session; onMouseLeave: () => void }) {
   return (
-    <div onMouseLeave={onMouseLeave} className=' bg-white absolute w-fit min-w-42 right-0 top-14 border border-grey-dark  shadow-xl'>
+    <div onMouseLeave={onMouseLeave} className=' bg-white absolute w-fit min-w-42 right-0 top-14 border  shadow-xl'>
       <div className='absolute w-14 h-14 -top-14 right-0'></div>
-      <div className='absolute rotate-45 right-5 -top-[7px] w-3 h-3 border-grey-dark border-l-1 border-t-1 bg-white'></div>
-      <h1 className=' p-4 uppercase text-center pb-4 font-bold border-grey-dark border-b'>
+      <div className='absolute rotate-45 right-5 -top-[7px] w-3 h-3 border-l-1 border-t-1 bg-white'></div>
+      <h1 className=' p-3 uppercase text-center pb-3 font-bold border-b'>
         {session && (
          'User menu'
         )}
@@ -207,7 +208,7 @@ function Logo() {
           <span className='absolute text-link top-5 italic -translate-y-1 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 duration-100 text-[10px] cursor-pointer'>
             Go to home page
           </span>
-          <span className='text-primary-dark'>MOTO</span>
+          <span className='text-primary'>MOTO</span>
           <span>SHOP</span>
         </Link>
       </div>

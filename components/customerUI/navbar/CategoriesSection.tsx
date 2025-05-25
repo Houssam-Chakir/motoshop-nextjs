@@ -4,7 +4,6 @@ import Container from "@/components/layout/Container";
 import CategoryMenu from "./CategoryMenu";
 
 const CategoriesSection = ({ sections, whichSectionMenuOpen, setWhichSectionMenuOpen }) => {
-
   return (
     <>
       {sections &&

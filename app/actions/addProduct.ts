@@ -17,6 +17,7 @@ interface ProductValues {
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
+  style: "None"| "Versitile"| "Racing"| "Adventure"| "Enduro"| "Urban"| "Touring";
   wholesalePrice: number;
   retailPrice: number;
   stockItems: SizeValues[]; // Replace `any` with a more specific type if available
@@ -35,6 +36,7 @@ interface ProductObject {
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
+  style: "None"| "Versitile"| "Racing"| "Adventure"| "Enduro"| "Urban"| "Touring";
   wholesalePrice: number;
   retailPrice: number;
   stock?: mongoose.Types.ObjectId; // Replace `any` with a more specific type if available
@@ -70,7 +72,7 @@ export default async function addNewProduct(values: ProductValues): Promise<{ st
 
     console.log("Server Action: Received values: ", values);
 
-    const { stockItems, identifiers, brand, productModel, title, category, type, season, wholesalePrice, retailPrice, description, specifications, images: imageFiles } = values;
+    const { stockItems, identifiers, brand, productModel, title, category, type, season, style, wholesalePrice, retailPrice, description, specifications, images: imageFiles } = values;
     const images = imageFiles.filter((image: { name: string }) => image.name !== "");
 
     // -- Create new product data -----------------------
@@ -82,6 +84,7 @@ export default async function addNewProduct(values: ProductValues): Promise<{ st
       category,
       type,
       season,
+      style,
       wholesalePrice,
       retailPrice,
       // stock: should have newly created stock id

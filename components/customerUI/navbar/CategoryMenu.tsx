@@ -35,13 +35,13 @@ function CategoryBlock({ category }) {
         <img className='h-12' src='/racing-helmet.svg' alt='racing' />
       </div>
       <div className='flex gap-1 flex-col'>
-        <Link href={"#"} className={`hover:text-primary-light font-display font-medium text-[20px] text-primary-dark pb-1 ${!category.applicableTypes ? "pt-2" : ""}`}>
+        <Link href={"#"} className={`hover:text-primary-dark  font-medium text-[20px] text-primary-dark pb-1 ${!category.applicableTypes ? "pt-2" : ""}`}>
           {category.name}
         </Link>
         {category.applicableTypes &&
           category.applicableTypes.map((type, i) => {
             return (
-                <Link href={"#"} key={i} className='relative text-sm font-light hover:tracking-[-0.007rem] hover:font-normal hover:underline duration-100'>
+                <Link href={"#"} key={i} className='relative text-sm text-slate-700 font-light hover:text-slate-950 hover:underline duration-100'>
                   {type.name}
                 </Link>
             );

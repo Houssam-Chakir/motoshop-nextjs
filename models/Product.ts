@@ -33,6 +33,8 @@ export interface ProductDocument extends Document {
   retailPrice: number;
   saleInfo?: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
+  style: "None"| "Versitile"| "Racing"| "Adventure"| "Enduro"| "Urban"| "Touring";
+  
 
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
@@ -68,6 +70,7 @@ const ProductSchema: Schema = new Schema(
     retailPrice: { type: Number, required: [true, "Please provide a price"], min: [0, "Price cannot be negative"] },
     saleInfo: { type: Schema.Types.ObjectId, ref: "Sale", index: true },
     season: { type: String, enum: ["All seasons", "Summer", "Winter", "Spring/Fall"], default: "All seasons" },
+    style: { type: String, enum: ["None", "Versitile", "Racing", "Adventure", 'Enduro', 'Urban', 'Touring'], default: "None" },
     images: {
       type: [{ secure_url: String, public_id: String}],
       required: true,

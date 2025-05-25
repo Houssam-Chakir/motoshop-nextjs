@@ -19,7 +19,6 @@ import addNewProduct from "@/app/actions/addProduct";
 import { toast } from "react-toastify";
 import { redirect } from "next/navigation";
 
-
 // Define the stock item schema
 const stockItemSchema = z.object({
   size: z.string().min(1, { message: "Size is required" }),
@@ -40,6 +39,7 @@ const formSchema = z.object({
   category: z.string().min(1, { message: "Category is required" }),
   type: z.string().min(1, { message: "Type is required" }),
   season: z.string().min(1, { message: "Season is required" }),
+  style: z.string().min(1, { message: "Style is required" }),
   wholesalePrice: z.string().refine((val) => !isNaN(Number.parseFloat(val)) && Number.parseFloat(val) > 0, {
     message: "Wholesale price must be positive",
   }),
@@ -351,6 +351,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
       category: "",
       type: "",
       season: "",
+      style: "",
       wholesalePrice: "",
       retailPrice: "",
       stockItems: [{ size: "", quantity: 0 }],
@@ -433,6 +434,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
   };
 
   const seasons = ["All seasons", "Summer", "Winter", "Spring/Fall"];
+  const styles = ["None", "Versitile", "Racing", "Adventure", "Enduro", "Urban", "Touring"];
 
   return (
     <Form {...form}>
@@ -511,32 +513,58 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
             )}
           />
         </div>
-
-        {/* Row 4: Season */}
-        <FormField
-          control={form.control}
-          name='season'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Season</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select season' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {seasons.map((season) => (
-                    <SelectItem key={season} value={season}>
-                      {season}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {/* Row 4: Season */}
+          <FormField
+            control={form.control}
+            name='season'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Season</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select season' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {seasons.map((season) => (
+                      <SelectItem key={season} value={season}>
+                        {season}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Row 4: Style */}
+          <FormField
+            control={form.control}
+            name='style'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Style</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select a style' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {styles.map((style) => (
+                      <SelectItem key={style} value={style}>
+                        {style}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Row 5: Wholesale Price and Retail Price */}
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>

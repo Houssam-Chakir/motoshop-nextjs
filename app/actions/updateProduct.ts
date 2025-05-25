@@ -28,6 +28,7 @@ interface ProductValues {
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
+  style: "None"| "Versitile"| "Racing"| "Adventure"| "Enduro"| "Urban"| "Touring";
   wholesalePrice: number;
   retailPrice: number;
   stockItems: FormStockItem[];
@@ -47,6 +48,7 @@ interface ProductObjectToSave {
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
+  style: "None"| "Versitile"| "Racing"| "Adventure"| "Enduro"| "Urban"| "Touring";
   wholesalePrice: number;
   retailPrice: number;
   description: string;
@@ -85,6 +87,7 @@ export default async function updateProduct(values: ProductValues): Promise<{ st
       category,
       type,
       season,
+      style,
       wholesalePrice,
       retailPrice,
       description,
@@ -103,6 +106,7 @@ export default async function updateProduct(values: ProductValues): Promise<{ st
       category,
       type,
       season,
+      style,
       wholesalePrice,
       retailPrice,
       description,

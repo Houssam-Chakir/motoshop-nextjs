@@ -5,6 +5,7 @@ import AuthProvider from "@/components/authentication/AuthProvider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import Navbar from "@/components/customerUI/navbar/navbar";
 import getSections from "@/utils/getSections";
+import TopBanner from "@/components/customerUI/layout/TopBanner";
 
 export const metadata: Metadata = {
   title: "Motoshop",
@@ -19,6 +20,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <AuthProvider>
         <body className='bg-grey-light'>
           <NuqsAdapter>
+            <TopBanner/>
             <Navbar sections={sections} />
             {children}
           </NuqsAdapter>

@@ -6,8 +6,8 @@ const CategoryButton = ({ section, inFocus, onClick }: { section: string; inFocu
 
   return (
     <>
-      <button onClick={onClick} className={`flex items-center group h-14 px-4 ${inFocus ? ('bg-primary'):('')} hover:bg-primary`}>
-        <span className={`${inFocus ? ('text-white'):('')} group-hover:text-white`}>{section.section}</span>
+      <button onClick={onClick} className={`flex items-center group h-[52px] px-4 ${inFocus ? ('bg-primary'):('')} hover:bg-primary`}>
+        <span className={`text-sm ${inFocus ? ('text-white'):('')} group-hover:text-white`}>{section.section}</span>
         <span className=''>
           <ChevronDown className={`h-4 ${inFocus ? ('text-white rotate-180 '):('')} group-hover:text-white duration-100`} />
         </span>

@@ -2,8 +2,7 @@
 
 import { useQueryState } from "nuqs";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { AlignJustify, BoxIcon, Heart, LogIn, LogOut, Menu, ShoppingCart, User, UserSearch, X } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { AlignJustify, BoxIcon, Heart, LogOut, ShoppingCart, User, UserSearch, X } from "lucide-react";
 import Link from "next/link";
 import Container from "../../layout/Container";
 import CategoriesSection from "./CategoriesSection";
@@ -15,11 +14,9 @@ import GoogleSignupButton from "@/components/authentication/GoogleSignUpButton";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import SearchInput, { SearchBar } from "./SearchInput";
 import { MobileSlider } from "../sideBar/MobileSidebar";
-import { Button } from "@/components/ui/button";
-import { CategoriesSlider } from "../sideBar/SectionsSlider";
-import { categoriesData } from "../sideBar/categories";
+import { CategoriesSlider } from "../sideBar/CategoriesSlider";
 
-export default function Navbar({ sections }: { categories: { id: string; name: string }[] }) {
+export default function Navbar({ sections }: { sections: { id: string; name: string }[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
   const [parent] = useAutoAnimate({ duration: 100 });
   const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
@@ -56,6 +53,7 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
         {/* Top section */}
         <div className='flex items-center justify-between pb-4'>
           <div className='flex gap-6'>
+            {/* Mobile Side Bar */}
             {!isTabletOrLarger && (
               <MobileSlider
                 trigger={
@@ -69,12 +67,12 @@ export default function Navbar({ sections }: { categories: { id: string; name: s
                 }
               >
                 <CategoriesSlider
-                  categories={categoriesData}
-                  onCategorySelect={(category) => {
-                    console.log("Selected category:", category.name);
+                  sections={sections}
+                  onCategorySelect={(section) => {
+                    console.log("Selected category:", section.section);
                   }}
-                  onTypeSelect={(type, category) => {
-                    console.log(`Selected ${type.name} from ${category.name}`);
+                  onTypeSelect={(type, section) => {
+                    console.log(`Selected ${type.name} from ${section.section}`);
                   }}
                 />
               </MobileSlider>

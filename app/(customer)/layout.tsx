@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 //f// Layout ------------------------------------------------------------------------------------
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const sections = await getSections();
+  console.log('sections: ', sections);
   return (
     <html lang='en' className={`${inter.variable} ${oxanium.variable}`}>
       <AuthProvider>
@@ -30,3 +31,4 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     </html>
   );
 }
+

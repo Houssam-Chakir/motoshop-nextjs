@@ -3,7 +3,6 @@ import "@/app/globals.css";
 
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/adminUI/Sidebar";
-import NavBar from "@/components/Navbar";
 import AuthProvider from "@/components/authentication/AuthProvider";
 import { ToastContainer } from "react-toastify";
 
@@ -17,7 +16,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className='flex min-h-screen'>
               <DashboardSidebar />
               <SidebarInset>
-                <NavBar />
                 <header className='flex h-16 items-center gap-4 border-b bg-background px-6'>
                   <SidebarTrigger />
                   <div className='flex-1'>

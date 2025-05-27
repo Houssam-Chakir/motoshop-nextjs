@@ -6,7 +6,7 @@ mongoose.plugin(slug);
 export interface CategoryDocument extends Document {
   name: string
   slug: string
-  section: string;
+  icon: string;
   applicableTypes: mongoose.Types.ObjectId[]
   createdAt?: Date;
   updatedAt?: Date;
@@ -16,7 +16,7 @@ export interface CategoryDocument extends Document {
 const CategorySchema = new Schema({
   name: { type: String, required: true },
   slug: { type: String, slug: 'name', required: true, unique: true },
-  section: { type: String, required: true, unique: true },
+  icon: { type: String, required: true, unique: true },
   // Reference to applicable types (optional but helpful)
   applicableTypes: [{ type: Schema.Types.ObjectId, ref: 'Type' }]
 });

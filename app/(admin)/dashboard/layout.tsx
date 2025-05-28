@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ToastContainer/>
         <AuthProvider>
           <SidebarProvider>
-            <div className='flex min-h-screen'>
+            <div className='flex w-full'>
               <DashboardSidebar />
               <SidebarInset>
                 <header className='flex h-16 items-center gap-4 border-b bg-background px-6'>

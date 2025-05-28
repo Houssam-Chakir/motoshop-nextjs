@@ -12,7 +12,11 @@ const InventoryPage = async () => {
   return (
     <div>
       <h1>Inventory</h1>
+      <div className="flex flex-col">
       <Link href={"inventory/product/add"}>Add product</Link>
+      <Link href={"inventory/categories/add"}>Add Category</Link>
+      </div>
+
       <div className='text-2xl'>Products</div>
       <div className='flex flex-wrap gap-4'>
         {products.map((product) => {

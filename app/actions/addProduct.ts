@@ -17,7 +17,7 @@ interface ProductValues {
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
-  style: "None"| "Versitile"| "Racing"| "Adventure"| "Enduro"| "Urban"| "Touring";
+  style: "None" | "Versitile" | "Racing" | "Adventure" | "Enduro" | "Urban" | "Touring";
   wholesalePrice: number;
   retailPrice: number;
   stockItems: SizeValues[]; // Replace `any` with a more specific type if available
@@ -36,13 +36,13 @@ interface ProductObject {
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
-  style: "None"| "Versitile"| "Racing"| "Adventure"| "Enduro"| "Urban"| "Touring";
+  style: "None" | "Versitile" | "Racing" | "Adventure" | "Enduro" | "Urban" | "Touring";
   wholesalePrice: number;
   retailPrice: number;
   stock?: mongoose.Types.ObjectId; // Replace `any` with a more specific type if available
   description: string; // Replace `any` with a more specific type if available
   specifications?: { name: string; description: string }; // Replace `any` with a more specific type if available
-  images: {secure_url: string, public_id: string}[];
+  images: { secure_url: string; public_id: string }[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -72,7 +72,22 @@ export default async function addNewProduct(values: ProductValues): Promise<{ st
 
     console.log("Server Action: Received values: ", values);
 
-    const { stockItems, identifiers, brand, productModel, title, category, type, season, style, wholesalePrice, retailPrice, description, specifications, images: imageFiles } = values;
+    const {
+      stockItems,
+      identifiers,
+      brand,
+      productModel,
+      title,
+      category,
+      type,
+      season,
+      style,
+      wholesalePrice,
+      retailPrice,
+      description,
+      specifications,
+      images: imageFiles,
+    } = values;
     const images = imageFiles.filter((image: { name: string }) => image.name !== "");
 
     // -- Create new product data -----------------------
@@ -96,10 +111,10 @@ export default async function addNewProduct(values: ProductValues): Promise<{ st
     };
 
     // -- Upload images to cloudinary and add secure urls and public ids objetcs array to productData --------
-    // returns objects array or secure url and public id
+    // returns objects array of secure url and public id
     uploadedImagesData = await imageUploader(images);
     // extract secure urls for images field
-    productData.images = uploadedImagesData
+    productData.images = uploadedImagesData;
 
     const sessionOptions = { session };
 
@@ -139,7 +154,8 @@ export default async function addNewProduct(values: ProductValues): Promise<{ st
     await session.commitTransaction();
     revalidatePath("/", "layout");
     return { status: true, slug: updatedProduct.slug };
-    //
+
+    //! Catch Error
   } catch (error) {
     if (session.inTransaction()) {
       // Check if a transaction is active before trying to abort

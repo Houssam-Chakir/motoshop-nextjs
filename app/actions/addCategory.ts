@@ -4,7 +4,7 @@ import { SubmissionData } from "@/components/forms/CategoryAddForm";
 import connectDB from "@/config/database";
 import Category from "@/models/Category";
 import Type from "@/models/Type";
-import isUserAuthorized from "@/utils/isUserAuthorized";
+import { isUserAuthorized } from "@/utils/isUserAuthorized";
 import svgDeleteCloudinary from "@/utils/svgDeleteCloudinary";
 import svgUploadCloudinary from "@/utils/svgUploadCloudinary";
 import mongoose, { ClientSession, Types as MongooseTypes } from "mongoose";

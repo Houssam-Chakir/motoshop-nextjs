@@ -36,14 +36,10 @@ declare module "next-auth" {
 const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId:
-        process.env.GOOGLE_CLIENT_ID ||
-        (() => {
-          throw new Error("GOOGLE_CLEINT_ID is not defined");
+      clientId: process.env.GOOGLE_CLIENT_ID || (() => {
+        throw new Error("GOOGLE_CLIENT_ID is not defined");
         })(),
-      clientSecret:
-        process.env.GOOGLE_CLIENT_SECRET ||
-        (() => {
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || (() => {
           throw new Error("GOOGLE_CLIENT_SECRET is not defined");
         })(),
       authorization: {
@@ -69,49 +65,57 @@ const authOptions: NextAuthOptions = {
      *
      * @throws Will throw an error if the database connection or user creation fails.
      */
-    async signIn({ profile }: { profile?: { email?: string; name?: string; picture?: string } }) {
+    async signIn({ profile }) {
       const { email, name, picture } = profile || {};
       if (!email || !name) throw new Error("Something went wrong signing in");
 
-      // Establish database connection
+      try {
       await connectDB();
-      // Check for existing user in database using profile email
-      const isUserExists = await User.findOne({ email: email });
-      // Create new user if no existing record found
+        const isUserExists = await User.findOne({ email });
+
       if (!isUserExists) {
         const newUser = {
-          email: email,
-          name: name.replace(/\s+/g, "").toLowerCase(), // Replace ALL spaces
+            email,
+            name: name.replace(/\s+/g, "").toLowerCase(),
           image: picture,
           role: 'customer'
         };
 
-        try {
           await User.create(newUser);
-          console.log("New user created:", newUser);
-        } catch (error) {
-          console.error("Error creating user:", error);
-          return false; // Return false to deny sign-in if user creation fails
         }
+        return true;
+      } catch (error) {
+        console.error("Error in signIn callback:", error);
+        return false;
       }
-      return true;
     },
-    async session({ session }: {session: Session}) {
-      // 1. Get user from database
-      if (!session.user || !session.user.email) {
+    async session({ session }) {
+      if (!session.user?.email) {
         throw new Error("Session user or email is undefined");
       }
+
+      try {
       const user = await User.findOne({ email: session.user.email });
-      // 2. Assign the user id to the session
+        if (!user) {
+          throw new Error("User not found in database");
+        }
+
       session.user.id = user._id.toString();
-      // 3. return session
       return session;
-    },
+      } catch (error) {
+        console.error("Error in session callback:", error);
+        throw error;
+      }
+    }
   },
-  // pages: {
-  //   signIn: '/auth/signin', // Or your custom path, e.g., '/login'
-  //   error: '/auth/error', // Good to also have a custom error page
-  // },
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error',
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
 };
 
 export default authOptions;

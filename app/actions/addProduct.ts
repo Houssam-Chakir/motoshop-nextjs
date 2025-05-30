@@ -6,7 +6,7 @@ import Product from "../../models/Product";
 import Stock from "@/models/Stock";
 import { revalidatePath } from "next/cache";
 import imageUploader from "@/utils/imageUploadCloudinary";
-import isUserAuthorized from "@/utils/isUserAuthorized";
+import { isUserAuthorized } from "@/utils/isUserAuthorized";
 import deleteImages from "@/utils/imageDeleteCloudinary";
 
 interface ProductValues {

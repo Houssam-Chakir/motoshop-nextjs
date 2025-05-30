@@ -5,7 +5,7 @@ import mongoose, { ClientSession } from "mongoose";
 
 import { revalidatePath } from "next/cache";
 import imageUploader from "@/utils/imageUploadCloudinary";
-import isUserAuthorized from "@/utils/isUserAuthorized";
+import { isUserAuthorized } from "@/utils/isUserAuthorized";
 import deleteImagesCloudinary from "@/utils/imageDeleteCloudinary"; // Renamed for clarity
 import { images as ImageDataType } from "@/components/forms/ProductEditForm"; // Type for image objects
 import Stock from "@/models/Stock";

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 // Import mongoose to use transactions
 import mongoose from "mongoose";
 import connectDB from "@/config/database";
-import isUserAuthorized from "@/utils/isUserAuthorized";
+import { isUserAuthorized } from "@/utils/isUserAuthorized";
 
 const deleteProduct = async (productId: string) => {
   await connectDB();

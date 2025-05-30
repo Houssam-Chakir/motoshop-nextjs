@@ -1,7 +1,7 @@
 "use server";
 
 import connectDB from "@/config/database";
-import isUserAuthorized from "@/utils/isUserAuthorized";
+import { isUserAuthorized } from "@/utils/isUserAuthorized";
 import mongoose, { ClientSession } from "mongoose";
 import Category from "@/models/Category";
 import Type from "@/models/Type";

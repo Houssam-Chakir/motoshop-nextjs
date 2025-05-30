@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { inter, oxanium } from "@/app/fonts";
 import "@/app/globals.css";
-import AuthProvider from "@/components/authentication/AuthProvider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import Navbar from "@/components/customerUI/navbar/navbar";
 import getSections from "@/utils/getSections";
@@ -14,21 +13,16 @@ export const metadata: Metadata = {
 };
 
 //f// Layout ------------------------------------------------------------------------------------
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
   const sections = await getSections();
-  console.log('sections: ', sections);
+
   return (
-    <html lang='en' className={`${inter.variable} ${oxanium.variable}`}>
-      <AuthProvider>
-        <body className='bg-grey-light'>
-          <NuqsAdapter>
-            <TopBanner />
-            <Navbar sections={sections} />
-            <Container>{children}</Container>
-          </NuqsAdapter>
-        </body>
-      </AuthProvider>
-    </html>
+    <div className='bg-grey-light'>
+      <NuqsAdapter>
+        <TopBanner />
+        <Navbar sections={sections} />
+        <Container>{children}</Container>
+      </NuqsAdapter>
+    </div>
   );
 }
-

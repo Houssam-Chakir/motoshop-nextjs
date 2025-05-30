@@ -5,12 +5,15 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { DashboardSidebar } from "@/components/adminUI/Sidebar";
 import AuthProvider from "@/components/authentication/AuthProvider";
 import { ToastContainer } from "react-toastify";
+import HeaderButtonsSection from "@/components/adminUI/headerButtons";
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+
   return (
     <html lang='en'>
       <body>
-        <ToastContainer/>
+        <ToastContainer />
         <AuthProvider>
           <SidebarProvider>
             <div className='flex w-full'>
@@ -21,8 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <div className='flex-1'>
                     <h1 className='text-lg font-semibold'>Dashboard</h1>
                   </div>
+                  <HeaderButtonsSection/>
                 </header>
-                <main className='flex-1 p-6'>{children}</main>
+                <main className='flex-1 p-4 bg-grey-light'>{children}</main>
               </SidebarInset>
             </div>
           </SidebarProvider>

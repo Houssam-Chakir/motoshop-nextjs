@@ -1,5 +1,3 @@
-import Category from "@/models/Category";
-import makeSerializable from "./convertToObj";
 import { getCachedCategories } from "./getCachedLists";
 
 // Function to manage categories by their respective sections

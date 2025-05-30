@@ -311,11 +311,11 @@ export default function CategoryForm() {
   };
 
   return (
-    <div className='max-w-2xl mx-auto p-6'>
-      <Card>
-        <CardHeader>
-          <CardTitle>Create New Category</CardTitle>
-          <CardDescription>Add a new category with its associated types</CardDescription>
+    <div className='max-w-2xl mx-auto p-6 overflow-scroll w-1/2'>
+      <Card className="rounded-none shadow-none">
+        <CardHeader className="border-b">
+          <CardTitle className="text-black font-medium text-2xl text-center">Create New Category</CardTitle>
+          <CardDescription className="text-center text-xs">Add a new category with its associated types</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className='space-y-6'>
@@ -328,7 +328,7 @@ export default function CategoryForm() {
 
             {/* Category Name */}
             <div className='space-y-2'>
-              <Label htmlFor='category-name'>Category Name</Label>
+              <Label htmlFor='category-name' className="text-black">Category Name</Label>
               <Input
                 id='category-name'
                 type='text'
@@ -353,7 +353,7 @@ export default function CategoryForm() {
 
             {/* Section Dropdown */}
             <div className='space-y-2'>
-              <Label htmlFor='section'>Section</Label>
+              <Label htmlFor='section' className="text-black">Section</Label>
               <Select value={formData.section} onValueChange={handleSectionChange}>
                 <SelectTrigger className={errors.section ? "border-destructive" : ""}>
                   <SelectValue placeholder='Select a section' />
@@ -377,7 +377,7 @@ export default function CategoryForm() {
 
             {/* Icon Upload */}
             <div className='space-y-2'>
-              <Label htmlFor='icon-upload'>Category Icon</Label>
+              <Label htmlFor='icon-upload' className="text-black">Category Icon</Label>
               <div className='flex items-center gap-4'>
                 <div className='flex-1'>
                   <Input id='icon-upload' type='file' accept='image/*' onChange={handleIconUpload} className={`cursor-pointer ${errors.icon ? "border-destructive" : ""}`} />
@@ -405,8 +405,7 @@ export default function CategoryForm() {
             <div className='space-y-4'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <Label className='text-base'>Types</Label>
-                  <p className='text-sm text-muted-foreground'>Add types that belong to this category</p>
+                  <Label className='text-base text-black'>Types</Label>
                 </div>
                 <Button type='button' variant='outline' size='sm' onClick={addType} className='flex items-center gap-2'>
                   <Plus className='h-4 w-4' />
@@ -506,7 +505,7 @@ export default function CategoryForm() {
               <Button type='button' variant='outline' onClick={resetForm}>
                 Reset
               </Button>
-              <Button type='submit' disabled={isSubmitting || !formData.name || !formData.section || !formData.icon}>
+              <Button className="bg-blue hover:bg-blue-700" type='submit' disabled={isSubmitting || !formData.name || !formData.section || !formData.icon}>
                 {isSubmitting ? "Processing..." : "Create Category"}
               </Button>
             </div>

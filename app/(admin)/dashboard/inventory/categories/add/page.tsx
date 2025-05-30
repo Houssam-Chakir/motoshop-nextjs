@@ -3,15 +3,15 @@ import CategoryAddForm from "@/components/forms/CategoryAddForm";
 import { getSessionUser } from "@/utils/getSessionUser";
 
 
-const AddProduct = async () => {
+const AddCategoryPage = async () => {
   await getSessionUser();
 
   return (
-    <section className='flex justify-center bg-slate-100'>
-      
+    <section className='flex justify-cente'>
+
         <CategoryAddForm />
     </section>
   );
 };
 
-export default AddProduct;
+export default AddCategoryPage;

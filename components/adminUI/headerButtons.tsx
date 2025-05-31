@@ -15,8 +15,8 @@ export default function HeaderButtonsSection() {
   const { data: session } = useSession();
 
   const [parent] = useAutoAnimate({ duration: 100 });
-  const username = session?.user.name.split(" ").at(0) || "username";
-  const profileImage = session?.user.image?.toString() as string;
+  const username = session?.user?.name?.split(" ").at(0) || "username";
+  const profileImage = session?.user?.image?.toString() as string;
 
 
 
@@ -70,7 +70,7 @@ export default function HeaderButtonsSection() {
   );
 }
 
-function UserMenu({ providers, session, onMouseLeave }: { session: Session; onMouseLeave: () => void }) {
+function UserMenu({ providers, session, onMouseLeave }: { session: Session | null; onMouseLeave: () => void; providers: Record<string, { id: string; name: string }> | null }) {
   return (
     <div onMouseLeave={onMouseLeave} className=' bg-white absolute w-fit min-w-42 right-0 top-14 border  shadow-xl'>
       <div className='absolute w-14 h-14 -top-14 right-0'></div>
@@ -97,13 +97,9 @@ function UserMenu({ providers, session, onMouseLeave }: { session: Session; onMo
             {providers &&
               Object.values(providers).map((provider, i) => {
                 if (provider.id === "google") {
-                  return <GoogleSignupButton onSignup={() => signIn(provider.id)} key={i} className='' />;
+                  return <GoogleSignupButton onSignup={async () => { await signIn(provider.id); }} key={i} className='' />;
                 }
               })}
-            {/* <li className='hover:text-primary' onClick={() => signIn()}>
-              <LogIn />
-              <span>SignIn with</span>
-            </li> */}
           </div>
         )}
       </ul>

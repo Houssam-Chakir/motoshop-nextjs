@@ -2,7 +2,7 @@
 
 import { useQueryState } from "nuqs";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { AlignJustify, BoxIcon, Heart, LogOut, ShoppingCart, User, UserSearch, X } from "lucide-react";
+import { AlignJustify, BoxIcon, Heart, LogOut, ShoppingCart, User, UserSearch } from "lucide-react";
 import Link from "next/link";
 import Container from "../../layout/Container";
 import CategoriesSection from "./CategoriesSection";
@@ -15,6 +15,8 @@ import useMediaQuery from "@/hooks/useMediaQuery";
 import SearchInput, { SearchBar } from "./SearchInput";
 import { MobileSlider } from "../sideBar/MobileSidebar";
 import { CategoriesSlider } from "../sideBar/CategoriesSlider";
+import { Section } from "@/types/section";
+import { Provider } from "next-auth/providers/index";
 
 export default function Navbar({ sections }: { sections: { id: string; name: string }[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
@@ -68,10 +70,10 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
               >
                 <CategoriesSlider
                   sections={sections}
-                  onCategorySelect={(section) => {
+                  onCategorySelect={(section: Section) => {
                     console.log("Selected category:", section.section);
                   }}
-                  onTypeSelect={(type, section) => {
+                  onTypeSelect={(type, section: Section) => {
                     console.log(`Selected ${type.name} from ${section.section}`);
                   }}
                 />
@@ -132,9 +134,23 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
   );
 }
 
-function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, setIsUserMenuOpen, isPhoneOrLarger }) {
+function UserButtonsSection({
+  providers,
+  session,
+  profileImage,
+  isUserMenuOpen,
+  setIsUserMenuOpen,
+  isPhoneOrLarger,
+}: {
+  providers: Provider;
+  session: Session;
+  profileImage: string;
+  isUserMenuOpen: boolean;
+  setIsUserMenuOpen: (value: boolean) => void;
+  isPhoneOrLarger: boolean;
+}) {
   const [parent] = useAutoAnimate({ duration: 100 });
-  const username = session?.user.name.split(" ").at(0) || "username";
+  const username = session?.user?.name?.split(" ").at(0) || "username";
   return (
     <>
       {isPhoneOrLarger && (

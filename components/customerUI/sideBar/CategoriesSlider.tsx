@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { SheetClose } from "@/components/ui/sheet";
+import { CategoriesSliderProps } from "@/types/categoriesSlider";
 
 // --- Type Definitions ---
 
@@ -25,15 +26,10 @@ interface SectionSchema {
   iconSlug?: string; // e.g., "riding-gear" to derive /riding-gear.svg
 }
 
-interface CategoriesSliderProps {
-  sections: SectionSchema[];
-  // onSubCategorySelect?: (subCategory: SubCategory, parentSection: SectionSchema) => void; // If needed by parent
-}
-
 // --- Helper Function ---
 const generateSlug = (name?: string): string => {
-  if (!name || typeof name !== 'string') return 'default-icon'; // Fallback slug
-  return name.trim().toLowerCase().replace(/\s+/g, '-');
+  if (!name || typeof name !== "string") return "default-icon"; // Fallback slug
+  return name.trim().toLowerCase().replace(/\s+/g, "-");
 };
 
 // --- Main Component ---
@@ -91,11 +87,7 @@ export function CategoriesSlider({ sections }: CategoriesSliderProps) {
                     <h3 className='text-sm font-medium text-muted-foreground mb-3 px-1'>Main Sections:</h3>
                     <div className='grid grid-cols-2 gap-3'>
                       {mainSections.map((section) => (
-                        <SidebarSectionButton
-                          key={section.id || section.section}
-                          section={section}
-                          onClick={() => handleSectionClick(section)}
-                        />
+                        <SidebarSectionButton key={section.id || section.section} section={section} onClick={() => handleSectionClick(section)} />
                       ))}
                     </div>
                   </div>
@@ -169,7 +161,7 @@ function SidebarSectionButton({ section, onClick }: SidebarSectionButtonProps) {
   return (
     <button
       onClick={onClick}
-      type="button"
+      type='button'
       className='w-full flex flex-col items-center justify-center p-3 aspect-square rounded-none ring-1 ring-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors duration-200 text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
     >
       <img

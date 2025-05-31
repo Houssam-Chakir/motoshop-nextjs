@@ -355,7 +355,7 @@ export default function ProductEditForm({ brands, types, categories, editProduct
   const [images, setImages] = useState<images[]>(editProduct.images || []);
   const [imagesToDelete, setImagesToDelete] = useState<images[]>([]);
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
-  //TODO Create image uploading logic, image ui displaying of files along side cloudinary urls aswell.
+
   const [imageError, setImageError] = useState("");
   const [availableSizes, setAvailableSizes] = useState<string[]>(["XXS", "XS", "S", "M", "L", "XL", "XXL"]);
 

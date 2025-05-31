@@ -14,7 +14,7 @@ const ProductEditPage = async ({ params }: { params: { id: string } }) => {
   // Get product to be edited
   const { id } = await params;
   const productDoc = await Product.findById(id).lean();
-  const product = makeSerializable(productDoc) as ProductType;
+  const product = makeSerializable(productDoc) as ProductType & { _id: string };
   // Get stock document using product id
   const stockDoc = await Stock.findOne({ productId: id }).lean() as StockDocument | null;
   const stock = makeSerializable(stockDoc)

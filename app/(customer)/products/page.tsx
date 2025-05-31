@@ -1,4 +1,5 @@
-import ProductCard from "@/components/Card";
+import ProductCardTest from "@/components/Card";
+import ProductCard from "@/components/ProductCard";
 import connectDB from "@/config/database";
 import Product, { ProductType } from "@/models/Product";
 import makeSerializable from "@/utils/convertToObj";
@@ -11,11 +12,23 @@ const ProductsPage = async () => {
   console.log("products: ", products);
   return (
     <>
-      <div className='text-2xl'>Products page</div>
-      <div className="flex flex-wrap gap-4">
+      <div className="py-4">
+        <div className='text-[16px]'>Products ({products.length})</div>
+      </div>
+      <div className='grid xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 gap-x-2 md:gap-y-16 sm:gap-y-8 gap-y-4'>
+        {/* {products.map((product) => {
+          return <ProductCardTest product={product} key={product.sku} />;
+        })} */}
         {products.map((product) => {
           return <ProductCard product={product} key={product.sku} />;
         })}
+        {products.map((product) => {
+          return <ProductCard product={product} key={product.sku} />;
+        })}
+        {products.map((product) => {
+          return <ProductCard product={product} key={product.sku} />;
+        })}
+
       </div>
     </>
   );

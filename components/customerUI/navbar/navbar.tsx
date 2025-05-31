@@ -50,13 +50,13 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
     setAuthProviders();
   }, []);
   return (
-    <header className='w-full pt-4  bg-white shadow-xs relative'>
+    <header className='w-full pt-4  bg-white shadow-xs relative z-30'>
       <Container className=''>
         {/* Top section */}
         <div className='flex items-center justify-between pb-4'>
           <div className='flex gap-6'>
             {/* Mobile Side Bar */}
-            {!isTabletOrLarger && (
+            {!isDesktop && (
               <MobileSlider
                 trigger={
                   <button>
@@ -127,7 +127,7 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
         </div>
         <div className='flex justify-center'>
           {/* Categories section */}
-          {isTabletOrLarger && <CategoriesSection whichSectionMenuOpen={whichSectionMenuOpen} setWhichSectionMenuOpen={setWhichSectionMenuOpen} sections={sections} />}
+          {isDesktop && <CategoriesSection whichSectionMenuOpen={whichSectionMenuOpen} setWhichSectionMenuOpen={setWhichSectionMenuOpen} sections={sections} />}
         </div>
       </Container>
     </header>

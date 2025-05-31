@@ -17,7 +17,7 @@ export default async function CustomerLayout({ children }: { children: React.Rea
   const sections = await getSections();
 
   return (
-    <div className='bg-grey-light'>
+    <div className=''>
       <NuqsAdapter>
         <TopBanner />
         <Navbar sections={sections} />

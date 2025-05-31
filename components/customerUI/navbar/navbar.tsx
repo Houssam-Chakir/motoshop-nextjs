@@ -6,7 +6,7 @@ import { AlignJustify, BoxIcon, Heart, LogOut, ShoppingCart, User, UserSearch } 
 import Link from "next/link";
 import Container from "../../layout/Container";
 import CategoriesSection from "./CategoriesSection";
-import { getProviders, signIn, signOut, useSession } from "next-auth/react";
+import { getProviders, signIn, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Session } from "next-auth";
@@ -16,7 +16,7 @@ import SearchInput, { SearchBar } from "./SearchInput";
 import { MobileSlider } from "../sideBar/MobileSidebar";
 import { CategoriesSlider } from "../sideBar/CategoriesSlider";
 import { Section } from "@/types/section";
-import { Provider } from "next-auth/providers/index";
+import { useSessionContext } from "@/components/authentication/SessionContext";
 
 export default function Navbar({ sections }: { sections: { id: string; name: string }[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
@@ -38,9 +38,9 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
     }
   }, [whichSectionMenuOpen, isUserMenuOpen]);
 
-  const { data: session } = useSession();
+  const { session } = useSessionContext();
   const [providers, setProviders] = useState<Record<string, { id: string; name: string }> | null>(null);
-  const profileImage = session?.user.image?.toString() as string;
+  const profileImage = session?.user?.image?.toString() as string;
 
   useEffect(() => {
     const setAuthProviders = async () => {
@@ -50,7 +50,7 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
     setAuthProviders();
   }, []);
   return (
-    <header className='w-full pt-4  bg-white shadow-xs relative z-30'>
+    <header className='w-full pt-4 bg-white shadow-xs z-30 sticky top-0'>
       <Container className=''>
         {/* Top section */}
         <div className='flex items-center justify-between pb-4'>

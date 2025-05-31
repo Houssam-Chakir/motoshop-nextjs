@@ -6,6 +6,7 @@ import Navbar from "@/components/customerUI/navbar/navbar";
 import getSections from "@/utils/getSections";
 import TopBanner from "@/components/customerUI/layout/TopBanner";
 import Container from "@/components/layout/Container";
+import { SessionProvider } from "@/components/authentication/SessionContext";
 
 export const metadata: Metadata = {
   title: "Motoshop",
@@ -19,9 +20,11 @@ export default async function CustomerLayout({ children }: { children: React.Rea
   return (
     <div className=''>
       <NuqsAdapter>
-        <TopBanner />
-        <Navbar sections={sections} />
-        <Container>{children}</Container>
+        <SessionProvider>
+          <TopBanner />
+          <Navbar sections={sections} />
+          <Container>{children}</Container>
+        </SessionProvider>
       </NuqsAdapter>
     </div>
   );

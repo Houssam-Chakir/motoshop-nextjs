@@ -9,10 +9,12 @@ interface CategoriesSectionProps {
 }
 
 const CategoriesSection = ({ sections, whichSectionMenuOpen, setWhichSectionMenuOpen }: CategoriesSectionProps) => {
+  const mainSections = sections.filter((section) => section.section !== "Riding Style");
+
   return (
     <>
       {sections &&
-        sections.map((section: Section, i: number) => {
+        mainSections.map((section: Section, i: number) => {
           return (
             <div key={i} className=''>
               <CategoryButton

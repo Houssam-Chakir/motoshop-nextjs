@@ -2,6 +2,10 @@
 
 import { ReviewType } from "@/models/Review";
 import { CldImage } from "next-cloudinary";
+import { Button } from "./ui/button";
+import { Heart, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import useMediaQuery from "@/hooks/useMediaQuery";
 
 interface ProductCard {
   barcode: string;
@@ -35,13 +39,55 @@ interface ProductCard {
 }
 
 function ProductCard({ product }: { product: ProductCard }) {
+  const router = useRouter();
+  const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
+  const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
+  const isDesktop = useMediaQuery("lg");
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // If the click was on a button or its children, don't navigate
+    if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+    // Navigate to product page
+    router.push(`/products/${product.slug}`);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    // Add to cart logic here
+    console.log("Add to cart:", product.sku);
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    // Wishlist logic here
+    console.log("Add to wishlist:", product.sku);
+  };
+
   return (
-    <div className='bg-white w-full sm:max-w-[300px] md:max-w-[236px]'>
+    <div onClick={handleCardClick} className='bg-white w-full sm:max-w-[300px] md:max-w-[236px] group cursor-pointer'>
       {/* Product Image */}
-      <div className='relative aspect-square w-full flex items-center justify-center bg-grey-light p-2'>
+      <div className='relative aspect-square w-full flex items-center justify-center bg-grey-light p-2 overflow-clip'>
+        {/* hover buttons */}
+        <Button
+          onClick={handleAddToCart}
+          className='absolute translate-y-16 py-2 h-fit bottom-5 text-white bg-blue-light backdrop-blur-2xl rounded-none w-full hover:bg-blue shadow-lg shadow-black/30 group-hover:translate-y-5'
+        >
+          <Plus className='' />
+          <span className='text-bold'>Add to cart</span>
+        </Button>
+        {/* -------- */}
+        <Button
+          onClick={handleWishlist}
+          className='absolute -translate-y-16 py-4 top-3 right-3 text-black hover:text-primary hover:bg-white bg-white rounded-full w-[35px] h-[35px] shadow-md group-hover:translate-y-0'
+        >
+          <Heart className='' />
+        </Button>
+        {/* Image */}
         <CldImage className='object-contain w-full h-full' width={236} height={236} src={product.images[0].public_id} alt='Description of my image' />
         {/* On sale tag */}
-        <div className="bg-primary text-white absolute uppercase font-bold text-[9px] px-1 py-0.5 bottom-0 left-0">on sale!</div>
+        <div className='bg-primary group-hover:-translate-y-9 transition-all text-white absolute uppercase font-bold text-[9px] px-1 py-0.5 bottom-0 left-0'>on sale!</div>
       </div>
       {/* Product Info */}
       <div className='py-1 flex flex-col gap-0.5'>

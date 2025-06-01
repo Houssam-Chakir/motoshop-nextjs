@@ -3,6 +3,7 @@
 import connectDB from "@/config/database";
 import User from "@/models/User";
 import { UserProfile } from "@/types/user";
+import { Types } from "mongoose";
 
 interface ActionResult {
   success: boolean;
@@ -33,7 +34,7 @@ export async function getMyDetailedProfile(userId: string): Promise<ActionResult
 
     // At this point, TypeScript knows userFromDb is a single object
     const profileData: UserProfile = {
-      id: (userFromDb._id as any).toString(),
+      id: (userFromDb._id as Types.ObjectId).toString(),
       name: userFromDb.name || null,
       email: userFromDb.email || null,
       image: userFromDb.image || null,

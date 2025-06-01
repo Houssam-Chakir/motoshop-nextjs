@@ -1,87 +1,170 @@
 // contexts/UserContext.tsx
-'use client'; // This will be a client-side context
+"use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { useSessionContext } from './SessionContext'; // Your existing SessionContext
-import { UserProfile, UserContextType } from '@/types/user'; // Adjust path as needed
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { useSessionContext } from "./SessionContext"; // Your existing custom SessionContext
+import { UserProfile, UserContextType } from "@/types/user"; // Ensure UserContextType from types/user.ts includes wishlist parts
+import { WishlistItem } from "@/types/wishlist"; // From types/wishlist.ts
+import { Types } from "mongoose";
 
-// Server Action to fetch user data (we'll define this in a moment)
-// For now, let's assume it exists and what it returns.
-// It should take a userId and return { success: boolean, data: UserProfile | null, message?: string }
-import { getMyDetailedProfile } from '@/actions/userProfileActions'; // Placeholder name
+// Import Server Actions from the root 'actions' folder
+import { getMyDetailedProfile } from "@/actions/userProfileActions";
+import { addItemToDbWishlistAction, removeItemFromDbWishlistAction } from "@/actions/wishlistActions"; // Ensure these actions are in actions/wishlistActions.ts
 
-// 1. Create the Context with a default undefined value
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// 2. Create the Provider Component
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const { session, status: authStatus } = useSessionContext(); // Use your existing SessionContext
+  const { session, status: authStatus } = useSessionContext();
 
+  // Profile State
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true); // Start as true
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
 
-  const clearUserProfile = useCallback(() => {
+  // Wishlist State (client-side representation with string IDs)
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
+  const [wishlistError, setWishlistError] = useState<string | null>(null);
+
+  const clearUserData = useCallback(() => {
     setProfile(null);
-    // We won't clear wishlist here yet, that will be part of a combined state later or its own state
+    setWishlist([]); // Clear wishlist as well
     setProfileError(null);
+    setWishlistError(null);
   }, []);
 
-  const fetchUserProfile = useCallback(async () => {
-    // Only fetch if authenticated and session has a user ID
-    if (authStatus === 'authenticated' && session?.user?.id) {
+  const fetchInitialUserData = useCallback(async () => {
+    if (authStatus === "authenticated" && session?.user?.id) {
       setIsLoadingProfile(true);
       setProfileError(null);
+      setWishlistError(null); // Clear wishlist errors on new fetch
       try {
-        // Call your server action to get detailed profile
-        const result = await getMyDetailedProfile(session.user.id); // Pass the user ID
+        const result = await getMyDetailedProfile(session.user.id);
 
         if (result.success && result.data) {
-          setProfile(result.data);
+          setProfile(result.data); // Set the UserProfile object
+          // Transform the ObjectId array from profile.wishlist into WishlistItem[]
+          if (result.data.wishlist && Array.isArray(result.data.wishlist)) {
+            const clientWishlist: WishlistItem[] = result.data.wishlist.map((objectId: Types.ObjectId) => ({
+              id: objectId.toString(),
+            }));
+            setWishlist(clientWishlist);
+          } else {
+            setWishlist([]); // No wishlist items or unexpected format
+          }
         } else {
-          setProfileError(result.message || 'Failed to fetch user profile.');
-          setProfile(null); // Clear profile on error
+          setProfileError(result.message || "Failed to fetch user data.");
+          clearUserData();
         }
       } catch (error) {
-        console.error("Error calling fetchUserProfile action:", error);
-        setProfileError(error instanceof Error ? error.message : 'An unexpected error occurred.');
-        setProfile(null);
+        console.error("Error calling fetchInitialUserData action:", error);
+        setProfileError(error instanceof Error ? error.message : "An unexpected error occurred.");
+        clearUserData();
       } finally {
         setIsLoadingProfile(false);
       }
-    } else if (authStatus === 'unauthenticated') {
-      clearUserProfile(); // Clear data if user logs out
-      setIsLoadingProfile(false); // Not loading if unauthenticated
-    } else if (authStatus === 'loading') {
+    } else if (authStatus === "unauthenticated") {
+      clearUserData();
+      setIsLoadingProfile(false);
+    } else if (authStatus === "loading") {
       setIsLoadingProfile(true); // Auth is loading, so user data might be coming
     }
-  }, [authStatus, session?.user?.id, clearUserProfile]); // Dependencies for useCallback
+  }, [authStatus, session?.user?.id, clearUserData]);
 
-  // Effect to fetch data when authentication status changes
   useEffect(() => {
-    fetchUserProfile();
-  }, [fetchUserProfile]); // fetchUserProfile is memoized by useCallback
+    fetchInitialUserData();
+  }, [fetchInitialUserData]);
+
+  const addItemToWishlist = async (itemId: string) => {
+    if (authStatus !== "authenticated" || !profile) {
+      setWishlistError("Please log in to add items to your wishlist.");
+      // Optionally, trigger a login modal or redirect.
+      return;
+    }
+    setIsLoadingWishlist(true);
+    setWishlistError(null);
+
+    const newItem: WishlistItem = { id: itemId };
+    const alreadyInList = wishlist.some((item) => item.id === itemId);
+
+    // Optimistic Update: Add to local state immediately if not already there
+    if (!alreadyInList) {
+      setWishlist((prevWishlist) => [...prevWishlist, newItem]);
+    }
+
+    const result = await addItemToDbWishlistAction(itemId);
+
+    if (!result.success) {
+      setWishlistError(result.message);
+      // Revert optimistic update if it was a new addition and server failed
+      if (!alreadyInList) {
+        setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== itemId));
+      }
+    } else {
+      // If server says it was already there (result.wasModified === false)
+      // but client state didn't have it (alreadyInList === false), ensure it's added client-side.
+      if (result.wasModified === false && !alreadyInList) {
+        setWishlist((prevWishlist) => {
+          if (!prevWishlist.find((item) => item.id === itemId)) {
+            return [...prevWishlist, newItem];
+          }
+          return prevWishlist;
+        });
+      }
+      setWishlistError(null); // Clear any previous error on success
+    }
+    setIsLoadingWishlist(false);
+  };
+
+  const removeItemFromWishlist = async (itemId: string) => {
+    if (authStatus !== "authenticated" || !profile) {
+      setWishlistError("Please log in to manage your wishlist.");
+      return;
+    }
+    setIsLoadingWishlist(true);
+    setWishlistError(null);
+
+    const originalWishlist = [...wishlist]; // Store for potential revert
+    // Optimistic Update: Remove from local state immediately
+    setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== itemId));
+
+    const result = await removeItemFromDbWishlistAction(itemId);
+
+    if (!result.success) {
+      setWishlistError(result.message);
+      setWishlist(originalWishlist); // Revert optimistic update
+    } else {
+      setWishlistError(null); // Clear any previous error on success
+    }
+    setIsLoadingWishlist(false);
+  };
+
+  const isInWishlist = (itemId: string): boolean => {
+    return wishlist.some((item) => item.id === itemId);
+  };
 
   const contextValue: UserContextType = {
     profile,
     isLoadingProfile,
     profileError,
-    fetchUserProfile,
-    clearUserProfile,
+    wishlist,
+    isLoadingWishlist,
+    wishlistError,
+    fetchInitialUserData, // Renamed from fetchUserProfile
+    clearUserData, // Renamed from clearUserProfile
+    addItemToWishlist,
+    removeItemFromWishlist,
+    isInWishlist,
   };
 
-  return (
-    <UserContext.Provider value={contextValue}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };
 
-// 3. Create a Custom Hook to easily consume the Context
+// Custom Hook to easily consume the Context
 export const useUserContext = (): UserContextType => {
   const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error('useUserContext must be used within a UserProvider');
+    throw new Error("useUserContext must be used within a UserProvider");
   }
   return context;
 };

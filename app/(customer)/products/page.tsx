@@ -22,18 +22,6 @@ const ProductsPage = async () => {
         {products.map((product) => {
           return <ProductCard product={product} key={product.sku} />;
         })}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
 
       </div>
     </>

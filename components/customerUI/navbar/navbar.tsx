@@ -16,7 +16,8 @@ import SearchInput, { SearchBar } from "./SearchInput";
 import { MobileSlider } from "../sideBar/MobileSidebar";
 import { CategoriesSlider } from "../sideBar/CategoriesSlider";
 import { Section } from "@/types/section";
-import { useSessionContext } from "@/components/authentication/SessionContext";
+import { useSessionContext } from "@/contexts/SessionContext";
+import { useUserContext } from "@/contexts/UserContext";
 
 export default function Navbar({ sections }: { sections: { id: string; name: string }[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
@@ -24,6 +25,7 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
   const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
   const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
+
 
   //Menus states
   const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState(null);
@@ -39,6 +41,8 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
   }, [whichSectionMenuOpen, isUserMenuOpen]);
 
   const { session } = useSessionContext();
+  const { profile } = useUserContext();
+  console.log('profile', profile)
   const [providers, setProviders] = useState<Record<string, { id: string; name: string }> | null>(null);
   const profileImage = session?.user?.image?.toString() as string;
 

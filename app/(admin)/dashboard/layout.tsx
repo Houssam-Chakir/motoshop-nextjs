@@ -1,7 +1,7 @@
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/adminUI/Sidebar";
 import HeaderButtonsSection from "@/components/adminUI/headerButtons";
-import { SessionProvider } from "@/components/authentication/SessionContext";
+import { SessionProvider } from "@/contexts/SessionContext";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (

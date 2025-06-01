@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Session } from "next-auth";
 import GoogleSignupButton from "@/components/authentication/GoogleSignUpButton";
-import { useSessionContext } from "@/components/authentication/SessionContext";
+import { useSessionContext } from "@/contexts/SessionContext";
 
 export default function HeaderButtons() {
   const { session } = useSessionContext();

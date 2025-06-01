@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import type { ProductType } from "@/models/Product";
-import updateProduct from "@/app/actions/updateProduct";
+import updateProduct from "@/actions/updateProduct";
 import { redirect } from "next/navigation";
 import mongoose from "mongoose";
 

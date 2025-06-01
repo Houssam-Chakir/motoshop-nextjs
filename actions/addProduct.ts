@@ -2,7 +2,7 @@
 
 import connectDB from "@/config/database";
 import mongoose from "mongoose";
-import Product from "../../models/Product";
+import Product from "../models/Product";
 import Stock from "@/models/Stock";
 import { revalidatePath } from "next/cache";
 import imageUploader from "@/utils/imageUploadCloudinary";

@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, X, FileImage, CheckCircle } from "lucide-react";
-import UpdateCategory from "@/app/actions/updateCategory";
+import UpdateCategory from "@/actions/updateCategory";
 
 // Section options
 const SECTION_OPTIONS = ["Riding Gear", "Motorcycle Parts", "Motorcycles"] as const;

@@ -40,8 +40,8 @@ interface ProductCard {
 
 function ProductCard({ product }: { product: ProductCard }) {
   const router = useRouter();
-  const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
-  const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
+  // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
+  // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -51,6 +51,12 @@ function ProductCard({ product }: { product: ProductCard }) {
     }
     // Navigate to product page
     router.push(`/products/${product.slug}`);
+  };
+
+  const handlePlusClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    //Plus logic here
+    console.log("Plus clicked", product.sku);
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -70,24 +76,37 @@ function ProductCard({ product }: { product: ProductCard }) {
       {/* Product Image */}
       <div className='relative aspect-square w-full flex items-center justify-center bg-grey-light p-2 overflow-clip'>
         {/* hover buttons */}
-        <Button
-          onClick={handleAddToCart}
-          className='absolute translate-y-16 py-2 h-fit bottom-5 text-white bg-blue-light backdrop-blur-2xl rounded-none w-full hover:bg-blue shadow-lg shadow-black/30 group-hover:translate-y-5'
-        >
-          <Plus className='' />
-          <span className='text-bold'>Add to cart</span>
-        </Button>
-        {/* -------- */}
-        <Button
-          onClick={handleWishlist}
-          className='absolute -translate-y-16 py-4 top-3 right-3 text-black hover:text-primary hover:bg-white bg-white rounded-full w-[35px] h-[35px] shadow-md group-hover:translate-y-0'
-        >
-          <Heart className='' />
-        </Button>
+        {!isDesktop && (
+          <Button onClick={handlePlusClick} className='absolute py-4 top-3 right-3 text-black hover:bg-white bg-white/80 rounded-full w-[35px] h-[35px] shadow-md'>
+            <Plus size={18} />
+          </Button>
+        )}
+        {isDesktop && (
+          <>
+            <Button
+              onClick={handleAddToCart}
+              className='absolute translate-y-16 py-2 h-fit bottom-5 text-white bg-blue-light backdrop-blur-2xl rounded-none w-full hover:bg-blue shadow-lg shadow-black/30 group-hover:translate-y-5'
+            >
+              <Plus size={20} />
+              <span className='text-bold'>Add to cart</span>
+            </Button>
+            {/* -------- */}
+            <Button
+              onClick={handleWishlist}
+              className='absolute -translate-y-16 py-4 top-3 right-3 text-black hover:text-primary hover:bg-white bg-white rounded-full w-[35px] h-[35px] shadow-md group-hover:translate-y-0'
+            >
+              <Heart size={18} />
+            </Button>
+          </>
+        )}
         {/* Image */}
         <CldImage className='object-contain w-full h-full' width={236} height={236} src={product.images[0].public_id} alt='Description of my image' />
         {/* On sale tag */}
-        <div className='bg-primary group-hover:-translate-y-9 transition-all text-white absolute uppercase font-bold text-[9px] px-1 py-0.5 bottom-0 left-0'>on sale!</div>
+        <div
+          className={`bg-primary ${isDesktop ? "group-hover:-translate-y-9" : ""} transition-all text-white absolute uppercase font-bold text-[9px] px-1 py-0.5 bottom-0 left-0`}
+        >
+          on sale!
+        </div>
       </div>
       {/* Product Info */}
       <div className='py-1 flex flex-col gap-0.5'>
@@ -98,7 +117,7 @@ function ProductCard({ product }: { product: ProductCard }) {
       </div>
       {/* Product Price */}
       <div className='flex gap-1 items-center'>
-        <div className='font-bold text-[clamp(14px,1.5vw,16px)] text-blue'>
+        <div className='font-bold text-[clamp(15px,1.5vw,16px)] text-blue'>
           {product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
         </div>
         <div className='font-medium text-[clamp(10px,1vw,10px)] text-primary-dark italic line-through'>

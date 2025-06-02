@@ -1,7 +1,7 @@
 // contexts/UserContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useMemo } from "react";
 import { useSessionContext } from "./SessionContext"; // Your existing custom SessionContext
 import { UserProfile, UserContextType } from "@/types/user"; // Ensure UserContextType from types/user.ts includes wishlist parts
 import { WishlistItem } from "@/types/wishlist"; // From types/wishlist.ts
@@ -75,37 +75,50 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     fetchInitialUserData();
   }, [fetchInitialUserData]);
 
-  const addItemToWishlist = async (itemId: string) => {
-    if (authStatus !== "authenticated" || !profile) {
-      setWishlistError("Please log in to add items to your wishlist.");
-      // Optionally, trigger a login modal or redirect.
+  const addItemToWishlist = useCallback( async (itemId: string) => {
+    console.log('[UserContext] addItemToWishlist called with itemId:', itemId);
+    console.log('[UserContext] Current authStatus:', authStatus);
+    console.log('[UserContext] Current profile:', profile ? profile.id : 'No profile');
+
+    if (authStatus !== 'authenticated' || !profile) {
+      const errorMsg = 'User not authenticated. Please log in to add items to your wishlist.';
+      console.error('[UserContext]', errorMsg);
+      setWishlistError(errorMsg); // Ensure wishlistError state is set
       return;
     }
+
     setIsLoadingWishlist(true);
     setWishlistError(null);
 
     const newItem: WishlistItem = { id: itemId };
-    const alreadyInList = wishlist.some((item) => item.id === itemId);
+    const alreadyInList = wishlist.some(item => item.id === itemId);
 
-    // Optimistic Update: Add to local state immediately if not already there
+    // Optimistic Update
     if (!alreadyInList) {
-      setWishlist((prevWishlist) => [...prevWishlist, newItem]);
+      console.log('[UserContext] Optimistically adding to client state:', itemId);
+      setWishlist(prevWishlist => [...prevWishlist, newItem]);
+    } else {
+      console.log('[UserContext] Item already in client wishlist state:', itemId);
     }
 
+    console.log('[UserContext] Calling server action addItemToDbWishlistAction for itemId:', itemId);
     const result = await addItemToDbWishlistAction(itemId);
+    console.log('[UserContext] Result from addItemToDbWishlistAction:', result);
 
     if (!result.success) {
+      console.error('[UserContext] Server action failed:', result.message);
       setWishlistError(result.message);
       // Revert optimistic update if it was a new addition and server failed
       if (!alreadyInList) {
-        setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== itemId));
+        console.log('[UserContext] Reverting optimistic add for:', itemId);
+        setWishlist(prevWishlist => prevWishlist.filter(item => item.id !== itemId));
       }
     } else {
-      // If server says it was already there (result.wasModified === false)
-      // but client state didn't have it (alreadyInList === false), ensure it's added client-side.
+      console.log('[UserContext] Server action successful:', result.message);
       if (result.wasModified === false && !alreadyInList) {
-        setWishlist((prevWishlist) => {
-          if (!prevWishlist.find((item) => item.id === itemId)) {
+        console.log('[UserContext] Server reported item already existed, client state was stale. Ensuring item is in list.');
+        setWishlist(prevWishlist => {
+          if (!prevWishlist.find(item => item.id === itemId)) {
             return [...prevWishlist, newItem];
           }
           return prevWishlist;
@@ -114,9 +127,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setWishlistError(null); // Clear any previous error on success
     }
     setIsLoadingWishlist(false);
-  };
+  }, [authStatus, profile, wishlist])
 
-  const removeItemFromWishlist = async (itemId: string) => {
+  const removeItemFromWishlist = useCallback( async (itemId: string) => {
     if (authStatus !== "authenticated" || !profile) {
       setWishlistError("Please log in to manage your wishlist.");
       return;
@@ -137,25 +150,31 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setWishlistError(null); // Clear any previous error on success
     }
     setIsLoadingWishlist(false);
-  };
+  }, [authStatus, profile, wishlist])
 
-  const isInWishlist = (itemId: string): boolean => {
+  const isInWishlist = useCallback( (itemId: string): boolean => {
     return wishlist.some((item) => item.id === itemId);
-  };
+  }, [wishlist])
 
-  const contextValue: UserContextType = {
+  const contextValue = useMemo(() => ({
     profile,
     isLoadingProfile,
     profileError,
     wishlist,
     isLoadingWishlist,
     wishlistError,
-    fetchInitialUserData, // Renamed from fetchUserProfile
-    clearUserData, // Renamed from clearUserProfile
+    fetchInitialUserData,
+    clearUserData,
     addItemToWishlist,
     removeItemFromWishlist,
     isInWishlist,
-  };
+  }), [
+    profile, isLoadingProfile, profileError,
+    wishlist, isLoadingWishlist, wishlistError,
+    fetchInitialUserData, clearUserData,
+    addItemToWishlist, removeItemFromWishlist, isInWishlist
+  ]);
+
 
   return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };

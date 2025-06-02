@@ -6,6 +6,8 @@ import { Button } from "./ui/button";
 import { Heart, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useMediaQuery from "@/hooks/useMediaQuery";
+import { useUserContext } from "@/contexts/UserContext";
+import React from "react";
 
 interface ProductCard {
   barcode: string;
@@ -44,6 +46,19 @@ function ProductCard({ product }: { product: ProductCard }) {
   // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
 
+  //userContext
+  const {
+    profile, // To check if user is logged in
+    isInWishlist,
+    addItemToWishlist,
+    removeItemFromWishlist,
+    isLoadingWishlist,
+    isLoadingProfile,
+  } = useUserContext();
+
+  const isCurrentlyInWishlist = isInWishlist(product._id);
+  const isLoggedIn = !!profile;
+
   const handleCardClick = (e: React.MouseEvent) => {
     // If the click was on a button or its children, don't navigate
     if ((e.target as HTMLElement).closest("button")) {
@@ -67,7 +82,13 @@ function ProductCard({ product }: { product: ProductCard }) {
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
-    // Wishlist logic here
+    if (isCurrentlyInWishlist) {
+      console.log("removing Item From Wishlist");
+      removeItemFromWishlist(product._id);
+    } else {
+      console.log("adding Item to Wishlist");
+      addItemToWishlist(product._id);
+    }
     console.log("Add to wishlist:", product.sku);
   };
 
@@ -91,12 +112,14 @@ function ProductCard({ product }: { product: ProductCard }) {
               <span className='text-bold'>Add to cart</span>
             </Button>
             {/* -------- */}
-            <Button
-              onClick={handleWishlist}
-              className='absolute -translate-y-16 py-4 top-3 right-3 text-black hover:text-primary hover:bg-white bg-white rounded-full w-[35px] h-[35px] shadow-md group-hover:translate-y-0'
-            >
-              <Heart size={18} />
-            </Button>
+            {isLoggedIn && (
+              <WishlistButton
+                handleWishlist={handleWishlist}
+                isCurrentlyInWishlist={isCurrentlyInWishlist}
+                isLoadingWishlist={isLoadingWishlist}
+                isLoadingProfile={isLoadingProfile}
+              />
+            )}
           </>
         )}
         {/* Image */}
@@ -127,5 +150,24 @@ function ProductCard({ product }: { product: ProductCard }) {
     </div>
   );
 }
+
+interface WishlistButtonProps {
+  handleWishlist: (e: React.MouseEvent) => void;
+  isCurrentlyInWishlist: boolean;
+  isLoadingWishlist: boolean;
+  isLoadingProfile: boolean;
+}
+
+const WishlistButton = React.memo(function WishlistButton({ handleWishlist, isCurrentlyInWishlist, isLoadingWishlist, isLoadingProfile }: WishlistButtonProps) {
+  return (
+    <Button
+      onClick={handleWishlist}
+      disabled={isLoadingProfile || isLoadingWishlist}
+      className={`absolute -translate-y-16 py-4 top-3 right-3 ${isCurrentlyInWishlist ? ('text-primary/50'): ('text-black hover:text-primary')}  hover:bg-white bg-white rounded-full w-[35px] h-[35px] shadow-md group-hover:translate-y-0`}
+    >
+      <Heart size={18} fill={isCurrentlyInWishlist ? "#f72323" : "none"} />
+    </Button>
+  );
+});
 
 export default ProductCard;

@@ -20,41 +20,55 @@ interface WishlistActionResult {
  * Assumes User model has a field like 'wishlistItems: [mongoose.Schema.Types.ObjectId]'
  */
 export async function addItemToDbWishlistAction(itemId: string): Promise<WishlistActionResult> {
+  console.log('[ServerAction] addItemToDbWishlistAction invoked. Item ID:', itemId);
   try {
     const sessionUser = await getSessionUser();
+    console.log('[ServerAction] Session User:', sessionUser);
+
     if (!sessionUser?.userId) {
+      console.log('[ServerAction] User not authenticated or userId missing.');
       return { success: false, message: 'Unauthorized. Please sign in.' };
     }
 
     if (!itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
+      console.log('[ServerAction] Invalid Item ID:', itemId);
       return { success: false, message: 'Invalid Item ID provided.' };
     }
 
+    console.log('[ServerAction] Connecting to DB...');
     await connectDB();
+    console.log('[ServerAction] DB Connected. User ID:', sessionUser.userId);
+
     const objectItemId = new mongoose.Types.ObjectId(itemId);
 
+    console.log('[ServerAction] Attempting to update User:', sessionUser.userId, 'with Item:', objectItemId.toString());
+    // Ensure 'wishlistItems' is the correct field name in your User schema
     const updateResult = await User.updateOne(
       { _id: sessionUser.userId },
-      { $addToSet: { wishlistItems: objectItemId } } // Ensure 'wishlistItems' is the correct field name in your User schema
+      { $addToSet: { wishlist: objectItemId } }
     );
+    console.log('[ServerAction] Mongoose updateResult:', updateResult);
 
     if (updateResult.matchedCount === 0) {
+      console.log('[ServerAction] User not found in DB with ID:', sessionUser.userId);
       return { success: false, message: 'User not found.' };
     }
 
     const wasModified = updateResult.modifiedCount > 0;
+    console.log('[ServerAction] Item was modified in DB:', wasModified);
+
     if (wasModified) {
-      revalidatePath('/wishlist'); // Example path, adjust as needed
-      // revalidatePath(`/products/${itemId}`); // If product page shows wishlist status
+      console.log('[ServerAction] Revalidating path /wishlist');
+      revalidatePath('/wishlist');
     }
 
     return {
       success: true,
-      message: wasModified ? 'Item added to wishlist.' : 'Item is already in wishlist.',
+      message: wasModified ? 'Item added to wishlist in DB.' : 'Item already in wishlist in DB.',
       wasModified,
     };
   } catch (error) {
-    console.error('Error in addItemToDbWishlistAction:', error);
+    console.error('[ServerAction] Critical error in addItemToDbWishlistAction:', error);
     const msg = error instanceof Error ? error.message : 'Server error occurred while adding to wishlist.';
     return { success: false, message: msg };
   }
@@ -80,7 +94,7 @@ export async function removeItemFromDbWishlistAction(itemId: string): Promise<Wi
 
     const updateResult = await User.updateOne(
       { _id: sessionUser.userId },
-      { $pull: { wishlistItems: objectItemId } } // Ensure 'wishlistItems' is the correct field name
+      { $pull: { wishlist: objectItemId } } // Ensure 'wishlistItems' is the correct field name
     );
 
     if (updateResult.matchedCount === 0) {

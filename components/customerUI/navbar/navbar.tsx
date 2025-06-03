@@ -21,11 +21,9 @@ import { useUserContext } from "@/contexts/UserContext";
 
 export default function Navbar({ sections }: { sections: { id: string; name: string }[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
-  const [parent] = useAutoAnimate({ duration: 100 });
   const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
-  const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
+  // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
-
 
   //Menus states
   const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState(null);
@@ -42,7 +40,7 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
 
   const { session } = useSessionContext();
   const { profile } = useUserContext();
-  console.log('profile', profile)
+  console.log("profile", profile);
   const [providers, setProviders] = useState<Record<string, { id: string; name: string }> | null>(null);
   const profileImage = session?.user?.image?.toString() as string;
 
@@ -104,7 +102,7 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
                   <>
                     <div className='absolute bg-white w-[100vw] -right-6 top-16 pt-4 pb-6'>
                       <Container className=''>
-                        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} parent={parent} />
+                        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
                       </Container>
                       <div
                         onClick={() => setIsSearchOpen(false)}
@@ -122,7 +120,7 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
             <UserButtonsSection
               isPhoneOrLarger={isPhoneOrLarger}
               providers={providers}
-              session={session}
+              session={session!}
               profileImage={profileImage}
               isUserMenuOpen={isUserMenuOpen}
               setIsUserMenuOpen={setIsUserMenuOpen}

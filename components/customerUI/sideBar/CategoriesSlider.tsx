@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { SheetClose } from "@/components/ui/sheet";
-import { CategoriesSliderProps } from "@/types/categoriesSlider";
+import { Section } from "@/types/section";
 
 // --- Type Definitions ---
 
@@ -33,6 +33,12 @@ const generateSlug = (name?: string): string => {
 };
 
 // --- Main Component ---
+export interface CategoriesSliderProps {
+  sections: Section[];
+  onCategorySelect: (section: Section) => void;
+  onTypeSelect: (type: { name: string }, section: Section) => void;
+}
+
 export function CategoriesSlider({ sections }: CategoriesSliderProps) {
   const [selectedSection, setSelectedSection] = React.useState<SectionSchema | null>(null);
 

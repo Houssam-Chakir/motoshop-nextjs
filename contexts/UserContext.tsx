@@ -9,7 +9,11 @@ import { Types } from "mongoose";
 
 // Import Server Actions from the root 'actions' folder
 import { getMyDetailedProfile } from "@/actions/userProfileActions";
-import { addItemToDbWishlistAction, removeItemFromDbWishlistAction } from "@/actions/wishlistActions"; // Ensure these actions are in actions/wishlistActions.ts
+import {
+  addItemToDbWishlistAction,
+  removeItemFromDbWishlistAction
+} from "@/actions/wishlistActions"; // Server actions
+import { clearGuestWishlist } from "@/lib/guestWishlistStore"; // Client-side local storage actions
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -35,6 +39,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchInitialUserData = useCallback(async () => {
     if (authStatus === "authenticated" && session?.user?.id) {
+      // Clear guest wishlist from localStorage on login
+      if (typeof window !== "undefined" && typeof clearGuestWishlist === "function") {
+        console.log("[UserContext] User authenticated, clearing guest wishlist from local storage.");
+        clearGuestWishlist();
+      } else if (typeof clearGuestWishlist !== "function") {
+        console.warn("[UserContext] clearGuestWishlist function is not available. Guest wishlist may persist after login.");
+      }
+
       setIsLoadingProfile(true);
       setProfileError(null);
       setWishlistError(null); // Clear wishlist errors on new fetch
@@ -54,22 +66,30 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           }
         } else {
           setProfileError(result.message || "Failed to fetch user data.");
-          clearUserData();
+          clearUserData(); // Clears context state, not local storage for guest
         }
       } catch (error) {
         console.error("Error calling fetchInitialUserData action:", error);
         setProfileError(error instanceof Error ? error.message : "An unexpected error occurred.");
-        clearUserData();
+        clearUserData(); // Clears context state
       } finally {
         setIsLoadingProfile(false);
       }
     } else if (authStatus === "unauthenticated") {
-      clearUserData();
+      clearUserData(); // Clears React context state for profile/wishlist
+
+      // Clear guest wishlist from localStorage on logout or if initially unauthenticated
+      if (typeof window !== "undefined" && typeof clearGuestWishlist === "function") {
+        console.log("[UserContext] User unauthenticated, clearing guest wishlist from local storage.");
+        clearGuestWishlist();
+      } else if (typeof clearGuestWishlist !== "function") {
+        console.warn("[UserContext] clearGuestWishlist function is not available. Guest wishlist may persist.");
+      }
       setIsLoadingProfile(false);
     } else if (authStatus === "loading") {
       setIsLoadingProfile(true); // Auth is loading, so user data might be coming
     }
-  }, [authStatus, session?.user?.id, clearUserData]);
+  }, [authStatus, session?.user?.id, clearUserData]); // Assuming clearGuestWishlist is a stable import from a module
 
   useEffect(() => {
     fetchInitialUserData();

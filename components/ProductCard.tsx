@@ -7,7 +7,12 @@ import { Heart, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { useUserContext } from "@/contexts/UserContext";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import {
+  addItemToGuestWishlist,
+  removeItemFromGuestWishlist,
+  isItemInGuestWishlist,
+} from "@/lib/guestWishlistStore";
 
 interface ProductCard {
   barcode: string;
@@ -56,8 +61,21 @@ function ProductCard({ product }: { product: ProductCard }) {
     isLoadingProfile,
   } = useUserContext();
 
-  const isCurrentlyInWishlist = isInWishlist(product._id);
   const isLoggedIn = !!profile;
+  const [isGuestItemInWishlist, setIsGuestItemInWishlist] = useState(false);
+
+  useEffect(() => {
+    if (!isLoggedIn && product?._id) {
+      setIsGuestItemInWishlist(isItemInGuestWishlist(product._id));
+    }
+    // If user logs in/out, or product changes, guest state should reset or re-evaluate
+    // If user logs in, UserContext will clear guest wishlist, so this local state might become stale
+    // until a re-render or if UserContext itself forces a re-render of ProductCard.
+    // For now, this handles guest state based on current product and login status.
+  }, [isLoggedIn, product?._id]);
+
+  // Determine the final wishlist status for the UI
+  const finalIsCurrentlyInWishlist = isLoggedIn ? isInWishlist(product._id) : isGuestItemInWishlist;
 
   const handleCardClick = (e: React.MouseEvent) => {
     // If the click was on a button or its children, don't navigate
@@ -82,14 +100,29 @@ function ProductCard({ product }: { product: ProductCard }) {
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
-    if (isCurrentlyInWishlist) {
-      console.log("removing Item From Wishlist");
-      removeItemFromWishlist(product._id);
+    if (!product?._id) return;
+
+    if (isLoggedIn) {
+      if (isInWishlist(product._id)) {
+        console.log("[ProductCard] Logged in: removing Item From DB Wishlist", product._id);
+        removeItemFromWishlist(product._id);
+      } else {
+        console.log("[ProductCard] Logged in: adding Item to DB Wishlist", product._id);
+        addItemToWishlist(product._id);
+      }
     } else {
-      console.log("adding Item to Wishlist");
-      addItemToWishlist(product._id);
+      // Guest user: interact with localStorage
+      if (isGuestItemInWishlist) {
+        console.log("[ProductCard] Guest: removing Item From Local Wishlist", product._id);
+        removeItemFromGuestWishlist(product._id);
+      } else {
+        console.log("[ProductCard] Guest: adding Item to Local Wishlist", product._id);
+        addItemToGuestWishlist(product._id);
+      }
+      // Update local state for guest after action
+      setIsGuestItemInWishlist(isItemInGuestWishlist(product._id));
     }
-    console.log("Add to wishlist:", product.sku);
+    console.log("Wishlist action for SKU:", product.sku);
   };
 
   return (
@@ -112,14 +145,13 @@ function ProductCard({ product }: { product: ProductCard }) {
               <span className='text-bold'>Add to cart</span>
             </Button>
             {/* -------- */}
-            {isLoggedIn && (
-              <WishlistButton
-                handleWishlist={handleWishlist}
-                isCurrentlyInWishlist={isCurrentlyInWishlist}
-                isLoadingWishlist={isLoadingWishlist}
-                isLoadingProfile={isLoadingProfile}
-              />
-            )}
+            {/* Wishlist button now visible for both logged-in and guest users on desktop */}
+            <WishlistButton
+              handleWishlist={handleWishlist}
+              isCurrentlyInWishlist={finalIsCurrentlyInWishlist}
+              isLoadingWishlist={isLoggedIn ? isLoadingWishlist : false}
+              isLoadingProfile={isLoggedIn ? isLoadingProfile : false}
+            />
           </>
         )}
         {/* Image */}
@@ -163,7 +195,9 @@ const WishlistButton = React.memo(function WishlistButton({ handleWishlist, isCu
     <Button
       onClick={handleWishlist}
       disabled={isLoadingProfile || isLoadingWishlist}
-      className={`absolute -translate-y-16 py-4 top-3 right-3 ${isCurrentlyInWishlist ? ('text-primary/50'): ('text-black hover:text-primary')}  hover:bg-white bg-white rounded-full w-[35px] h-[35px] shadow-md group-hover:translate-y-0`}
+      className={`absolute -translate-y-16 py-4 top-3 right-3 ${
+        isCurrentlyInWishlist ? "text-primary/50" : "text-black hover:text-primary"
+      }  hover:bg-white bg-white rounded-full w-[35px] h-[35px] shadow-md group-hover:translate-y-0`}
     >
       <Heart size={18} fill={isCurrentlyInWishlist ? "#f72323" : "none"} />
     </Button>

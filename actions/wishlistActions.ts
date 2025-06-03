@@ -1,4 +1,3 @@
-// app/actions/wishlistActions.ts
 'use server';
 
 import connectDB from '@/config/database';
@@ -42,7 +41,6 @@ export async function addItemToDbWishlistAction(itemId: string): Promise<Wishlis
     const objectItemId = new mongoose.Types.ObjectId(itemId);
 
     console.log('[ServerAction] Attempting to update User:', sessionUser.userId, 'with Item:', objectItemId.toString());
-    // Ensure 'wishlistItems' is the correct field name in your User schema
     const updateResult = await User.updateOne(
       { _id: sessionUser.userId },
       { $addToSet: { wishlist: objectItemId } }
@@ -58,8 +56,8 @@ export async function addItemToDbWishlistAction(itemId: string): Promise<Wishlis
     console.log('[ServerAction] Item was modified in DB:', wasModified);
 
     if (wasModified) {
-      console.log('[ServerAction] Revalidating path /wishlist');
-      revalidatePath('/wishlist');
+      console.log('[ServerAction] Revalidating path');
+      revalidatePath('/');
     }
 
     return {

@@ -75,106 +75,124 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     fetchInitialUserData();
   }, [fetchInitialUserData]);
 
-  const addItemToWishlist = useCallback( async (itemId: string) => {
-    console.log('[UserContext] addItemToWishlist called with itemId:', itemId);
-    console.log('[UserContext] Current authStatus:', authStatus);
-    console.log('[UserContext] Current profile:', profile ? profile.id : 'No profile');
+  const addItemToWishlist = useCallback(
+    async (itemId: string) => {
+      console.log("[UserContext] addItemToWishlist called with itemId:", itemId);
+      console.log("[UserContext] Current authStatus:", authStatus);
+      console.log("[UserContext] Current profile:", profile ? profile.id : "No profile");
 
-    if (authStatus !== 'authenticated' || !profile) {
-      const errorMsg = 'User not authenticated. Please log in to add items to your wishlist.';
-      console.error('[UserContext]', errorMsg);
-      setWishlistError(errorMsg); // Ensure wishlistError state is set
-      return;
-    }
+      if (authStatus !== "authenticated" || !profile) {
+        const errorMsg = "User not authenticated. Please log in to add items to your wishlist.";
+        console.error("[UserContext]", errorMsg);
+        setWishlistError(errorMsg); // Ensure wishlistError state is set
+        return;
+      }
 
-    setIsLoadingWishlist(true);
-    setWishlistError(null);
+      setIsLoadingWishlist(true);
+      setWishlistError(null);
 
-    const newItem: WishlistItem = { id: itemId };
-    const alreadyInList = wishlist.some(item => item.id === itemId);
+      const newItem: WishlistItem = { id: itemId };
+      const alreadyInList = wishlist.some((item) => item.id === itemId);
 
-    // Optimistic Update
-    if (!alreadyInList) {
-      console.log('[UserContext] Optimistically adding to client state:', itemId);
-      setWishlist(prevWishlist => [...prevWishlist, newItem]);
-    } else {
-      console.log('[UserContext] Item already in client wishlist state:', itemId);
-    }
-
-    console.log('[UserContext] Calling server action addItemToDbWishlistAction for itemId:', itemId);
-    const result = await addItemToDbWishlistAction(itemId);
-    console.log('[UserContext] Result from addItemToDbWishlistAction:', result);
-
-    if (!result.success) {
-      console.error('[UserContext] Server action failed:', result.message);
-      setWishlistError(result.message);
-      // Revert optimistic update if it was a new addition and server failed
+      // Optimistic Update
       if (!alreadyInList) {
-        console.log('[UserContext] Reverting optimistic add for:', itemId);
-        setWishlist(prevWishlist => prevWishlist.filter(item => item.id !== itemId));
+        console.log("[UserContext] Optimistically adding to client state:", itemId);
+        setWishlist((prevWishlist) => [...prevWishlist, newItem]);
+      } else {
+        console.log("[UserContext] Item already in client wishlist state:", itemId);
       }
-    } else {
-      console.log('[UserContext] Server action successful:', result.message);
-      if (result.wasModified === false && !alreadyInList) {
-        console.log('[UserContext] Server reported item already existed, client state was stale. Ensuring item is in list.');
-        setWishlist(prevWishlist => {
-          if (!prevWishlist.find(item => item.id === itemId)) {
-            return [...prevWishlist, newItem];
-          }
-          return prevWishlist;
-        });
+
+      console.log("[UserContext] Calling server action addItemToDbWishlistAction for itemId:", itemId);
+      const result = await addItemToDbWishlistAction(itemId);
+      console.log("[UserContext] Result from addItemToDbWishlistAction:", result);
+
+      if (!result.success) {
+        console.error("[UserContext] Server action failed:", result.message);
+        setWishlistError(result.message);
+        // Revert optimistic update if it was a new addition and server failed
+        if (!alreadyInList) {
+          console.log("[UserContext] Reverting optimistic add for:", itemId);
+          setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== itemId));
+        }
+      } else {
+        console.log("[UserContext] Server action successful:", result.message);
+        if (result.wasModified === false && !alreadyInList) {
+          console.log("[UserContext] Server reported item already existed, client state was stale. Ensuring item is in list.");
+          setWishlist((prevWishlist) => {
+            if (!prevWishlist.find((item) => item.id === itemId)) {
+              return [...prevWishlist, newItem];
+            }
+            return prevWishlist;
+          });
+        }
+        setWishlistError(null); // Clear any previous error on success
       }
-      setWishlistError(null); // Clear any previous error on success
-    }
-    setIsLoadingWishlist(false);
-  }, [authStatus, profile, wishlist])
+      setIsLoadingWishlist(false);
+    },
+    [authStatus, profile, wishlist]
+  );
 
-  const removeItemFromWishlist = useCallback( async (itemId: string) => {
-    if (authStatus !== "authenticated" || !profile) {
-      setWishlistError("Please log in to manage your wishlist.");
-      return;
-    }
-    setIsLoadingWishlist(true);
-    setWishlistError(null);
+  const removeItemFromWishlist = useCallback(
+    async (itemId: string) => {
+      if (authStatus !== "authenticated" || !profile) {
+        setWishlistError("Please log in to manage your wishlist.");
+        return;
+      }
+      setIsLoadingWishlist(true);
+      setWishlistError(null);
 
-    const originalWishlist = [...wishlist]; // Store for potential revert
-    // Optimistic Update: Remove from local state immediately
-    setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== itemId));
+      const originalWishlist = [...wishlist]; // Store for potential revert
+      // Optimistic Update: Remove from local state immediately
+      setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== itemId));
 
-    const result = await removeItemFromDbWishlistAction(itemId);
+      const result = await removeItemFromDbWishlistAction(itemId);
 
-    if (!result.success) {
-      setWishlistError(result.message);
-      setWishlist(originalWishlist); // Revert optimistic update
-    } else {
-      setWishlistError(null); // Clear any previous error on success
-    }
-    setIsLoadingWishlist(false);
-  }, [authStatus, profile, wishlist])
+      if (!result.success) {
+        setWishlistError(result.message);
+        setWishlist(originalWishlist); // Revert optimistic update
+      } else {
+        setWishlistError(null); // Clear any previous error on success
+      }
+      setIsLoadingWishlist(false);
+    },
+    [authStatus, profile, wishlist]
+  );
 
-  const isInWishlist = useCallback( (itemId: string): boolean => {
-    return wishlist.some((item) => item.id === itemId);
-  }, [wishlist])
+  const isInWishlist = useCallback(
+    (itemId: string): boolean => {
+      return wishlist.some((item) => item.id === itemId);
+    },
+    [wishlist]
+  );
 
-  const contextValue = useMemo(() => ({
-    profile,
-    isLoadingProfile,
-    profileError,
-    wishlist,
-    isLoadingWishlist,
-    wishlistError,
-    fetchInitialUserData,
-    clearUserData,
-    addItemToWishlist,
-    removeItemFromWishlist,
-    isInWishlist,
-  }), [
-    profile, isLoadingProfile, profileError,
-    wishlist, isLoadingWishlist, wishlistError,
-    fetchInitialUserData, clearUserData,
-    addItemToWishlist, removeItemFromWishlist, isInWishlist
-  ]);
-
+  const contextValue = useMemo(
+    () => ({
+      profile,
+      isLoadingProfile,
+      profileError,
+      wishlist,
+      isLoadingWishlist,
+      wishlistError,
+      fetchInitialUserData,
+      clearUserData,
+      addItemToWishlist,
+      removeItemFromWishlist,
+      isInWishlist,
+    }),
+    [
+      profile,
+      isLoadingProfile,
+      profileError,
+      wishlist,
+      isLoadingWishlist,
+      wishlistError,
+      fetchInitialUserData,
+      clearUserData,
+      addItemToWishlist,
+      removeItemFromWishlist,
+      isInWishlist,
+    ]
+  );
 
   return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };

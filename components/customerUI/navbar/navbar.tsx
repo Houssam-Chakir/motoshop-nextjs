@@ -174,53 +174,108 @@ function UserButtonsSection({
   );
 }
 
-function UserMenu({ providers, session }: { session: Session; providers: Record<string, { id: string; name: string }> }) {
+function UserMenu({ providers, session }: { session: Session | null; providers: Record<string, { id: string; name: string }> }) {
+  const { wishlist } = useUserContext(); // Get wishlist from context
   return (
     <>
-      <h2 className=' text-lg p-3 uppercase text-center pb-3 font-bold border-b'>
-        {session && "User menu"}
-        {!session && "Sign Up"}
-      </h2>
-      <ul className='w-full flex flex-col gap-2 px-2 py-4 text-md *:text-nowrap *:px-8 *:py-8 *:flex *:gap-4 *:border *:hover:bg-grey *:cursor-default *:items-center [&_*]:h-5'>
-        {session && (
-          <>
-            <li>
-              <UserSearch size={28} />
-              <span>Profile</span>
+      {session && (
+        <div className='flex flex-col h-full min-h-0'>
+          {/* Profile Info & Counts Section */}
+          <div className='p-4 border-b shrink-0'>
+            <div className='flex items-center gap-3 mb-3'>
+              <div className='w-12 h-12 rounded-full overflow-hidden border border-gray-300 bg-gray-100'>
+                <Image
+                  src={session.user?.image || "/default-avatar.png"} // Ensure you have a fallback avatar
+                  alt={session.user?.name || "User Avatar"}
+                  width={48}
+                  height={48}
+                  className='object-cover w-full h-full'
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/default-avatar.png";
+                  }} // Fallback for broken image links
+                />
+              </div>
+              <div>
+                <p className='font-semibold text-sm truncate'>{session.user?.name || "User Name"}</p>
+                <p className='text-xs text-gray-500 truncate'>{session.user?.email || "user@example.com"}</p>
+              </div>
+            </div>
+            <div className='bg-grey border-grey-medium border-1 border-dashed *:flex *:gap-1 rounded-full py-2 px-4 flex justify-around gap-2 text-center text-xs'>
+              <div>
+                <p className='font-semibold'>{wishlist?.length ?? 0}</p>
+                <p className='text-slate-700'>Wishlist</p>
+              </div>
+              <div>
+                <p className='font-semibold'>0</p>
+                <p className='text-slate-700'>Cart</p>
+              </div>
+              <div>
+                <p className='font-semibold'>0</p>
+                <p className='text-slate-700'>Orders</p>
+              </div>
+            </div>
+          </div>
+          {/* Main Action Buttons List */}
+          <ul className='flex-grow w-full flex flex-col gap-1.5 px-2 py-3 text-md overflow-y-auto'>
+            {/* Section 1: Profile, Orders */}
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <UserSearch size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Profile</span>
             </li>
-            <li>
-              <BoxIcon size={28} />
-              <span>Orders</span>
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <BoxIcon size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Orders</span>
             </li>
-            <li className='hover:text-primary' onClick={() => signOut()}>
-              <LogOut size={28} />
+
+            <hr className='my-1.5 border-gray-200' />
+
+            {/* Section 2: Wishlist, Cart */}
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <Heart size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Wishlist</span>
+            </li>
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <ShoppingCart size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Cart</span>
+            </li>
+          </ul>
+          {/* Logout Button Section (at the bottom) */}
+          <div className='mt-auto p-2 border-t shrink-0'>
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className='w-full flex items-center justify-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-primary hover:text-white rounded-xs transition-colors duration-150'
+            >
+              <LogOut size={20} />
               <span>Logout</span>
-            </li>
-          </>
-        )}
-        {!session && (
-          <div className='hover:!bg-white !h-12 !py-0 border-none'>
-            {providers &&
-              Object.values(providers).map((provider, i) => {
-                if (provider.id === "google") {
-                  return (
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Guest View (Sign Up) */}
+      {!session && (
+        <div className='flex flex-col flex-grow items-center pt-24 p-4'>
+          {providers &&
+            Object.values(providers).map((provider) => {
+              if (provider.id === "google") {
+                return (
+                  <>
+                    <h2 className='text-lg p-3 uppercase text-center pb-3 font-bold border-b shrink-0'>Sign Up</h2>
                     <GoogleSignupButton
                       onSignup={async () => {
-                        await signIn(provider.id);
+                        await signIn(provider.id, { callbackUrl: "/" });
                       }}
-                      key={i}
-                      className=''
+                      key={provider.id}
+                      className='w-full max-w-xs'
                     />
-                  );
-                }
-              })}
-            {/* <li className='hover:text-primary' onClick={() => signIn()}>
-              <LogIn />
-              <span>SignIn with</span>
-            </li> */}
-          </div>
-        )}
-      </ul>
+                  </>
+                );
+              }
+              return null;
+            })}
+          {!providers && <p className='text-sm text-gray-500'>Sign up options are currently unavailable.</p>}
+        </div>
+      )}
     </>
   );
 }

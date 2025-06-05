@@ -18,7 +18,8 @@ export async function getMyDetailedProfile(userId: string): Promise<ActionResult
 
   try {
     await connectDB();
-    const userFromDb = await User.findById(userId).lean();
+    // Populate user wishlist with product details 
+    const userFromDb = await User.findById(userId).populate('wishlist').lean();
     console.log('user from db:', userFromDb)
 
     if (!userFromDb) {

@@ -1,6 +1,6 @@
 // types/user.ts (or your existing types file where UserContextType is defined)
 import mongoose from "mongoose";
-import { WishlistItem } from './wishlist'; // Adjust path if needed
+import { WishlistItem } from "./wishlist"; // Adjust path if needed
 
 export interface UserProfile {
   id: string;
@@ -24,9 +24,8 @@ export interface UserContextType {
   isLoadingWishlist: boolean; // For add/remove operations
   wishlistError: string | null;
 
-
   fetchInitialUserData: () => Promise<void>;
-  clearUserData: () => void; 
+  clearUserData: () => void;
 
   // NEW: Wishlist functions
   addItemToWishlist: (itemId: string) => Promise<void>;

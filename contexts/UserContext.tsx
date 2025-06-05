@@ -9,10 +9,7 @@ import { Types } from "mongoose";
 
 // Import Server Actions from the root 'actions' folder
 import { getMyDetailedProfile } from "@/actions/userProfileActions";
-import {
-  addItemToDbWishlistAction,
-  removeItemFromDbWishlistAction
-} from "@/actions/wishlistActions"; // Server actions
+import { addItemToDbWishlistAction, removeItemFromDbWishlistAction } from "@/actions/wishlistActions"; // Server actions
 import { clearGuestWishlist } from "@/lib/guestWishlistStore"; // Client-side local storage actions
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -57,9 +54,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           setProfile(result.data); // Set the UserProfile object
           // Transform the ObjectId array from profile.wishlist into WishlistItem[]
           if (result.data.wishlist && Array.isArray(result.data.wishlist)) {
-            const clientWishlist: WishlistItem[] = result.data.wishlist.map((objectId: Types.ObjectId) => ({
-              id: objectId.toString(),
-            }));
+            const clientWishlist: WishlistItem[] = result.data.wishlist
+              .filter((item: any) => item && item._id) // Ensure item exists and has an _id
+              .map((item: any) => ({
+                id: item._id.toString(),
+                title: item.title || "",
+                price: item.retailPrice || 0,
+                imageUrl: item.images?.[0]?.secure_url || "",
+                identifiers: item.identifiers || { 
+                  brand: "", 
+                  categoryType: "", 
+                  category: "" 
+                },
+              }));
             setWishlist(clientWishlist);
           } else {
             setWishlist([]); // No wishlist items or unexpected format

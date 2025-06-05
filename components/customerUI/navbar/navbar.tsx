@@ -18,7 +18,9 @@ import { CategoriesSlider } from "../sideBar/CategoriesSlider";
 import { Section } from "@/types/section";
 import { useSessionContext } from "@/contexts/SessionContext";
 import { useUserContext } from "@/contexts/UserContext";
+import WishlistSlider from "./WishlistSlider";
 
+// -- Navbar -------------------------------------------
 export default function Navbar({ sections }: { sections: Section[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
   const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
@@ -136,6 +138,7 @@ export default function Navbar({ sections }: { sections: Section[] }) {
   );
 }
 
+// -- User Buttons Section -------------------------------------------
 function UserButtonsSection({
   providers,
   session,
@@ -153,12 +156,7 @@ function UserButtonsSection({
   const username = session?.user?.name?.split(" ").at(0) || "username";
   return (
     <>
-      {isPhoneOrLarger && (
-        <div className='flex flex-col items-center group cursor-pointer'>
-          <Heart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
-          <span className='text-xs mt-1 group-hover:text-primary'>Wishlist</span>
-        </div>
-      )}
+      {isPhoneOrLarger && <WishlistSlider session={session} />}
 
       <div className='flex flex-col items-center relative group cursor-pointer'>
         <div className='relative '>
@@ -174,6 +172,7 @@ function UserButtonsSection({
   );
 }
 
+// -- User Menu -------------------------------------------
 function UserMenu({ providers, session }: { session: Session | null; providers: Record<string, { id: string; name: string }> }) {
   const { wishlist } = useUserContext(); // Get wishlist from context
   return (
@@ -280,6 +279,7 @@ function UserMenu({ providers, session }: { session: Session | null; providers: 
   );
 }
 
+// -- User Menu Slider -------------------------------------------
 function UserMenuSlider({
   session,
   profileImage,
@@ -328,6 +328,7 @@ function UserMenuSlider({
   );
 }
 
+// -- Logo -------------------------------------------
 function Logo() {
   return (
     <>

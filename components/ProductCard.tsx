@@ -65,13 +65,19 @@ function ProductCard({ product }: { product: ProductCard }) {
   const [isGuestItemInWishlist, setIsGuestItemInWishlist] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn && product?._id) {
-      setIsGuestItemInWishlist(isItemInGuestWishlist(product._id));
-    }
-    // If user logs in/out, or product changes, guest state should reset or re-evaluate
-    // If user logs in, UserContext will clear guest wishlist, so this local state might become stale
-    // until a re-render or if UserContext itself forces a re-render of ProductCard.
-    // For now, this handles guest state based on current product and login status.
+    const updateGuestWishlistStatus = () => {
+      if (!isLoggedIn && product?._id) {
+        setIsGuestItemInWishlist(isItemInGuestWishlist(product._id));
+      }
+    };
+    // Initial status check
+    updateGuestWishlistStatus();
+    // Listen for global guest wishlist changes
+    window.addEventListener('guestWishlistChanged', updateGuestWishlistStatus);
+    // Cleanup listener on component unmount or when dependencies change
+    return () => {
+      window.removeEventListener('guestWishlistChanged', updateGuestWishlistStatus);
+    };
   }, [isLoggedIn, product?._id]);
 
   // Determine the final wishlist status for the UI
@@ -117,7 +123,14 @@ function ProductCard({ product }: { product: ProductCard }) {
         removeItemFromGuestWishlist(product._id);
       } else {
         console.log("[ProductCard] Guest: adding Item to Local Wishlist", product._id);
-        addItemToGuestWishlist(product._id);
+        addItemToGuestWishlist({
+          id: product._id,
+          title: product.title,
+          identifiers: product.identifiers,
+          retailPrice: product.retailPrice,
+          imageUrl: product.images[0].secure_url,
+          // If you add imageUrl to GuestWishlistItem, you'd get it from product.images[0]?.secure_url or similar
+        });
       }
       // Update local state for guest after action
       setIsGuestItemInWishlist(isItemInGuestWishlist(product._id));

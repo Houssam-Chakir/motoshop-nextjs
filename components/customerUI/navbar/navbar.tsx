@@ -19,6 +19,7 @@ import { Section } from "@/types/section";
 import { useSessionContext } from "@/contexts/SessionContext";
 import { useUserContext } from "@/contexts/UserContext";
 import WishlistSlider from "./WishlistSlider";
+import CartSlider from "./CartSlider";
 
 // -- Navbar -------------------------------------------
 export default function Navbar({ sections }: { sections: Section[] }) {
@@ -158,15 +159,7 @@ function UserButtonsSection({
     <>
       {isPhoneOrLarger && <WishlistSlider session={session} />}
 
-      <div className='flex flex-col items-center relative group cursor-pointer'>
-        <div className='relative '>
-          <ShoppingCart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
-          <span className='absolute -top-1.5 -right-2 bg-secondary-light opacity-80 group-hover:opacity-100 text-white text-sm font-bold rounded-full duration-100 group-hover:-translate-y-1 h-4 w-4 flex items-center justify-center'>
-            0
-          </span>
-        </div>
-        <span className='text-xs mt-1 group-hover:text-primary'>Cart</span>
-      </div>
+      <CartSlider session={session}/>
       <UserMenuSlider session={session} providers={providers} profileImage={profileImage} username={username} isUserMenuOpen={isUserMenuOpen} />
     </>
   );
@@ -324,7 +317,7 @@ function UserMenuSlider({
       }
     >
       <UserMenu providers={providers ?? {}} session={session!} />
-     
+
     </MobileSlider>
   );
 }

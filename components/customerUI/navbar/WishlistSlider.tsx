@@ -109,7 +109,7 @@ export default function WishlistSlider({ session }: { session: Session | null })
           {wishlist &&
             wishlist.map((item) => {
               console.log(item);
-              return <WishlistItem key={item.id} item={item} />;
+              return <WishlistItem key={item.id} item={item} session={session} />;
             })}
           {/* wishlist items from guest users */}
           {guestWishlistItems.length > 0 &&
@@ -155,7 +155,7 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
   };
 
   return (
-    <div onClick={(e) => handleItemClick(e)} key={item.id} className='relative flex text-start gap-2 transition-all border-1 hover:shadow-sm cursor-pointer'>
+    <div onClick={(e) => handleItemClick(e)} key={item.id} className='relative flex text-start gap-2 transition-all border-1 hover:border-gray-400 cursor-pointer'>
       {/* Image */}
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-2 overflow-clip'>
         <Image className='object-contain w-full h-full' src={item.imageUrl ?? '/noProductImage.png'} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
@@ -169,8 +169,8 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
           </p>
         </div>
         <div className=' gap-2 items-center pl-0.5'>
-
-          <span className='text-emerald-500 text-xs'>In Stock</span>
+          {item.inStock && <span className='text-emerald-500 text-xs'>In Stock</span>}
+          {!item.inStock && <span className='text-red-500 text-xs'>Out of Stock</span>}
           <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>{item.retailPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
         </div>
       </div>

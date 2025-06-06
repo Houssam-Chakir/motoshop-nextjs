@@ -1,6 +1,7 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
 import slug from "mongoose-slug-updater";
 import { nanoid } from "nanoid";
+import { boolean } from "zod";
 
 mongoose.plugin(slug);
 
@@ -39,6 +40,7 @@ export interface ProductDocument extends Document {
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
   stock?: mongoose.Types.ObjectId;
+  inStock: boolean;
 
   specifications: ProductSpec[];
   reviews: ProductReview[];
@@ -80,6 +82,7 @@ const ProductSchema: Schema = new Schema(
     type: { type: Schema.Types.ObjectId, ref: "Type", required: [true, "Please choose a type"], index: true },
 
     stock: { type: mongoose.Types.ObjectId, unique: true },
+    inStock: {type: Boolean, default: true},
     specifications: [
       {
         name: { type: String, required: [true, "Please provide a name for the spec"] },

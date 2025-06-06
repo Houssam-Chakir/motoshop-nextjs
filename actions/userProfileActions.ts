@@ -18,9 +18,9 @@ export async function getMyDetailedProfile(userId: string): Promise<ActionResult
 
   try {
     await connectDB();
-    // Populate user wishlist with product details 
-    const userFromDb = await User.findById(userId).populate('wishlist').lean();
-    console.log('user from db:', userFromDb)
+    // Populate user wishlist with product details
+    const userFromDb = await User.findById(userId).populate("wishlist").lean();
+    console.log("user from db:", userFromDb);
 
     if (!userFromDb) {
       return { success: false, message: "User not found." };
@@ -43,12 +43,13 @@ export async function getMyDetailedProfile(userId: string): Promise<ActionResult
       orders: userFromDb.orders || null,
       wishlist: userFromDb.wishlist
         ? (userFromDb.wishlist as any[]).map((item: any) => ({
-            id: item._id ? item._id.toString() : '', // Ensure _id exists and convert to string
+            id: item._id ? item._id.toString() : "", // Ensure _id exists and convert to string
             title: item.title,
             imageUrl: item.images && item.images[0] ? item.images[0].secure_url : undefined,
-            price: item.retailPrice,
+            retailPrice: item.retailPrice,
             identifiers: item.identifiers, // Assuming structure matches
             slug: item.slug,
+            inStock: item.inStock,
           }))
         : null,
       cart: userFromDb.cart || null,

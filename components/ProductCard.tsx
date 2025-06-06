@@ -8,11 +8,7 @@ import { useRouter } from "next/navigation";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { useUserContext } from "@/contexts/UserContext";
 import React, { useState, useEffect } from "react";
-import {
-  addItemToGuestWishlist,
-  removeItemFromGuestWishlist,
-  isItemInGuestWishlist,
-} from "@/lib/guestWishlistStore";
+import { addItemToGuestWishlist, removeItemFromGuestWishlist, isItemInGuestWishlist } from "@/lib/guestWishlistStore";
 
 interface ProductCard {
   barcode: string;
@@ -36,6 +32,7 @@ interface ProductCard {
   slug: string;
   specifications: Array<{ name: string; description: string }>;
   stock: string;
+  inStock: boolean;
   style: string;
   title: string;
   type: string;
@@ -73,10 +70,10 @@ function ProductCard({ product }: { product: ProductCard }) {
     // Initial status check
     updateGuestWishlistStatus();
     // Listen for global guest wishlist changes
-    window.addEventListener('guestWishlistChanged', updateGuestWishlistStatus);
+    window.addEventListener("guestWishlistChanged", updateGuestWishlistStatus);
     // Cleanup listener on component unmount or when dependencies change
     return () => {
-      window.removeEventListener('guestWishlistChanged', updateGuestWishlistStatus);
+      window.removeEventListener("guestWishlistChanged", updateGuestWishlistStatus);
     };
   }, [isLoggedIn, product?._id]);
 
@@ -118,9 +115,10 @@ function ProductCard({ product }: { product: ProductCard }) {
           id: product._id,
           title: product.title,
           imageUrl: product.images?.[0]?.secure_url,
-          price: product.retailPrice,
+          retailPrice: product.retailPrice,
           identifiers: product.identifiers,
           slug: product.slug,
+          inStock: product.inStock,
         });
       }
     } else {
@@ -136,7 +134,8 @@ function ProductCard({ product }: { product: ProductCard }) {
           identifiers: product.identifiers,
           retailPrice: product.retailPrice,
           imageUrl: product.images[0].secure_url,
-          slug: product.slug, // Added slug
+          slug: product.slug,
+          inStock: product.inStock,
         });
       }
       // Update local state for guest after action

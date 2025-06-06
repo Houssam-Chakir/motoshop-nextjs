@@ -17,7 +17,8 @@ export interface GuestWishlistItem {
   retailPrice: number;
   // Consider adding imageUrl if it's small or essential for a quick view, e.g.:
   imageUrl?: string;
-  slug: string; // Added slug field
+  slug: string;
+  inStock: boolean;
 }
 
 /**
@@ -45,10 +46,10 @@ export const addItemToGuestWishlist = (item: GuestWishlistItem): void => {
   if (typeof window === "undefined") return;
   try {
     const currentWishlist = getGuestWishlist();
-    if (!currentWishlist.some(existingItem => existingItem.id === item.id)) {
+    if (!currentWishlist.some((existingItem) => existingItem.id === item.id)) {
       const updatedWishlist = [...currentWishlist, item];
       localStorage.setItem(GUEST_WISHLIST_KEY, JSON.stringify(updatedWishlist));
-      window.dispatchEvent(new CustomEvent('guestWishlistChanged'));
+      window.dispatchEvent(new CustomEvent("guestWishlistChanged"));
     }
   } catch (error) {
     console.error("Error adding item to guest wishlist in localStorage:", error);
@@ -63,9 +64,9 @@ export const removeItemFromGuestWishlist = (itemId: string): void => {
   if (typeof window === "undefined") return;
   try {
     const currentWishlist = getGuestWishlist();
-    const updatedWishlist = currentWishlist.filter(itemInStorage => itemInStorage.id !== itemId);
+    const updatedWishlist = currentWishlist.filter((itemInStorage) => itemInStorage.id !== itemId);
     localStorage.setItem(GUEST_WISHLIST_KEY, JSON.stringify(updatedWishlist));
-    window.dispatchEvent(new CustomEvent('guestWishlistChanged'));
+    window.dispatchEvent(new CustomEvent("guestWishlistChanged"));
   } catch (error) {
     console.error("Error removing item from guest wishlist in localStorage:", error);
   }
@@ -80,7 +81,7 @@ export const isItemInGuestWishlist = (itemId: string): boolean => {
   if (typeof window === "undefined") return false;
   try {
     const currentWishlist = getGuestWishlist();
-    return currentWishlist.some(itemInStorage => itemInStorage.id === itemId);
+    return currentWishlist.some((itemInStorage) => itemInStorage.id === itemId);
   } catch (error) {
     console.error("Error checking item in guest wishlist:", error);
     return false;
@@ -95,7 +96,7 @@ export const clearGuestWishlist = (): void => {
   try {
     localStorage.removeItem(GUEST_WISHLIST_KEY);
     console.log("Guest wishlist cleared from local storage.");
-    window.dispatchEvent(new CustomEvent('guestWishlistChanged'));
+    window.dispatchEvent(new CustomEvent("guestWishlistChanged"));
   } catch (error) {
     console.error("Error clearing guest wishlist from localStorage:", error);
   }

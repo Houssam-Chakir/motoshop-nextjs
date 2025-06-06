@@ -52,24 +52,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
         if (result.success && result.data) {
           setProfile(result.data); // Set the UserProfile object
-          // Transform the ObjectId array from profile.wishlist into WishlistItem[]
+          // result.data.wishlist is already WishlistItem[] | null from getMyDetailedProfile
           if (result.data.wishlist && Array.isArray(result.data.wishlist)) {
-            const clientWishlist: WishlistItem[] = result.data.wishlist
-              .filter((item: any) => item && item._id) // Ensure item exists and has an _id
-              .map((item: any) => ({
-                id: item._id.toString(),
-                title: item.title || "",
-                price: item.retailPrice || 0,
-                imageUrl: item.images?.[0]?.secure_url || "",
-                identifiers: item.identifiers || { 
-                  brand: "", 
-                  categoryType: "", 
-                  category: "" 
-                },
-              }));
-            setWishlist(clientWishlist);
+            setWishlist(result.data.wishlist);
           } else {
-            setWishlist([]); // No wishlist items or unexpected format
+            setWishlist([]); // No wishlist items or it's null
           }
         } else {
           setProfileError(result.message || "Failed to fetch user data.");
@@ -103,8 +90,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, [fetchInitialUserData]);
 
   const addItemToWishlist = useCallback(
-    async (itemId: string) => {
-      console.log("[UserContext] addItemToWishlist called with itemId:", itemId);
+    async (item: WishlistItem) => {
+      console.log("[UserContext] addItemToWishlist called with item:", item);
       console.log("[UserContext] Current authStatus:", authStatus);
       console.log("[UserContext] Current profile:", profile ? profile.id : "No profile");
 
@@ -118,19 +105,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setIsLoadingWishlist(true);
       setWishlistError(null);
 
-      const newItem: WishlistItem = { id: itemId };
-      const alreadyInList = wishlist.some((item) => item.id === itemId);
+      // The 'item' parameter is now the full WishlistItem object
+      const alreadyInList = wishlist.some((i) => i.id === item.id);
 
       // Optimistic Update
       if (!alreadyInList) {
-        console.log("[UserContext] Optimistically adding to client state:", itemId);
-        setWishlist((prevWishlist) => [...prevWishlist, newItem]);
+        console.log("[UserContext] Optimistically adding to client state:", item);
+        setWishlist((prevWishlist) => [...prevWishlist, item]);
       } else {
-        console.log("[UserContext] Item already in client wishlist state:", itemId);
+        console.log("[UserContext] Item already in client wishlist state:", item.id);
       }
 
-      console.log("[UserContext] Calling server action addItemToDbWishlistAction for itemId:", itemId);
-      const result = await addItemToDbWishlistAction(itemId);
+      console.log("[UserContext] Calling server action addItemToDbWishlistAction for itemId:", item.id);
+      const result = await addItemToDbWishlistAction(item.id);
       console.log("[UserContext] Result from addItemToDbWishlistAction:", result);
 
       if (!result.success) {
@@ -138,16 +125,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setWishlistError(result.message);
         // Revert optimistic update if it was a new addition and server failed
         if (!alreadyInList) {
-          console.log("[UserContext] Reverting optimistic add for:", itemId);
-          setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== itemId));
+          console.log("[UserContext] Reverting optimistic add for:", item.id);
+          setWishlist((prevWishlist) => prevWishlist.filter((i) => i.id !== item.id));
         }
       } else {
         console.log("[UserContext] Server action successful:", result.message);
         if (result.wasModified === false && !alreadyInList) {
           console.log("[UserContext] Server reported item already existed, client state was stale. Ensuring item is in list.");
           setWishlist((prevWishlist) => {
-            if (!prevWishlist.find((item) => item.id === itemId)) {
-              return [...prevWishlist, newItem];
+            if (!prevWishlist.find((i) => i.id === item.id)) {
+              return [...prevWishlist, item]; // Use the full item passed to the function
             }
             return prevWishlist;
           });

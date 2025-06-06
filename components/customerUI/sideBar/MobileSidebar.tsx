@@ -9,13 +9,20 @@ interface MobileSliderProps {
   children: React.ReactNode;
   side?: "left" | "right" | "top" | "bottom";
   className?: string;
+  showDefaultCloseButton?: boolean;
 }
 
-export function MobileSlider({ trigger, children, side = "left", className = "w-[320px] p-0" }: MobileSliderProps) {
+export function MobileSlider({
+  trigger,
+  children,
+  side = "left",
+  className = "w-[320px] p-0",
+  showDefaultCloseButton, // Added prop here
+}: MobileSliderProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent side={side} className={className}>
+      <SheetContent side={side} className={className} showDefaultCloseButton={showDefaultCloseButton}>
         <VisuallyHidden asChild>
           <SheetTitle>Main Navigation Menu</SheetTitle>
         </VisuallyHidden>

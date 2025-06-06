@@ -41,7 +41,16 @@ export async function getMyDetailedProfile(userId: string): Promise<ActionResult
       image: userFromDb.image || null,
       role: userFromDb.role || null,
       orders: userFromDb.orders || null,
-      wishlist: userFromDb.wishlist || null,
+      wishlist: userFromDb.wishlist
+        ? (userFromDb.wishlist as any[]).map((item: any) => ({
+            id: item._id ? item._id.toString() : '', // Ensure _id exists and convert to string
+            title: item.title,
+            imageUrl: item.images && item.images[0] ? item.images[0].secure_url : undefined,
+            price: item.retailPrice,
+            identifiers: item.identifiers, // Assuming structure matches
+            slug: item.slug,
+          }))
+        : null,
       cart: userFromDb.cart || null,
     };
 

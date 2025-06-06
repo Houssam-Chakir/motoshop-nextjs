@@ -9,7 +9,7 @@ export interface UserProfile {
   image?: string | null;
   role?: string | null;
   orders?: mongoose.Types.ObjectId[] | null;
-  wishlist?: mongoose.Types.ObjectId[] | null; // This is what your DB/server action provides
+  wishlist?: WishlistItem[] | null; // This will hold the populated wishlist items
   cart?: mongoose.Types.ObjectId[] | null;
 }
 
@@ -28,7 +28,7 @@ export interface UserContextType {
   clearUserData: () => void;
 
   // NEW: Wishlist functions
-  addItemToWishlist: (itemId: string) => Promise<void>;
+  addItemToWishlist: (item: WishlistItem) => Promise<void>;
   removeItemFromWishlist: (itemId: string) => Promise<void>;
   isInWishlist: (itemId: string) => boolean;
 }

@@ -17,6 +17,7 @@ export interface GuestWishlistItem {
   retailPrice: number;
   // Consider adding imageUrl if it's small or essential for a quick view, e.g.:
   imageUrl?: string;
+  slug: string; // Added slug field
 }
 
 /**

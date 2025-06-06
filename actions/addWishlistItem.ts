@@ -56,6 +56,7 @@ export async function addItemToWishlistAction(itemId: string): Promise<ActionRes
 
     if (wasItemNewlyAdded) {
       revalidatePath('/wishlist');
+      revalidatePath('/');
       revalidatePath(`/products`);
       revalidatePath(`/products/${itemId}`);
 

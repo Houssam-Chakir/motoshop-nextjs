@@ -114,7 +114,14 @@ function ProductCard({ product }: { product: ProductCard }) {
         removeItemFromWishlist(product._id);
       } else {
         console.log("[ProductCard] Logged in: adding Item to DB Wishlist", product._id);
-        addItemToWishlist(product._id);
+        addItemToWishlist({
+          id: product._id,
+          title: product.title,
+          imageUrl: product.images?.[0]?.secure_url,
+          price: product.retailPrice,
+          identifiers: product.identifiers,
+          slug: product.slug,
+        });
       }
     } else {
       // Guest user: interact with localStorage
@@ -129,7 +136,7 @@ function ProductCard({ product }: { product: ProductCard }) {
           identifiers: product.identifiers,
           retailPrice: product.retailPrice,
           imageUrl: product.images[0].secure_url,
-          // If you add imageUrl to GuestWishlistItem, you'd get it from product.images[0]?.secure_url or similar
+          slug: product.slug, // Added slug
         });
       }
       // Update local state for guest after action
@@ -177,9 +184,9 @@ function ProductCard({ product }: { product: ProductCard }) {
         </div>
       </div>
       {/* Product Info */}
-      <div className='py-1 flex flex-col gap-0.5'>
+      <div className='py-1 flex flex-col leading-5'>
         <div className='font-medium text-[clamp(14px,1.5vw,16px)] line-clamp-1 w-full'>{product.title}</div>
-        <div className='text-[clamp(12px,1.5vw,14px)] text-grey-darker'>
+        <div className='text-[clamp(11px,1.5vw,12px)] text-grey-darker'>
           {product.identifiers.brand} {product.identifiers.category}
         </div>
       </div>

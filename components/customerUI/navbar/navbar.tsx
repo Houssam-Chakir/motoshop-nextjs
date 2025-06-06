@@ -324,6 +324,7 @@ function UserMenuSlider({
       }
     >
       <UserMenu providers={providers ?? {}} session={session!} />
+     
     </MobileSlider>
   );
 }

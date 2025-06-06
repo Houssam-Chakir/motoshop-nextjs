@@ -5,4 +5,5 @@ export interface WishlistItem {
   imageUrl?: string; // Optional
   price?: number;
   identifiers?: { brand: string; categoryType: string; category: string };
+  slug?: string; // Added optional slug field
 }

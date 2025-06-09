@@ -4,6 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --breakpoint-xs: 562px;
   /* Fonts */
   --font-sans: var(--font-inter);    /* Makes Inter the default sans-serif font */
   --font-display: var(--font-oxanium); /* Creates a new utility for Oxanium */
@@ -43,6 +44,7 @@
 
   /* Blues */
   --color-blue: var(--blue);                       /* NEW (from your list) */
+  --color-blue-light: var(--blue-light);                       /* NEW (from your list) */
   --color-blue-sky: var(--blue-sky);               /* NEW (from your list) */
   --color-blue-sky-light: var(--blue-sky-light);   /* NEW (from your list) */
 
@@ -100,6 +102,7 @@
   --secondary: oklch(0.3049 0.0379 279.69);
   --secondary-light: oklch(0.6804 0.034 261.69);
   --blue: oklch(0.2374 0.1595 267.26);
+  --blue-light: oklch(0.3374 0.1595 267.26);
   --blue-sky: oklch(0.8469 0.0753 264.05);
   --blue-sky-light: oklch(0.9656 0.0171 248.01);
   --secondary-foreground: oklch(0.208 0.042 265.755);

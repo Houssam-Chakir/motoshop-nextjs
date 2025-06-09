@@ -7,28 +7,7 @@ import Category from "@/models/Category";
 import Type from "@/models/Type";
 import svgUploadCloudinary from "@/utils/svgUploadCloudinary";
 import svgDeleteCloudinary from "@/utils/svgDeleteCloudinary";
-
-interface TypeData {
-  _id?: string;
-  name: string;
-  slug: string;
-}
-
-interface CategoryData {
-  _id: string;
-  name: string;
-  slug: string;
-  section: string;
-  icon: File | {
-    secure_url: string;
-    public_id: string;
-  };
-  currentIcon?: {
-    secure_url: string;
-    public_id: string;
-  };
-  types: TypeData[];
-}
+import { CategoryData } from "@/types/category";
 
 async function UpdateCategory(categoryData: CategoryData) {
   const session: ClientSession = await mongoose.startSession();

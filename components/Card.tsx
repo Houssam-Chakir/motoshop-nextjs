@@ -3,11 +3,11 @@
 import { ProductDocument } from "@/models/Product";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import deleteProduct from "@/app/actions/deleteProduct";
+import deleteProduct from "@/actions/deleteProduct";
 import { toast } from "react-toastify";
 // import Image from "next/image";
 
-const ProductCard = ({ product }) => {
+const ProductCardTest = ({ product }) => {
   const handleDeleteProduct = async () => {
     const isConfirmed = confirm("Are you sure you want to delete this product");
     if (isConfirmed) {
@@ -49,4 +49,4 @@ const ProductCard = ({ product }) => {
   );
 };
 
-export default ProductCard;
+export default ProductCardTest;

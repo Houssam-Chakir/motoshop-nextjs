@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import addNewProduct from "@/app/actions/addProduct";
+import addNewProduct from "@/actions/addProduct";
 import { toast } from "react-toastify";
 import { redirect } from "next/navigation";
 

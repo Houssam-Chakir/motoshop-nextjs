@@ -8,13 +8,11 @@ interface SearchInputProps {
   isDesktop: boolean;
 }
 interface SearchBarProps {
-  parent: React.RefObject<HTMLDivElement>;
   searchQuery: string;
   setSearchQuery: (value: string) => void;
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({ searchQuery, setSearchQuery, isDesktop = false }) => {
-  const [parent] = useAutoAnimate({ duration: 100 });
 
   if (!isDesktop) {
     return (
@@ -23,7 +21,6 @@ const SearchInput: React.FC<SearchInputProps> = ({ searchQuery, setSearchQuery, 
           <Search className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
           <span className='text-xs mt-1 group-hover:text-primary'>Search</span>
         </div>
-        
       </>
     );
   }
@@ -31,14 +28,15 @@ const SearchInput: React.FC<SearchInputProps> = ({ searchQuery, setSearchQuery, 
   if (isDesktop) {
     return (
       <div className='relative max-w-[518px] w-full mx-4'>
-        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} parent={parent} />
+        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       </div>
     );
   }
 };
 
 //f/ Search Bar Component
-export function SearchBar({ parent, searchQuery, setSearchQuery }: SearchBarProps) {
+export function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
+  const [parent] = useAutoAnimate({ duration: 100 });
   return (
     <div ref={parent} className='relative'>
       <Input

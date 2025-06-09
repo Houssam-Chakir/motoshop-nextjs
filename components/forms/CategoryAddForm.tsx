@@ -5,14 +5,14 @@ import { useState } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, X, FileImage, CheckCircle } from "lucide-react";
-import addNewCategory from "@/app/actions/addCategory";
+import addNewCategory from "@/actions/addCategory";
 
 // Section options
 const SECTION_OPTIONS = ["Riding Gear", "Motorcycle Parts", "Motorcycles"] as const;
@@ -312,10 +312,10 @@ export default function CategoryForm() {
 
   return (
     <div className='max-w-2xl mx-auto p-6 overflow-scroll w-1/2'>
-      <Card className="rounded-none shadow-none">
-        <CardHeader className="border-b">
-          <CardTitle className="text-black font-medium text-2xl text-center">Create New Category</CardTitle>
-          <CardDescription className="text-center text-xs">Add a new category with its associated types</CardDescription>
+      <Card className='rounded-none shadow-none'>
+        <CardHeader className='border-b'>
+          <CardTitle className='text-black font-medium text-2xl text-center'>Create New Category</CardTitle>
+          <CardDescription className='text-center text-xs'>Add a new category with its associated types</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className='space-y-6'>
@@ -328,7 +328,9 @@ export default function CategoryForm() {
 
             {/* Category Name */}
             <div className='space-y-2'>
-              <Label htmlFor='category-name' className="text-black">Category Name</Label>
+              <Label htmlFor='category-name' className='text-black'>
+                Category Name
+              </Label>
               <Input
                 id='category-name'
                 type='text'
@@ -353,7 +355,9 @@ export default function CategoryForm() {
 
             {/* Section Dropdown */}
             <div className='space-y-2'>
-              <Label htmlFor='section' className="text-black">Section</Label>
+              <Label htmlFor='section' className='text-black'>
+                Section
+              </Label>
               <Select value={formData.section} onValueChange={handleSectionChange}>
                 <SelectTrigger className={errors.section ? "border-destructive" : ""}>
                   <SelectValue placeholder='Select a section' />
@@ -377,7 +381,9 @@ export default function CategoryForm() {
 
             {/* Icon Upload */}
             <div className='space-y-2'>
-              <Label htmlFor='icon-upload' className="text-black">Category Icon</Label>
+              <Label htmlFor='icon-upload' className='text-black'>
+                Category Icon
+              </Label>
               <div className='flex items-center gap-4'>
                 <div className='flex-1'>
                   <Input id='icon-upload' type='file' accept='image/*' onChange={handleIconUpload} className={`cursor-pointer ${errors.icon ? "border-destructive" : ""}`} />
@@ -505,7 +511,7 @@ export default function CategoryForm() {
               <Button type='button' variant='outline' onClick={resetForm}>
                 Reset
               </Button>
-              <Button className="bg-blue hover:bg-blue-700" type='submit' disabled={isSubmitting || !formData.name || !formData.section || !formData.icon}>
+              <Button className='bg-blue hover:bg-blue-700' type='submit' disabled={isSubmitting || !formData.name || !formData.section || !formData.icon}>
                 {isSubmitting ? "Processing..." : "Create Category"}
               </Button>
             </div>

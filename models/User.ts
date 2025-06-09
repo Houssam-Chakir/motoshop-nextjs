@@ -16,7 +16,7 @@ export interface UserDocument extends Document {
   // password?: string;
   image?: string;
   role: "customer" | "admin";
-  likedProducts?: mongoose.Types.ObjectId[];
+  wishlist?: mongoose.Types.ObjectId[];
   cart?: mongoose.Types.ObjectId[];
   orders?: mongoose.Types.ObjectId[];
   deliveryInformation?: DeliveryInformation;
@@ -52,12 +52,10 @@ const UserSchema: Schema = new Schema(
     // },
     image: String,
     role: { type: String, enum: ["customer", "admin"], default: "customer" },
-    likedProducts: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
+    wishlist: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+      default: []
+    },
     cart: { type: Schema.Types.ObjectId, ref: "Cart" },
     orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
 

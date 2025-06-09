@@ -17,8 +17,9 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import type { ProductType } from "@/models/Product";
-import updateProduct from "@/app/actions/updateProduct";
+import updateProduct from "@/actions/updateProduct";
 import { redirect } from "next/navigation";
+import mongoose from "mongoose";
 
 // Define the stock item schema
 const stockItemSchema = z.object({
@@ -355,7 +356,7 @@ export default function ProductEditForm({ brands, types, categories, editProduct
   const [images, setImages] = useState<images[]>(editProduct.images || []);
   const [imagesToDelete, setImagesToDelete] = useState<images[]>([]);
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
-  //TODO Create image uploading logic, image ui displaying of files along side cloudinary urls aswell.
+
   const [imageError, setImageError] = useState("");
   const [availableSizes, setAvailableSizes] = useState<string[]>(["XXS", "XS", "S", "M", "L", "XL", "XXL"]);
 

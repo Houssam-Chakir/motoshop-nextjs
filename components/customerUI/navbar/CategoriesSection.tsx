@@ -1,16 +1,27 @@
-import { useState } from "react";
 import CategoryButton from "./CategoryButton";
-import Container from "@/components/layout/Container";
 import CategoryMenu from "./CategoryMenu";
+import { Section } from "@/types/section";
 
-const CategoriesSection = ({ sections, whichSectionMenuOpen, setWhichSectionMenuOpen }) => {
+interface CategoriesSectionProps {
+  sections: Section[];
+  whichSectionMenuOpen: number | null;
+  setWhichSectionMenuOpen: (value: number | null) => void;
+}
+
+const CategoriesSection = ({ sections, whichSectionMenuOpen, setWhichSectionMenuOpen }: CategoriesSectionProps) => {
+  const mainSections = sections.filter((section) => section.section !== "Riding Style");
+
   return (
     <>
       {sections &&
-        sections.map((section, i) => {
+        mainSections.map((section: Section, i: number) => {
           return (
             <div key={i} className=''>
-              <CategoryButton inFocus={whichSectionMenuOpen === i ? true : false} onClick={() => setWhichSectionMenuOpen((prev) => (prev === i ? null : i))} section={section} />
+              <CategoryButton
+                inFocus={whichSectionMenuOpen === i ? true : false}
+                onClick={() => setWhichSectionMenuOpen(whichSectionMenuOpen === i ? null : i)}
+                section={section}
+              />
               {/* Category Menu */}
               {whichSectionMenuOpen === i && <CategoryMenu onMouseLeave={() => setWhichSectionMenuOpen(null)} section={section} />}
             </div>

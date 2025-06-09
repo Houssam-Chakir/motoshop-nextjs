@@ -17,8 +17,6 @@ interface ProductReview {
   createdAt: Date;
 }
 
-
-
 // Main Product interface that extends Document
 export interface ProductDocument extends Document {
   barcode: string;
@@ -33,16 +31,16 @@ export interface ProductDocument extends Document {
   retailPrice: number;
   saleInfo?: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
-  style: "None"| "Versitile"| "Racing"| "Adventure"| "Enduro"| "Urban"| "Touring";
-
+  style: "None" | "Versitile" | "Racing" | "Adventure" | "Enduro" | "Urban" | "Touring";
 
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
   stock?: mongoose.Types.ObjectId;
+  inStock: boolean;
 
   specifications: ProductSpec[];
   reviews: ProductReview[];
-  images: {secure_url: string, public_id: string}[];
+  images: { secure_url: string; public_id: string }[];
 
   likes: number;
 
@@ -70,16 +68,17 @@ const ProductSchema: Schema = new Schema(
     retailPrice: { type: Number, required: [true, "Please provide a price"], min: [0, "Price cannot be negative"] },
     saleInfo: { type: Schema.Types.ObjectId, ref: "Sale", index: true },
     season: { type: String, enum: ["All seasons", "Summer", "Winter", "Spring/Fall"], default: "All seasons" },
-    style: { type: String, enum: ["None", "Versitile", "Racing", "Adventure", 'Enduro', 'Urban', 'Touring'], default: "None" },
+    style: { type: String, enum: ["None", "Versitile", "Racing", "Adventure", "Enduro", "Urban", "Touring"], default: "None" },
     images: {
-      type: [{ secure_url: String, public_id: String}],
+      type: [{ secure_url: String, public_id: String }],
       required: true,
     },
 
     category: { type: Schema.Types.ObjectId, ref: "Category", required: [true, "Please choose a category"], index: true },
     type: { type: Schema.Types.ObjectId, ref: "Type", required: [true, "Please choose a type"], index: true },
 
-    stock: { type: mongoose.Types.ObjectId, unique: true },
+    stock: { type: mongoose.Types.ObjectId, unique: true},
+    inStock: { type: Boolean, default: true },
     specifications: [
       {
         name: { type: String, required: [true, "Please provide a name for the spec"] },
@@ -181,5 +180,13 @@ ProductSchema.index({ title: "text", description: "text" });
 const Product = models.Product || model("Product", ProductSchema);
 
 // Export a type without the Document methods for use in functions
-export type ProductType = Omit<ProductDocument, keyof Document>;
+export type ProductType = Omit<ProductDocument, keyof Document> & {
+  _id: string;
+  brand?: { _id: string, name: string };
+  category?: { _id: string, name: string };
+  stock?: {
+    _id: string;
+    sizes: string[];
+  };
+};
 export default Product;

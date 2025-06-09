@@ -1,7 +1,14 @@
+/* eslint-disable @next/next/no-img-element */
 import Container from "@/components/layout/Container";
 import Link from "next/link";
+import { Section, Category, Type } from "@/types/section";
 
-const CategoryMenu = ({ section, onMouseLeave }) => {
+interface CategoryMenuProps {
+  section: Section;
+  onMouseLeave: () => void;
+}
+
+const CategoryMenu = ({ section, onMouseLeave }: CategoryMenuProps) => {
   return (
     <div onMouseLeave={onMouseLeave} className='absolute bg-white w-full left-0 pb-12 border-t-4 border-primary'>
       <div className='w-fill py-6 font-bold'>
@@ -17,10 +24,10 @@ const CategoryMenu = ({ section, onMouseLeave }) => {
 };
 
 // whats inside the drop down
-function SectionMenu({ section }) {
+function SectionMenu({ section }: { section: Section }) {
   return (
     <div className='flex gap'>
-      {section.categories.map((category, i) => {
+      {section.categories.map((category: Category, i: number) => {
         return <CategoryBlock key={i} category={category} />;
       })}
     </div>
@@ -28,7 +35,7 @@ function SectionMenu({ section }) {
 }
 
 // blocks of categories
-function CategoryBlock({ category }) {
+function CategoryBlock({ category }: { category: Category }) {
   return (
     <div className='flex gap-6 py-6 pl-6 pr-12'>
       <div className=''>
@@ -39,11 +46,11 @@ function CategoryBlock({ category }) {
           {category.name}
         </Link>
         {category.applicableTypes &&
-          category.applicableTypes.map((type, i) => {
+          category.applicableTypes.map((type: Type, i: number) => {
             return (
-                <Link href={"#"} key={i} className='relative text-sm text-slate-700 font-light hover:text-slate-950 hover:underline duration-100'>
-                  {type.name}
-                </Link>
+              <Link href={"#"} key={i} className='relative text-sm text-slate-700 font-light hover:text-slate-950 hover:underline duration-100'>
+                {type.name}
+              </Link>
             );
           })}
       </div>

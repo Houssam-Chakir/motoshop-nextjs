@@ -17,6 +17,7 @@ export const getSessionUser = async (): Promise<SessionUser> => {
   if (!session || !session.user) {
     throw new Error("Error getting user session");
   }
+  console.log(session)
 
   return {
     user: session.user,

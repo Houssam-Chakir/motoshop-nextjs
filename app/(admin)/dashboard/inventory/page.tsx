@@ -7,12 +7,23 @@ import Category from "@/models/Category";
 import { Button } from "@/components/ui/button";
 import { Pen } from "lucide-react";
 
+interface CategoryType {
+  _id: string;
+  name: string;
+  slug: string;
+  section: string;
+  icon: {
+    secure_url: string;
+    public_id: string;
+  };
+}
+
 const InventoryPage = async () => {
   await connectDB();
   const productsDoc = await Product.find({}).lean();
   const products = makeSerializable(productsDoc) as ProductType[];
   const categoriesDoc = await Category.find({}).lean();
-  const categories = makeSerializable(categoriesDoc);
+  const categories = makeSerializable(categoriesDoc) as CategoryType[];
   console.log("products: ", products);
   return (
     <div>
@@ -30,7 +41,7 @@ const InventoryPage = async () => {
       </div>
       <div>Categories</div>
       <div className='flex gap-4 flex-wrap'>
-        {categories.map((category, i) => {
+        {categories.map((category: CategoryType, i: number) => {
           return (
             <div key={i} className='p-4 border bg-white w-fit flex gap-2 items-center'>
               <h3>{category.name}</h3>

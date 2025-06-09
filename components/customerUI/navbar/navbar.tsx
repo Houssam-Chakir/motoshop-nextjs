@@ -2,11 +2,11 @@
 
 import { useQueryState } from "nuqs";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { AlignJustify, BoxIcon, Heart, LogOut, ShoppingCart, User, UserSearch, X } from "lucide-react";
+import { AlignJustify, BoxIcon, Heart, LogOut, ShoppingCart, User, UserSearch } from "lucide-react";
 import Link from "next/link";
 import Container from "../../layout/Container";
 import CategoriesSection from "./CategoriesSection";
-import { getProviders, signIn, signOut, useSession } from "next-auth/react";
+import { getProviders, signIn, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Session } from "next-auth";
@@ -15,16 +15,21 @@ import useMediaQuery from "@/hooks/useMediaQuery";
 import SearchInput, { SearchBar } from "./SearchInput";
 import { MobileSlider } from "../sideBar/MobileSidebar";
 import { CategoriesSlider } from "../sideBar/CategoriesSlider";
+import { Section } from "@/types/section";
+import { useSessionContext } from "@/contexts/SessionContext";
+import { useUserContext } from "@/contexts/UserContext";
+import WishlistSlider from "./WishlistSlider";
+import CartSlider from "./CartSlider";
 
-export default function Navbar({ sections }: { sections: { id: string; name: string }[] }) {
+// -- Navbar -------------------------------------------
+export default function Navbar({ sections }: { sections: Section[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
-  const [parent] = useAutoAnimate({ duration: 100 });
   const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
-  const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
+  // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
 
   //Menus states
-  const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState(null);
+  const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState<number | null>(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -36,9 +41,11 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
     }
   }, [whichSectionMenuOpen, isUserMenuOpen]);
 
-  const { data: session } = useSession();
+  const { session } = useSessionContext();
+  const { profile } = useUserContext();
+  console.log("profile", profile);
   const [providers, setProviders] = useState<Record<string, { id: string; name: string }> | null>(null);
-  const profileImage = session?.user.image?.toString() as string;
+  const profileImage = session?.user?.image?.toString() as string;
 
   useEffect(() => {
     const setAuthProviders = async () => {
@@ -48,13 +55,13 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
     setAuthProviders();
   }, []);
   return (
-    <header className='w-full pt-4  bg-white shadow-xs relative'>
+    <header className='w-full pt-4 bg-white shadow-xs z-30 sticky top-0'>
       <Container className=''>
         {/* Top section */}
         <div className='flex items-center justify-between pb-4'>
           <div className='flex gap-6'>
             {/* Mobile Side Bar */}
-            {!isTabletOrLarger && (
+            {!isDesktop && (
               <MobileSlider
                 trigger={
                   <button>
@@ -68,10 +75,10 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
               >
                 <CategoriesSlider
                   sections={sections}
-                  onCategorySelect={(section) => {
+                  onCategorySelect={(section: Section) => {
                     console.log("Selected category:", section.section);
                   }}
-                  onTypeSelect={(type, section) => {
+                  onTypeSelect={(type, section: Section) => {
                     console.log(`Selected ${type.name} from ${section.section}`);
                   }}
                 />
@@ -98,7 +105,7 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
                   <>
                     <div className='absolute bg-white w-[100vw] -right-6 top-16 pt-4 pb-6'>
                       <Container className=''>
-                        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} parent={parent} />
+                        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
                       </Container>
                       <div
                         onClick={() => setIsSearchOpen(false)}
@@ -116,7 +123,7 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
             <UserButtonsSection
               isPhoneOrLarger={isPhoneOrLarger}
               providers={providers}
-              session={session}
+              session={session!}
               profileImage={profileImage}
               isUserMenuOpen={isUserMenuOpen}
               setIsUserMenuOpen={setIsUserMenuOpen}
@@ -125,119 +132,197 @@ export default function Navbar({ sections }: { sections: { id: string; name: str
         </div>
         <div className='flex justify-center'>
           {/* Categories section */}
-          {isTabletOrLarger && <CategoriesSection whichSectionMenuOpen={whichSectionMenuOpen} setWhichSectionMenuOpen={setWhichSectionMenuOpen} sections={sections} />}
+          {isDesktop && <CategoriesSection whichSectionMenuOpen={whichSectionMenuOpen} setWhichSectionMenuOpen={setWhichSectionMenuOpen} sections={sections} />}
         </div>
       </Container>
     </header>
   );
 }
 
-function UserButtonsSection({ providers, session, profileImage, isUserMenuOpen, setIsUserMenuOpen, isPhoneOrLarger }) {
-  const [parent] = useAutoAnimate({ duration: 100 });
-  const username = session?.user.name.split(" ").at(0) || "username";
+// -- User Buttons Section -------------------------------------------
+function UserButtonsSection({
+  providers,
+  session,
+  profileImage,
+  isUserMenuOpen,
+  isPhoneOrLarger,
+}: {
+  providers: Record<string, { id: string; name: string }> | null;
+  session: Session;
+  profileImage: string;
+  isUserMenuOpen: boolean;
+  setIsUserMenuOpen: (value: boolean) => void;
+  isPhoneOrLarger: boolean;
+}) {
+  const username = session?.user?.name?.split(" ").at(0) || "username";
   return (
     <>
-      {isPhoneOrLarger && (
-        <div className='flex flex-col items-center group cursor-pointer'>
-          <Heart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
-          <span className='text-xs mt-1 group-hover:text-primary'>Wishlist</span>
+      {isPhoneOrLarger && <WishlistSlider session={session} />}
+
+      <CartSlider session={session}/>
+      <UserMenuSlider session={session} providers={providers} profileImage={profileImage} username={username} isUserMenuOpen={isUserMenuOpen} />
+    </>
+  );
+}
+
+// -- User Menu -------------------------------------------
+function UserMenu({ providers, session }: { session: Session | null; providers: Record<string, { id: string; name: string }> }) {
+  const { wishlist } = useUserContext(); // Get wishlist from context
+  return (
+    <>
+      {session && (
+        <div className='flex flex-col h-full min-h-0'>
+          {/* Profile Info & Counts Section */}
+          <div className='p-4 border-b shrink-0'>
+            <div className='flex items-center gap-3 mb-3'>
+              <div className='w-12 h-12 rounded-full overflow-hidden border border-gray-300 bg-gray-100'>
+                <Image
+                  src={session.user?.image || "/default-avatar.png"} // Ensure you have a fallback avatar
+                  alt={session.user?.name || "User Avatar"}
+                  width={48}
+                  height={48}
+                  className='object-cover w-full h-full'
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/default-avatar.png";
+                  }} // Fallback for broken image links
+                />
+              </div>
+              <div>
+                <p className='font-semibold text-sm truncate'>{session.user?.name || "User Name"}</p>
+                <p className='text-xs text-gray-500 truncate'>{session.user?.email || "user@example.com"}</p>
+              </div>
+            </div>
+            <div className='bg-grey border-grey-medium border-1 border-dashed *:flex *:gap-1 rounded-full py-2 px-4 flex justify-around gap-2 text-center text-xs'>
+              <div>
+                <p className='font-semibold'>{wishlist?.length ?? 0}</p>
+                <p className='text-slate-700'>Wishlist</p>
+              </div>
+              <div>
+                <p className='font-semibold'>0</p>
+                <p className='text-slate-700'>Cart</p>
+              </div>
+              <div>
+                <p className='font-semibold'>0</p>
+                <p className='text-slate-700'>Orders</p>
+              </div>
+            </div>
+          </div>
+          {/* Main Action Buttons List */}
+          <ul className='flex-grow w-full flex flex-col gap-1.5 px-2 py-3 text-md overflow-y-auto'>
+            {/* Section 1: Profile, Orders */}
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <UserSearch size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Profile</span>
+            </li>
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <BoxIcon size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Orders</span>
+            </li>
+
+            <hr className='my-1.5 border-gray-200' />
+
+            {/* Section 2: Wishlist, Cart */}
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <Heart size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Wishlist</span>
+            </li>
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <ShoppingCart size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Cart</span>
+            </li>
+          </ul>
+          {/* Logout Button Section (at the bottom) */}
+          <div className='mt-auto p-2 border-t shrink-0'>
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className='w-full flex items-center justify-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-primary hover:text-white rounded-xs transition-colors duration-150'
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
+          </div>
         </div>
       )}
 
-      <div className='flex flex-col items-center relative group cursor-pointer'>
-        <div className='relative '>
-          <ShoppingCart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
-          <span className='absolute -top-1.5 -right-2 bg-secondary-light opacity-80 group-hover:opacity-100 text-white text-sm font-bold rounded-full duration-100 group-hover:-translate-y-1 h-4 w-4 flex items-center justify-center'>
-            0
-          </span>
-        </div>
-        <span className='text-xs mt-1 group-hover:text-primary'>Cart</span>
-      </div>
+      {/* Guest View (Sign Up) */}
       {!session && (
-        <div ref={parent}>
-          <div onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)} className='flex flex-col items-center group cursor-pointer'>
-            <User className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
-            <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
-          </div>
-          {isUserMenuOpen && <UserMenu providers={providers} session={session} onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
-        </div>
-      )}
-      {session && (
-        <div ref={parent}>
-          <button
-            onMouseEnter={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            type='button'
-            className=' flex flex-col items-center group cursor-pointer'
-            aria-label='toggle profile dropdown'
-          >
-            <div className={` ${isUserMenuOpen ? "group-hover:-translate-y-1" : ""} duration-100 w-5 h-5 overflow-hidden border-2 border-gray-400 rounded-full`}>
-              <Image
-                src={
-                  profileImage
-                    ? profileImage
-                    : "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
-                }
-                className='object-cover w-full h-full '
-                alt='avatar'
-                width={0}
-                height={0}
-                sizes='100vw'
-              />
-            </div>
-            <span className={`text-xs mt-1 ${isUserMenuOpen ? "text-primary-dark" : ""} group-hover:text-primary`}>{username}</span>
-          </button>
-          {isUserMenuOpen && <UserMenu providers={providers} session={session} onMouseLeave={() => setIsUserMenuOpen(!isUserMenuOpen)} />}
+        <div className='flex flex-col flex-grow items-center pt-24 p-4'>
+          {providers &&
+            Object.values(providers).map((provider) => {
+              if (provider.id === "google") {
+                return (
+                  <>
+                    <h2 className='text-lg p-3 uppercase text-center pb-3 font-bold border-b shrink-0'>Sign Up</h2>
+                    <GoogleSignupButton
+                      onSignup={async () => {
+                        await signIn(provider.id, { callbackUrl: "/" });
+                      }}
+                      key={provider.id}
+                      className='w-full max-w-xs'
+                    />
+                  </>
+                );
+              }
+              return null;
+            })}
+          {!providers && <p className='text-sm text-gray-500'>Sign up options are currently unavailable.</p>}
         </div>
       )}
     </>
   );
 }
 
-function UserMenu({ providers, session, onMouseLeave }: { session: Session; onMouseLeave: () => void }) {
+// -- User Menu Slider -------------------------------------------
+function UserMenuSlider({
+  session,
+  profileImage,
+  username,
+  isUserMenuOpen,
+  providers,
+}: {
+  session: Session | null;
+  profileImage: string;
+  username: string;
+  isUserMenuOpen: boolean;
+  providers: Record<string, { id: string; name: string }> | null;
+}) {
+  const [parent] = useAutoAnimate({ duration: 100 });
+
   return (
-    <div onMouseLeave={onMouseLeave} className=' bg-white absolute w-fit min-w-42 right-0 top-14 border  shadow-xl'>
-      <div className='absolute w-14 h-14 -top-14 right-0'></div>
-      <div className='absolute rotate-45 right-5 -top-[7px] w-3 h-3 border-l-1 border-t-1 bg-white'></div>
-      <h1 className=' text-sm p-3 uppercase text-center pb-3 font-bold border-b'>
-        {session && "User menu"}
-        {!session && "Sign Up"}
-      </h1>
-      <ul className='w-full py-4 text-sm *:text-nowrap *:px-6 *:py-6 *:flex *:gap-4 *:hover:bg-grey *:cursor-default *:items-center [&_*]:h-5'>
-        {session && (
-          <>
-            <li>
-              <UserSearch />
-              <span>Profile</span>
-            </li>
-            <li>
-              <BoxIcon />
-              <span>Orders</span>
-            </li>
-            <li className='hover:text-primary' onClick={() => signOut()}>
-              <LogOut />
-              <span>Logout</span>
-            </li>
-          </>
-        )}
-        {!session && (
-          <div className='hover:!bg-white !h-12 !py-0'>
-            {providers &&
-              Object.values(providers).map((provider, i) => {
-                if (provider.id === "google") {
-                  return <GoogleSignupButton onSignup={() => signIn(provider.id)} key={i} className='' />;
-                }
-              })}
-            {/* <li className='hover:text-primary' onClick={() => signIn()}>
-              <LogIn />
-              <span>SignIn with</span>
-            </li> */}
-          </div>
-        )}
-      </ul>
-    </div>
+    <MobileSlider
+      side='right'
+      trigger={
+        <div ref={parent} className='flex flex-col items-center group cursor-pointer'>
+          {!session ? (
+            <>
+              <User className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
+              <span className='text-xs mt-1 group-hover:text-primary'>Guest</span>
+            </>
+          ) : (
+            <>
+              <div className={`${isUserMenuOpen ? "group-hover:-translate-y-1" : ""} duration-100 w-5 h-5 overflow-hidden border-1 border-gray-400 rounded-full`}>
+                <Image
+                  src={profileImage || "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"}
+                  className='object-cover w-full h-full'
+                  alt='avatar'
+                  width={0}
+                  height={0}
+                  sizes='100vw'
+                />
+              </div>
+              <span className={`text-xs mt-1 ${isUserMenuOpen ? "text-primary-dark" : ""} group-hover:text-primary`}>{username}</span>
+            </>
+          )}
+        </div>
+      }
+    >
+      <UserMenu providers={providers ?? {}} session={session!} />
+
+    </MobileSlider>
   );
 }
 
+// -- Logo -------------------------------------------
 function Logo() {
   return (
     <>

@@ -45,7 +45,9 @@ export default function WishlistSlider({ session }: { session: Session | null })
   return (
     <MobileSlider
       side='right'
-      showDefaultCloseButton={false} // Added this line
+      showDefaultCloseButton={false}
+      className="md:w-[450px] xs:w-[90%]  p-0"
+
       trigger={
         <div className='flex flex-col items-center group cursor-pointer'>
           <Heart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
@@ -119,9 +121,10 @@ export default function WishlistSlider({ session }: { session: Session | null })
             })}
           {wishlist.length === 0 && guestWishlistItems.length === 0 && (
             //Display empty svg
-            <div className="p-8 pt-12 text-center text-grey-darker" >
-              <img className="opacity-80" src='/empty.svg' alt='empty wishlist' />
-              <p className="font-display pr-2">Wishlist is empty</p>
+            <div className="p-8 pt-12 text-center text-gray-500" >
+              <img className="opacity-80 w-40 mx-auto pb-4" src='/empty.svg' alt='empty wishlist' />
+              <p className='font-semibold'>Your wishlist is empty</p>
+              <p className='text-sm mt-1'>Looks like you haven't added anything to your wishlist yet.</p>
             </div>
           )}
         </div>

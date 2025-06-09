@@ -1,6 +1,7 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
 
-interface SizeQuantityType {
+
+export interface SizeQuantityType {
   size: string; // e.g., 'S', 'M', 'L', 'XL'
   quantity: number;
 }
@@ -37,6 +38,13 @@ const StockSchema = new Schema<StockDocument>(
 );
 
 const Stock = models.Stock || model<StockDocument>("Stock", StockSchema);
-export type StockType = Omit<StockDocument, keyof Document>;
+// Refined StockType for serialized data
+export type StockType = Omit<StockDocument, keyof Document | 'productId' | 'createdAt' | 'updatedAt'> & {
+  _id: string;
+  productId: string; // ObjectId is serialized to string
+  sizes: SizeQuantityType[]; // This structure is fine, assuming SizeQuantityType is defined above
+  createdAt?: string; // Date is often serialized to string
+  updatedAt?: string; // Date is often serialized to string
+};
 
 export default Stock;

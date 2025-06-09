@@ -4,10 +4,16 @@
 import { useUserContext } from "@/contexts/UserContext";
 import { Session } from "next-auth";
 import { MobileSlider } from "../sideBar/MobileSidebar";
-import { ShoppingCart, X, Trash2 } from "lucide-react";
-import { CartItem as CartItemType } from "@/types/cart";
-import { getGuestCart, removeItemFromGuestCart, updateGuestCartItemQuantity, getGuestCartTotalItems, getGuestCartSubtotal } from "@/lib/guestCartStore";
-import React, { useState, useEffect, useMemo } from "react";
+import { ShoppingCart, X, Trash2, Minus, Plus } from "lucide-react";
+// import { CartItem as CartItemType } from "@/types/cart"; // Using GuestCartProductItem directly
+import {
+  getGuestCart,
+  removeItemFromGuestCart,
+  updateItemQuantityInGuestCart,
+  GuestCart, // Import GuestCart type
+  GuestCartProductItem, // Import GuestCartProductItem type
+} from "@/lib/guestCartStore";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -22,40 +28,46 @@ const CartItemCard = ({
   onRemove,
   onQuantityChange,
 }: {
-  item: CartItemType;
+  item: GuestCartProductItem; // Changed to GuestCartProductItem
   session: Session | null;
-  onRemove: (itemId: string, variantId?: string) => void;
-  onQuantityChange: (itemId: string, quantity: number, variantId?: string) => void;
+  onRemove: (productId: string, size: string) => void; // Adjusted params
+  onQuantityChange: (productId: string, size: string, newQuantity: number) => void; // Adjusted params
 }) => {
   const handleRemove = () => {
-    onRemove(item.id /*, item.selectedVariant?.id */);
+    onRemove(item.productId, item.size); // Use productId and size
   };
 
   const handleQuantityChange = (newQuantity: number) => {
-    onQuantityChange(item.id, newQuantity /*, item.selectedVariant?.id */);
+    onQuantityChange(item.productId, item.size, newQuantity); // Use productId, size, and newQuantity
   };
 
   return (
-    <div className='flex gap-3 border-b py-3 px-1 items-center'>
-      <div className='w-20 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0'>
-        <Image src={item.imageUrl || "/noProductImage.png"} alt={item.title || "Cart item"} width={80} height={80} className='object-cover w-full h-full' />
+    <div className='flex gap-2 py-3 px-1'>
+      <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-2 overflow-clip'>
+        <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
       </div>
-      <div className='flex-grow'>
-        <h4 className='text-sm font-medium line-clamp-1'>{item.title}</h4>
-        {/* {item.selectedVariant && <p className='text-xs text-gray-500'>{item.selectedVariant.name}</p>} */}
-        <p className='text-xs text-gray-500'>Price: {item.price?.toFixed(2)} MAD</p>
-        <div className='flex items-center gap-2 mt-1'>
-          <button onClick={() => handleQuantityChange(item.quantity - 1)} className='px-2 py-0.5 border rounded text-sm'>
-            -
-          </button>
-          <span>{item.quantity}</span>
-          <button onClick={() => handleQuantityChange(item.quantity + 1)} className='px-2 py-0.5 border rounded text-sm'>
-            +
-          </button>
+      <div className='flex-grow flex flex-col justify-between'>
+        <div>
+          <h4 className='text-sm font-medium line-clamp-1'>{item.title}</h4>
+          <p className='text-xs text-gray-500'>Size: {item.size}</p>
+          <p className='text-xs text-gray-500'>Price: {item.unitPrice?.toFixed(2)} MAD</p>
+        </div>
+        <div className="flex w-full items-center-safe justify-between">
+          <div className='flex items-center gap-2 mt-2 border rounded-full'>
+            <button onClick={() => handleQuantityChange(item.quantity - 1)} className='px-3 py-0  h-full hover:bg-grey-light rounded-l-full text-sm'>
+              <Minus size={16} height={24} />
+            </button>
+            <span className="px-1">{item.quantity}</span>
+            <button onClick={() => handleQuantityChange(item.quantity + 1)} className='text-[14px] px-3 py-0  h-full hover:bg-grey-light rounded-r-full text-sm'>
+              <Plus size={16} height={24} />
+            </button>
+          </div>
+          <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue pt-1'>
+            {item.totalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
+          </p>
         </div>
       </div>
       <div className='text-right flex-shrink-0'>
-        <p className='text-sm font-semibold'>{(item.price && item.quantity ? item.price * item.quantity : 0).toFixed(2)} MAD</p>
         <button onClick={handleRemove} className='text-red-500 hover:text-red-700 text-xs mt-1'>
           <Trash2 size={16} />
         </button>
@@ -72,41 +84,44 @@ export default function CartSlider({ session }: { session: Session | null }) {
   const { profile } = useUserContext(); // Using profile to check if logged in
   const isLoggedIn = !!profile;
 
-  const [guestCartItems, setGuestCartItems] = useState<CartItemType[]>([]);
-  const [guestTotalItems, setGuestTotalItems] = useState(0);
-  const [guestSubtotal, setGuestSubtotal] = useState(0);
+  const [guestCart, setGuestCart] = useState<GuestCart>(getGuestCart()); // Use GuestCart state
 
   useEffect(() => {
-    const updateGuestCartState = () => {
-      setGuestCartItems(getGuestCart());
-      setGuestTotalItems(getGuestCartTotalItems());
-      setGuestSubtotal(getGuestCartSubtotal());
+    const handleGuestCartChange = (event: CustomEvent<GuestCart>) => {
+      setGuestCart(event.detail);
     };
-    updateGuestCartState();
-    window.addEventListener("guestCartChanged", updateGuestCartState);
-    return () => window.removeEventListener("guestCartChanged", updateGuestCartState);
+    // Initial load is handled by useState, this is for subsequent changes
+    window.addEventListener("guestCartChanged", handleGuestCartChange as EventListener);
+    return () => window.removeEventListener("guestCartChanged", handleGuestCartChange as EventListener);
   }, []);
 
   // TODO: Combine with logged-in user's cart state from UserContext once implemented
-  const displayCartItems = isLoggedIn ? [] /* cart */ : guestCartItems;
-  const totalCartItems = isLoggedIn ? 0 /* cart.reduce((sum, item) => sum + item.quantity, 0) */ : guestTotalItems;
-  const cartSubtotal = isLoggedIn ? 0 /* cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) */ : guestSubtotal;
+  const displayCartItems = isLoggedIn ? [] /* cart.products */ : guestCart.products;
+  const totalCartItems = isLoggedIn ? 0 /* cart.totalQuantity */ : guestCart.totalQuantity;
+  const cartSubtotal = isLoggedIn ? 0 /* cart.totalAmount */ : guestCart.totalAmount;
 
-  const handleRemoveItem = (itemId: string, variantId?: string) => {
+  const handleRemoveItem = (productId: string, size: string) => {
     if (isLoggedIn) {
       // removeItemFromCart(itemId, variantId); // TODO: From UserContext
-      console.log("TODO: Remove from DB cart", itemId, variantId);
+      console.log("TODO: Remove from DB cart", productId, size);
     } else {
-      removeItemFromGuestCart(itemId /*, variantId */);
+      // Parameters for removeItemFromGuestCart are (productId: string, size: string)
+      removeItemFromGuestCart(productId, size || "Standard"); // Use productId and size, provide fallback for size if necessary
     }
   };
 
-  const handleQuantityChange = (itemId: string, quantity: number, variantId?: string) => {
+  const handleQuantityChange = (productId: string, size: string, newQuantity: number) => {
     if (isLoggedIn) {
       // updateCartItemQuantity(itemId, quantity, variantId); // TODO: From UserContext
-      console.log("TODO: Update DB cart quantity", itemId, quantity, variantId);
+      console.log("TODO: Update DB cart quantity", productId, newQuantity, size);
     } else {
-      updateGuestCartItemQuantity(itemId, quantity /*, variantId */);
+      // Parameters for updateItemQuantityInGuestCart are (productId: string, size: string, newQuantity: number)
+      if (newQuantity <= 0) {
+        // Ensure guest store's remove logic is hit if quantity is 0 or less
+        removeItemFromGuestCart(productId, size || "Standard"); // Use productId and size, provide fallback for size
+      } else {
+        updateItemQuantityInGuestCart(productId, size || "Standard", newQuantity); // Use productId, size, and newQuantity
+      }
     }
   };
 
@@ -119,6 +134,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
     <MobileSlider
       side='right'
       showDefaultCloseButton={false}
+      className="w-[450px] p-0"
       trigger={
         <div className='relative flex flex-col items-center group cursor-pointer'>
           <ShoppingCart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
@@ -144,16 +160,10 @@ export default function CartSlider({ session }: { session: Session | null }) {
         </div>
 
         {/* Cart Items */}
-        <div ref={parent} className='flex-grow overflow-y-auto p-3 space-y-3'>
+        <div ref={parent} className='flex-grow overflow-y-auto p-2'>
           {displayCartItems.length > 0 ? (
             displayCartItems.map((item) => (
-              <CartItemCard
-                key={item.id + /* item.selectedVariant?.id || */ ""}
-                item={item}
-                session={session}
-                onRemove={handleRemoveItem}
-                onQuantityChange={handleQuantityChange}
-              />
+              <CartItemCard key={item.productId + item.size} item={item} session={session} onRemove={handleRemoveItem} onQuantityChange={handleQuantityChange} />
             ))
           ) : (
             <div className='p-8 pt-12 text-center text-gray-500'>

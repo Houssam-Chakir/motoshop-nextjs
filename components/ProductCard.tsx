@@ -9,6 +9,7 @@ import useMediaQuery from "@/hooks/useMediaQuery";
 import { useUserContext } from "@/contexts/UserContext";
 import React, { useState, useEffect } from "react";
 import { addItemToGuestWishlist, removeItemFromGuestWishlist, isItemInGuestWishlist } from "@/lib/guestWishlistStore";
+import { addItemToGuestCart } from "@/lib/guestCartStore";
 
 interface ProductCard {
   barcode: string;
@@ -97,8 +98,20 @@ function ProductCard({ product }: { product: ProductCard }) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
-    // Add to cart logic here
-    console.log("Add to cart:", product.sku);
+    if (!product?._id) return;
+
+    if (isLoggedIn) {
+      // TODO: Implement add to DB cart logic
+      console.log("TODO: Add to DB cart:", product.sku);
+    } else {
+      // Guest user: add to guest cart (sessionStorage)
+      // Assuming a default size "Standard" as ProductCard doesn't have size selection yet.
+      // The 'product' object from props should be compatible with the Pick<ProductDocument, ...> type.
+      // addItemToGuestCart expects (product, size, quantity)
+      addItemToGuestCart(product, "Standard", 1);
+      console.log("Added to guest cart:", product.title);
+      // Optionally, provide user feedback (e.g., a toast notification)
+    }
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
@@ -147,7 +160,7 @@ function ProductCard({ product }: { product: ProductCard }) {
   return (
     <div onClick={handleCardClick} className='bg-white w-full sm:max-w-[300px] md:max-w-[236px] group cursor-pointer'>
       {/* Product Image */}
-      <div className='relative aspect-square w-full flex items-center justify-center bg-grey-light p-2 overflow-clip'>
+      <div className='flex relative justify-center items-center p-2 w-full overflow-clip aspect-square bg-grey-light'>
         {/* hover buttons */}
         {!isDesktop && (
           <Button onClick={handlePlusClick} className='absolute py-4 top-3 right-3 text-black hover:bg-white bg-white/80 rounded-full w-[35px] h-[35px] shadow-md'>
@@ -158,7 +171,7 @@ function ProductCard({ product }: { product: ProductCard }) {
           <>
             <Button
               onClick={handleAddToCart}
-              className='absolute translate-y-16 py-2 h-fit bottom-5 text-white bg-blue-light backdrop-blur-2xl rounded-none w-full hover:bg-blue shadow-lg shadow-black/30 group-hover:translate-y-5'
+              className='absolute bottom-5 py-2 w-full text-white rounded-none shadow-lg backdrop-blur-2xl translate-y-16 h-fit bg-blue-light hover:bg-blue shadow-black/30 group-hover:translate-y-5'
             >
               <Plus size={20} />
               <span className='text-bold'>Add to cart</span>
@@ -183,19 +196,24 @@ function ProductCard({ product }: { product: ProductCard }) {
         </div>
       </div>
       {/* Product Info */}
-      <div className='py-1 flex flex-col leading-5'>
+      <div className='flex flex-col py-1 leading-5'>
         <div className='font-medium text-[clamp(14px,1.5vw,16px)] line-clamp-1 w-full'>{product.title}</div>
         <div className='text-[clamp(11px,1.5vw,12px)] text-grey-darker'>
           {product.identifiers.brand} {product.identifiers.category}
         </div>
       </div>
       {/* Product Price */}
-      <div className='flex gap-1 items-center'>
-        <div className='font-bold text-[clamp(15px,1.5vw,16px)] text-blue'>
-          {product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
+      <div className='flex gap-1 items-baseline'>
+        <div className='font-bold text-blue text-[clamp(15px,1.5vw,16px)]'>
+          {product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
         </div>
-        <div className='font-medium text-[clamp(10px,1vw,10px)] text-primary-dark italic line-through'>
-          {product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
+        <div className='text-[clamp(10px,1.5vw,14px)] text-blue'>
+          {product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split(",")[1] !== "00" && (
+            <span className='text-[clamp(10px,1.5vw,14px)]'>
+              ,{product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split(",")[1]}
+            </span>
+          )}
+          <span className='font-bold text-[clamp(15px,1.5vw,16px)]'> MAD</span>
         </div>
       </div>
     </div>

@@ -10,6 +10,12 @@ import { useUserContext } from "@/contexts/UserContext";
 import React, { useState, useEffect } from "react";
 import { addItemToGuestWishlist, removeItemFromGuestWishlist, isItemInGuestWishlist } from "@/lib/guestWishlistStore";
 import { addItemToGuestCart } from "@/lib/guestCartStore";
+import { getProductWithStock } from "@/actions/cartActions";
+import { ProductDocument } from "@/models/Product";
+import { StockDocument } from "@/models/Stock";
+import { Modal } from "./Modal";
+import ProductInfo from "./customerUI/ProductInfo";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 interface ProductCard {
   barcode: string;
@@ -43,6 +49,11 @@ interface ProductCard {
   __v: number;
 }
 
+type ModalDataType = {
+  product: ProductDocument;
+  stock: StockDocument | null;
+} | null;
+
 function ProductCard({ product }: { product: ProductCard }) {
   const router = useRouter();
   // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
@@ -61,6 +72,43 @@ function ProductCard({ product }: { product: ProductCard }) {
 
   const isLoggedIn = !!profile;
   const [isGuestItemInWishlist, setIsGuestItemInWishlist] = useState(false);
+
+  // State for the modal itself
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // State for fetching data FOR the modal
+  const [isModalLoading, setIsModalLoading] = useState(false);
+  const [modalData, setModalData] = useState<ModalDataType>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
+
+  const handleOpenAddToCartModal = async () => {
+    setIsModalOpen(true); // Open modal shell immediately
+    setIsModalLoading(true); // Show loading state
+    setModalError(null); // Clear previous errors
+
+    try {
+      // Call the server action to get fresh product and stock data
+      const result = await getProductWithStock(product._id);
+
+      if (result.success && result.data) {
+        setModalData(result.data); // Set the fetched data
+      } else {
+        throw new Error(result.message || "Failed to fetch product details.");
+      }
+    } catch (error) {
+      console.error(error);
+      setModalError(error instanceof Error ? error.message : "An error occurred.");
+    } finally {
+      setIsModalLoading(false); // Stop loading state
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    // It's good practice to clear data when modal closes
+    setModalData(null);
+    setModalError(null);
+  };
 
   useEffect(() => {
     const updateGuestWishlistStatus = () => {
@@ -96,23 +144,6 @@ function ProductCard({ product }: { product: ProductCard }) {
     console.log("Plus clicked", product.sku);
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    if (!product?._id) return;
-
-    if (isLoggedIn) {
-      // TODO: Implement add to DB cart logic
-      console.log("TODO: Add to DB cart:", product.sku);
-    } else {
-      // Guest user: add to guest cart (sessionStorage)
-      // Assuming a default size "Standard" as ProductCard doesn't have size selection yet.
-      // The 'product' object from props should be compatible with the Pick<ProductDocument, ...> type.
-      // addItemToGuestCart expects (product, size, quantity)
-      addItemToGuestCart(product, "Standard", 1);
-      console.log("Added to guest cart:", product.title);
-      // Optionally, provide user feedback (e.g., a toast notification)
-    }
-  };
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
@@ -159,6 +190,28 @@ function ProductCard({ product }: { product: ProductCard }) {
 
   return (
     <div onClick={handleCardClick} className='bg-white w-full sm:max-w-[300px] md:max-w-[236px] group cursor-pointer'>
+      {/* Modal -------------------------------------------------------------------------- */}
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={isModalLoading ? "Loading..." : 'Overview'}>
+        {/* Modal Content Logic */}
+        {isModalLoading && (
+          <div className='flex justify-center items-center h-48'>
+            {/* Replace with your preferred spinner component */}
+            <p>Loading product details...</p>
+          </div>
+        )}
+        {modalError && (
+          <div className='text-red-600'>
+            <p>Error:</p>
+            <p>{modalError}</p>
+          </div>
+        )}
+        {!isModalLoading && modalData && (
+          <div>
+            <ProductInfo isLoggedIn={isLoggedIn} product={modalData.product} stock={modalData.stock} />
+          </div>
+        )}
+      </Modal>
+      {/* /Modal -------------------------------------------------------------------------- */}
       {/* Product Image */}
       <div className='flex relative justify-center items-center p-2 w-full overflow-clip aspect-square bg-grey-light'>
         {/* hover buttons */}
@@ -170,7 +223,7 @@ function ProductCard({ product }: { product: ProductCard }) {
         {isDesktop && (
           <>
             <Button
-              onClick={handleAddToCart}
+              onClick={handleOpenAddToCartModal}
               className='absolute bottom-5 py-2 w-full text-white rounded-none shadow-lg backdrop-blur-2xl translate-y-16 h-fit bg-blue-light hover:bg-blue shadow-black/30 group-hover:translate-y-5'
             >
               <Plus size={20} />

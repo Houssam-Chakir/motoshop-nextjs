@@ -14,7 +14,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang='en' className={`${inter.variable} ${oxanium.variable}`}>
       <body>
         <ToastContainer />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <div id='modal-root'></div>
+        </AuthProvider>
       </body>
     </html>
   );

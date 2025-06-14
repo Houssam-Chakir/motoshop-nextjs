@@ -4,8 +4,10 @@ export interface Type {
 }
 
 export interface Category {
+  _id?: string;
   name: string;
   slug: string;
+  section: string;
   icon: {
     secure_url: string;
     public_id: string;

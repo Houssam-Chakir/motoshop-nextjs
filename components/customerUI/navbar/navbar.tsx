@@ -20,6 +20,7 @@ import { useSessionContext } from "@/contexts/SessionContext";
 import { useUserContext } from "@/contexts/UserContext";
 import WishlistSlider from "./WishlistSlider";
 import CartSlider from "./CartSlider";
+import autoAnimate from "@formkit/auto-animate";
 
 // -- Navbar -------------------------------------------
 export default function Navbar({ sections }: { sections: Section[] }) {
@@ -27,6 +28,8 @@ export default function Navbar({ sections }: { sections: Section[] }) {
   const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
   // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
+
+  const [parent]=useAutoAnimate()
 
   //Menus states
   const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState<number | null>(null);
@@ -130,7 +133,7 @@ export default function Navbar({ sections }: { sections: Section[] }) {
             />
           </div>
         </div>
-        <div className='flex justify-center'>
+        <div ref={parent} className='flex justify-center'>
           {/* Categories section */}
           {isDesktop && <CategoriesSection whichSectionMenuOpen={whichSectionMenuOpen} setWhichSectionMenuOpen={setWhichSectionMenuOpen} sections={sections} />}
         </div>

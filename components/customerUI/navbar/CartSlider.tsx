@@ -5,6 +5,8 @@ import { useUserContext } from "@/contexts/UserContext";
 import { Session } from "next-auth";
 import { MobileSlider } from "../sideBar/MobileSidebar";
 import { ShoppingCart, X, Trash, Minus, Plus } from "lucide-react";
+import { ProductType } from "@/models/Product";
+import { CartType } from "@/types/cart";
 // import { CartItem as CartItemType } from "@/types/cart"; // Using GuestCartProductItem directly
 import {
   getGuestCart,
@@ -66,9 +68,7 @@ const CartItemCard = ({
             </button>
           </div>
           <div className='flex w-full justify-end'>
-            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue pt-1'>
-              {item.totalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
-            </p>
+            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue pt-1'>{item.totalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
           </div>
         </div>
       </div>
@@ -86,35 +86,46 @@ export default function CartSlider({ session }: { session: Session | null }) {
   const { profile, cart, isLoadingCart, fetchCart } = useUserContext();
   const isLoggedIn = !!profile;
 
-  const [guestCart, setGuestCart] = useState<GuestCart>(getGuestCart()); // Use GuestCart state
+  // Initialize with an empty cart to prevent hydration mismatch. Server will render 0 items.
+  const [guestCart, setGuestCart] = useState<GuestCart>({ products: [], totalQuantity: 0, totalAmount: 0 });
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // This effect runs only on the client, after the initial render.
+    setIsClient(true); // Mark that we are on the client.
+    setGuestCart(getGuestCart()); // Load the actual guest cart from sessionStorage.
+
     const handleGuestCartChange = (event: CustomEvent<GuestCart>) => {
       setGuestCart(event.detail);
     };
-    // Initial load is handled by useState, this is for subsequent changes
+
     window.addEventListener("guestCartChanged", handleGuestCartChange as EventListener);
-    return () => window.removeEventListener("guestCartChanged", handleGuestCartChange as EventListener);
+
+    return () => {
+      window.removeEventListener("guestCartChanged", handleGuestCartChange as EventListener);
+    };
   }, []);
 
   // Convert authenticated cart items to GuestCartProductItem shape for unified rendering
-  const displayCartItems: GuestCartProductItem[] = isLoggedIn
-    ? (cart?.products ?? []).map((p) => ({
-        productId: p.productId._id,
-        title: p.productId.title,
-        slug: p.productId.slug,
-        imageUrl: p.productId.images?.[0]?.secure_url,
-        size: p.size,
-        quantity: p.quantity,
-        unitPrice: p.unitPrice,
-        totalPrice: p.totalPrice,
-        inStock: true,
-        brand: undefined,
-      }))
-    : guestCart.products;
+  const userCartItems: GuestCartProductItem[] =
+    cart?.products.map((item) => ({
+      productId: item.productId._id,
+      title: item.productId.title,
+      slug: item.productId.slug,
+      imageUrl: item.productId.images?.[0]?.secure_url,
+      size: item.size,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      totalPrice: item.totalPrice,
+      // The properties below are not in CartProductItemType, so we provide defaults.
+      inStock: true, // Assuming items in cart are in stock. For more accuracy, this would need a re-fetch.
+      brand: undefined,
+    })) || [];
 
-  const totalCartItems = isLoggedIn ? cart?.quantity ?? 0 : guestCart.totalQuantity;
-  const cartSubtotal = isLoggedIn ? cart?.totalAmount ?? 0 : guestCart.totalAmount;
+  // After hydration, the guestCart state updates, and this will re-render with the correct data.
+  const displayCartItems = isLoggedIn ? userCartItems : guestCart.products;
+  const totalCartItems = isLoggedIn ? cart?.quantity || 0 : guestCart.totalQuantity;
+  const totalCartPrice = isLoggedIn ? cart?.totalAmount || 0 : guestCart.totalAmount;
 
   const handleRemoveItem = async (productId: string, size: string) => {
     if (isLoggedIn) {
@@ -211,7 +222,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
           <div className='border-t p-4 space-y-3 shrink-0'>
             <div className='flex justify-between text-sm font-medium'>
               <span>Subtotal ({totalCartItems} items)</span>
-              <span>{cartSubtotal.toFixed(2)} MAD</span>
+              <span>{totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
             </div>
             <Button onClick={handleCheckout} className='w-full bg-primary hover:bg-primary-dark text-white'>
               Proceed to Checkout

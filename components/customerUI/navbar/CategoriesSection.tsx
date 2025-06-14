@@ -10,6 +10,7 @@ interface CategoriesSectionProps {
 
 const CategoriesSection = ({ sections, whichSectionMenuOpen, setWhichSectionMenuOpen }: CategoriesSectionProps) => {
   const mainSections = sections.filter((section) => section.section !== "Riding Style");
+  const ridingStyleSection = sections.filter((section) => section.section === "Riding Style");
 
   return (
     <>
@@ -23,7 +24,7 @@ const CategoriesSection = ({ sections, whichSectionMenuOpen, setWhichSectionMenu
                 section={section}
               />
               {/* Category Menu */}
-              {whichSectionMenuOpen === i && <CategoryMenu onMouseLeave={() => setWhichSectionMenuOpen(null)} section={section} />}
+              {whichSectionMenuOpen === i && <CategoryMenu onMouseLeave={() => setWhichSectionMenuOpen(null)} section={section} ridingStyleSection={ridingStyleSection[0]} />}
             </div>
           );
         })}

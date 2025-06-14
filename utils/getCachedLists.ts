@@ -2,8 +2,9 @@ import connectDB from "@/config/database";
 import Brand from "@/models/Brand";
 import { unstable_cache as nextCache } from "next/cache";
 import convertToSerializableObject from "@/utils/convertToObj";
-import Type from "@/models/Type";
+import TypeModel from "@/models/Type";
 import Category from "@/models/Category";
+import { Category as CategoryType, Type } from "@/types/section";
 
 /**
  * Fetches and caches the list of Brands / types / Categories.
@@ -30,7 +31,7 @@ export const getCachedTypes = nextCache(
   async () => {
     console.log("Fetching types from database...");
     await connectDB();
-    const TypesDoc = await Type.find({}).lean().exec();
+    const TypesDoc = await TypeModel.find({}).lean().exec();
     const Types = convertToSerializableObject(TypesDoc) as { _id: string; name: string }[];
 
     return Types;
@@ -48,21 +49,17 @@ export const getCachedCategories = nextCache(
     console.log("Fetching Categories from database...");
     await connectDB();
     const categoriesDoc = await Category.find({}).lean().exec();
-    const categories = convertToSerializableObject(categoriesDoc) as { _id: string; name: string }[];
+    const categories = convertToSerializableObject(categoriesDoc) as CategoryType[];
     await Category.populate(categories, { path: "applicableTypes" });
 
+    // Clean up the populated applicableTypes to match the 'Type' interface
     categories.forEach((category) => {
-      category.applicableTypes = category.applicableTypes.map((type) => {
-        // Ensure type._doc exists or adjust based on actual object structure
-        const originalDoc = type._doc || type;
-        return {
-          category: originalDoc.category?.toString(),
-          name: originalDoc.name,
-          slug: originalDoc.slug,
-          icon: originalDoc.icon,
-          _id: originalDoc._id?.toString(),
-        };
-      });
+      if (category.applicableTypes) {
+        category.applicableTypes = category.applicableTypes.map((type: any) => ({
+          name: type.name,
+          slug: type.slug,
+        }));
+      }
     });
 
     return categories;

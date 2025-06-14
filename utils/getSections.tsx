@@ -1,18 +1,27 @@
 import { getCachedCategories } from "./getCachedLists";
+import { Category } from "@/types/section";
 
 // Function to manage categories by their respective sections
 export default async function getSections() {
   // Predefined sections with initial categories
-  const sections = [
+  const sections: { section: string; categories: Category[] }[] = [
     { section: "Helmets", categories: [] },
-    { section: "Riding Style", categories: [{ name: "Adventure" }, { name: "Racing" }, { name: "Touring" }, { name: "Urban" }, { name: "Enduro" }] },
+    {
+      section: "Riding Style",
+      categories: ["Adventure", "Racing", "Touring", "Urban", "Enduro"].map((name) => ({
+        name,
+        slug: name.toLowerCase().replace(/\s+/g, "-"),
+        section: "Riding Style",
+        icon: { secure_url: "", public_id: "" }, // Placeholder icon
+      })),
+    },
     { section: "Riding Gear", categories: [] },
     { section: "Motorcycle Parts", categories: [] },
     { section: "Motorcycles", categories: [] },
   ];
 
   // Fetch categories from the cache
-  const categories = await getCachedCategories();
+  const categories: Category[] = await getCachedCategories();
 
   // Create a map for quick access to categories by section
   const sectionMap = new Map();
@@ -40,11 +49,19 @@ export default async function getSections() {
   }
   const ridingGearSection = sections.find((section) => section.section === "Riding Gear");
   const helmetsCategory = ridingGearSection?.categories?.find((category) => category.name === "Helmets");
-  const helmetsApplicableTypes = helmetsCategory?.applicableTypes;
+  const helmetsApplicableTypes = helmetsCategory?.applicableTypes ?? [];
 
-  sections.at(0)?.categories.push(...helmetsApplicableTypes)
+  sections.at(0)?.categories.push(...(helmetsApplicableTypes as any));
 
-  // Log the final sections structure
-  console.log("sections: ", sections);
-  return sections; // Return the sections with their respective categories
+  // Log the sections structure before mapping
+  // console.log("sections: ", sections);
+
+  // Map to match the Section interface, adding name and slug
+  const finalSections = sections.map((s) => ({
+    ...s,
+    name: s.section,
+    slug: s.section.toLowerCase().replace(/\s+/g, "-"),
+  }));
+
+  return finalSections; // Return the sections conforming to the Section type
 }

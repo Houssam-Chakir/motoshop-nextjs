@@ -105,6 +105,7 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
       const result = await addItemToCart({ productId: product._id, size: selectedSize, quantity });
       if (result.success) {
         toast.success(result.message);
+        await fetchCart();
       } else {
         toast.error(result.message);
       }

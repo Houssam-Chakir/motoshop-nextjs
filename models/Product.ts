@@ -66,7 +66,7 @@ const ProductSchema: Schema = new Schema(
     description: { type: String, required: [true, "Please provide a description"], trim: true },
     wholesalePrice: { type: Number, required: [true, "Please provide a price"], min: [0, "Price cannot be negative"] },
     retailPrice: { type: Number, required: [true, "Please provide a price"], min: [0, "Price cannot be negative"] },
-    saleInfo: { type: Schema.Types.ObjectId, ref: "Sale", index: true },
+    saleInfo: { type: Schema.Types.ObjectId, ref: "Sale", index: true, default: null },
     season: { type: String, enum: ["All seasons", "Summer", "Winter", "Spring/Fall"], default: "All seasons" },
     style: { type: String, enum: ["None", "Versitile", "Racing", "Adventure", "Enduro", "Urban", "Touring"], default: "None" },
     images: {

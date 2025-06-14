@@ -75,19 +75,18 @@ const saveGuestCart = (cart: GuestCart): void => {
  * @param size The selected size for the product.
  * @param quantity The quantity to add.
  */
+type GuestCartActionResult = { success: boolean; message: string };
+
 export const addItemToGuestCart = (
-  product: Pick<ProductDocument, "_id" | "title" | "slug" | "images" | "retailPrice" | "inStock" | "identifiers" | "brand">,
+  product: Pick<ProductDocument, "_id" | "title" | "slug" | "images" | "retailPrice" | "inStock" | "identifiers">,
   size: string,
   quantity: number
-): { success: boolean; message: string } => {
+): GuestCartActionResult => {
   if (typeof window === "undefined") {
-    return { success: false, message: "Cannot add to cart from server." };
+    return { success: false, message: "addItemToGuestCart can only be used in the browser." };
   }
   if (quantity <= 0) {
-    return { success: false, message: "Quantity must be positive." };
-  }
-  if (!size) {
-    return { success: false, message: "Please select a size." };
+    return { success: false, message: "Quantity must be greater than 0." };
   }
 
   const cart = getGuestCart();
@@ -117,7 +116,7 @@ export const addItemToGuestCart = (
 
   const { totalQuantity, totalAmount } = calculateCartTotals(cart.products);
   saveGuestCart({ ...cart, totalQuantity, totalAmount });
-
+  // return status
   return { success: true, message: "Item added to guest cart successfully." };
 };
 

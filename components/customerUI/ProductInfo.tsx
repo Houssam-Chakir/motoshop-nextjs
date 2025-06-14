@@ -10,6 +10,8 @@ import { StockType, SizeQuantityType } from "@/models/Stock"; // Adjusted path, 
 import { CldImage } from "next-cloudinary";
 import { toast } from "react-toastify";
 import { addItemToGuestCart } from "@/lib/guestCartStore";
+import { addItemToCart } from "@/actions/cartActions";
+import { useUserContext } from "@/contexts/UserContext";
 
 interface ProductInfoProps {
   product: ProductType;
@@ -18,8 +20,8 @@ interface ProductInfoProps {
 }
 
 export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoProps) {
-  console.log("product in product info", product);
-  console.log("stock in product info", stock);
+  const { fetchCart } = useUserContext();
+
   const {
     _id,
     title,
@@ -94,15 +96,20 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
     });
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
     if (!product?._id) return;
 
     if (isLoggedIn) {
-      // TODO: Implement add to DB cart logic
-      console.log("TODO: Add to DB cart:", product.sku);
-      toast.info("Feature coming soon!");
+      // add item to logged in user cart or create new cart for user
+      const result = await addItemToCart({ productId: product._id, size: selectedSize, quantity });
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
     } else {
+      // add item to guest cart
       const result = addItemToGuestCart(product, selectedSize, quantity);
       if (result.success) {
         toast.success(result.message);
@@ -122,6 +129,8 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  const currentImage = currentImageIndex >= 0 ? images[currentImageIndex]?.secure_url : "/placeholder-product.png";
+
   return (
     <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
       {/* Left side - Images */}
@@ -129,10 +138,11 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
         {/* Main image */}
         <div className='overflow-hidden relative h-96 bg-grey-light'>
           <CldImage
-            src={(currentImageIndex >= 0 && images[currentImageIndex]?.secure_url) || "/placeholder-product.png"}
-            alt={title}
+            src={currentImage}
+            alt={product.title}
             fill
-            className='object-contain w-full h-full'
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-contain transition-transform duration-500 ease-in-out group-hover:scale-105"
           />
           {images.length > 1 && (
             <>

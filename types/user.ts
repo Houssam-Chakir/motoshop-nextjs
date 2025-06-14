@@ -31,4 +31,15 @@ export interface UserContextType {
   addItemToWishlist: (item: WishlistItem) => Promise<void>;
   removeItemFromWishlist: (itemId: string) => Promise<void>;
   isInWishlist: (itemId: string) => boolean;
+
+  // Cart State
+  cart: import("./cart").CartType | null;
+  isLoadingCart: boolean;
+  cartError: string | null;
+
+  // Cart Functions
+  fetchCart: () => Promise<void>;
+
+  // Cart Mutations
+  addItemToCart: (args: { productId: string; size: string; quantity: number }) => Promise<void>;
 }

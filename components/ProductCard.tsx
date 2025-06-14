@@ -144,7 +144,6 @@ function ProductCard({ product }: { product: ProductCard }) {
     console.log("Plus clicked", product.sku);
   };
 
-
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
     if (!product?._id) return;
@@ -191,7 +190,7 @@ function ProductCard({ product }: { product: ProductCard }) {
   return (
     <div onClick={handleCardClick} className='bg-white w-full sm:max-w-[300px] md:max-w-[236px] group cursor-pointer'>
       {/* Modal -------------------------------------------------------------------------- */}
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={isModalLoading ? "Loading..." : 'Overview'}>
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={isModalLoading ? "Loading..." : "Overview"}>
         {/* Modal Content Logic */}
         {isModalLoading && (
           <div className='flex justify-center items-center h-48'>

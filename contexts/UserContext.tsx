@@ -11,6 +11,8 @@ import { Types } from "mongoose";
 import { getMyDetailedProfile } from "@/actions/userProfileActions";
 import { addItemToDbWishlistAction, removeItemFromDbWishlistAction } from "@/actions/wishlistActions"; // Server actions
 import { clearGuestWishlist } from "@/lib/guestWishlistStore"; // Client-side local storage actions
+import { getCart } from "@/actions/cartActions";
+import { CartType } from "@/types/cart";
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -27,11 +29,35 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
 
+  // Cart State
+  const [cart, setCart] = useState<CartType | null>(null);
+  const [isLoadingCart, setIsLoadingCart] = useState(false);
+  const [cartError, setCartError] = useState<string | null>(null);
+
   const clearUserData = useCallback(() => {
     setProfile(null);
     setWishlist([]); // Clear wishlist as well
     setProfileError(null);
     setWishlistError(null);
+    setCartError(null);
+    setCart(null);
+  }, []);
+
+  const fetchCart = useCallback(async () => {
+    setIsLoadingCart(true);
+    setCartError(null);
+    try {
+      const result = await getCart();
+      if (result.success) {
+        setCart(result.cart);
+      } else {
+        setCartError(result.message || "Failed to fetch cart.");
+      }
+    } catch (error) {
+      setCartError(error instanceof Error ? error.message : "An unexpected error occurred.");
+    } finally {
+      setIsLoadingCart(false);
+    }
   }, []);
 
   const fetchInitialUserData = useCallback(async () => {
@@ -62,6 +88,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           setProfileError(result.message || "Failed to fetch user data.");
           clearUserData(); // Clears context state, not local storage for guest
         }
+        // Fetch cart regardless of profile result so user sees cart or error
+        await fetchCart();
       } catch (error) {
         console.error("Error calling fetchInitialUserData action:", error);
         setProfileError(error instanceof Error ? error.message : "An unexpected error occurred.");
@@ -179,6 +207,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     [wishlist]
   );
 
+  // Cart: add item then refresh
+  const addItemToCart = useCallback(
+    async ({ productId, size, quantity }: { productId: string; size: string; quantity: number }) => {
+      if (authStatus !== "authenticated") return;
+      const result = await (await import("@/actions/cartActions")).addItemToCart({ productId, size, quantity });
+      if (result.success) {
+        await fetchCart();
+      }
+    },
+    [authStatus, fetchCart]
+  );
+
   const contextValue = useMemo(
     () => ({
       profile,
@@ -192,6 +232,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       addItemToWishlist,
       removeItemFromWishlist,
       isInWishlist,
+      cart,
+      isLoadingCart,
+      cartError,
+      fetchCart,
+      addItemToCart,
     }),
     [
       profile,
@@ -205,6 +250,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       addItemToWishlist,
       removeItemFromWishlist,
       isInWishlist,
+      cart,
+      isLoadingCart,
+      cartError,
+      fetchCart,
+      addItemToCart,
     ]
   );
 

@@ -18,18 +18,17 @@ import Image from "next/image";
 import { SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-// import { removeItemFromDbCartAction, updateDbCartItemQuantityAction } from "@/actions/cartActions"; // Placeholder for server actions
+import { removeItemFromCart, updateCartItemQuantity } from "@/actions/cartActions";
+import { toast } from "react-toastify";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 // Placeholder for CartItemCard component - will be created in a separate file
 const CartItemCard = ({
   item,
-  session,
   onRemove,
   onQuantityChange,
 }: {
   item: GuestCartProductItem; // Changed to GuestCartProductItem
-  session: Session | null;
   onRemove: (productId: string, size: string) => void; // Adjusted params
   onQuantityChange: (productId: string, size: string, newQuantity: number) => void; // Adjusted params
 }) => {
@@ -54,7 +53,7 @@ const CartItemCard = ({
         </div>
         <div className="flex w-full items-center-safe justify-between">
           <div className='flex items-center gap-2 mt-2 border rounded-full'>
-            <button onClick={() => handleQuantityChange(item.quantity - 1)} className='px-3 py-0  h-full hover:bg-grey-light rounded-l-full text-sm'>
+            <button onClick={() => handleQuantityChange(item.quantity - 1)} className={`px-3 py-0  h-full hover:bg-grey-light rounded-l-full text-sm ${item.quantity === 1 ? "text-grey-dark" : ""}`} disabled={item.quantity === 1}>
               <Minus size={16} height={24} />
             </button>
             <span className="px-1">{item.quantity}</span>
@@ -80,8 +79,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
   const [parent] = useAutoAnimate();
   const router = useRouter();
 
-  // const { cart, isLoadingCart, addItemToCart, removeItemFromCart, updateCartItemQuantity } = useUserContext(); // TODO: Add cart to UserContext
-  const { profile } = useUserContext(); // Using profile to check if logged in
+  const { profile, cart, isLoadingCart, fetchCart } = useUserContext();
   const isLoggedIn = !!profile;
 
   const [guestCart, setGuestCart] = useState<GuestCart>(getGuestCart()); // Use GuestCart state
@@ -95,25 +93,57 @@ export default function CartSlider({ session }: { session: Session | null }) {
     return () => window.removeEventListener("guestCartChanged", handleGuestCartChange as EventListener);
   }, []);
 
-  // TODO: Combine with logged-in user's cart state from UserContext once implemented
-  const displayCartItems = isLoggedIn ? [] /* cart.products */ : guestCart.products;
-  const totalCartItems = isLoggedIn ? 0 /* cart.totalQuantity */ : guestCart.totalQuantity;
-  const cartSubtotal = isLoggedIn ? 0 /* cart.totalAmount */ : guestCart.totalAmount;
+  // Convert authenticated cart items to GuestCartProductItem shape for unified rendering
+  const displayCartItems: GuestCartProductItem[] = isLoggedIn
+    ? (cart?.products ?? []).map((p) => ({
+        productId: p.productId._id,
+        title: p.productId.title,
+        slug: p.productId.slug,
+        imageUrl: p.productId.images?.[0]?.secure_url,
+        size: p.size,
+        quantity: p.quantity,
+        unitPrice: p.unitPrice,
+        totalPrice: p.totalPrice,
+        inStock: true,
+        brand: undefined,
+      }))
+    : guestCart.products;
 
-  const handleRemoveItem = (productId: string, size: string) => {
+  const totalCartItems = isLoggedIn ? cart?.quantity ?? 0 : guestCart.totalQuantity;
+  const cartSubtotal = isLoggedIn ? cart?.totalAmount ?? 0 : guestCart.totalAmount;
+
+  const handleRemoveItem = async (productId: string, size: string) => {
     if (isLoggedIn) {
-      // removeItemFromCart(itemId, variantId); // TODO: From UserContext
-      console.log("TODO: Remove from DB cart", productId, size);
+      try {
+        const result = await removeItemFromCart({ productId, size });
+        if (result.success) {
+          toast.success(result.message);
+          await fetchCart();
+        } else {
+          toast.error(result.message);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to remove item.");
+      }
     } else {
-      // Parameters for removeItemFromGuestCart are (productId: string, size: string)
-      removeItemFromGuestCart(productId, size || "Standard"); // Use productId and size, provide fallback for size if necessary
+      removeItemFromGuestCart(productId, size || "Standard");
     }
   };
 
-  const handleQuantityChange = (productId: string, size: string, newQuantity: number) => {
+  const handleQuantityChange = async (productId: string, size: string, newQuantity: number) => {
     if (isLoggedIn) {
-      // updateCartItemQuantity(itemId, quantity, variantId); // TODO: From UserContext
-      console.log("TODO: Update DB cart quantity", productId, newQuantity, size);
+      try {
+        const result = await updateCartItemQuantity({ productId, size, quantity: newQuantity });
+        if (result.success) {
+          await fetchCart();
+        } else {
+          toast.error(result.message);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to update cart.");
+      }
     } else {
       // Parameters for updateItemQuantityInGuestCart are (productId: string, size: string, newQuantity: number)
       if (newQuantity <= 0) {
@@ -163,7 +193,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
         <div ref={parent} className='flex-grow overflow-y-auto p-2'>
           {displayCartItems.length > 0 ? (
             displayCartItems.map((item) => (
-              <CartItemCard key={item.productId + item.size} item={item} session={session} onRemove={handleRemoveItem} onQuantityChange={handleQuantityChange} />
+              <CartItemCard key={item.productId + item.size} item={item} onRemove={handleRemoveItem} onQuantityChange={handleQuantityChange} />
             ))
           ) : (
             <div className='p-8 pt-12 text-center text-gray-500'>

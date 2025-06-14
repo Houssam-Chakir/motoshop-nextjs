@@ -184,10 +184,10 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
           <div className='space-y-6'>
             {/* Price and badges */}
             <div className='space-y-0'>
-              <div className='flex gap-3 items-center'>
-                <span className='text-3xl font-black tracking-wider text-blue-900'>{retailPrice?.toLocaleString("en-US")} MAD</span>
+              <div className='flex gap-1 md:gap-2 lg:gap-3 items-center'>
+                <span className='md:text-2xl text-3xl font-black tracking-wider text-blue-900'>{retailPrice?.toLocaleString("en-US")} MAD</span>
                 <Badge className='text-white rounded-none bg-primary'>ON SALE!</Badge>
-                <Badge className='text-white bg-orange-600 rounded-none'>SUMMER SALE</Badge>
+                <Badge className='text-white rounded-none bg-orange-600'>SUMMER SALE</Badge>
               </div>
               <p className='italic text-[13px] text-success-green'>
                 <span className='line-through text-grey-darker'>{retailPrice?.toLocaleString("en-US")} MAD</span> saving 1000.00 MAD + Free shipping

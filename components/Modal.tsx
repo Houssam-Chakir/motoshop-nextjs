@@ -46,7 +46,7 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
       {/* Modal Content */}
       <div
         onClick={(e) => e.stopPropagation()} // Prevent click-through
-        className='fixed top-1/2 left-1/2 w-[70vw] -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xs shadow-xl z-50'
+        className='fixed top-1/2 left-1/2 w-[80vw] -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xs shadow-xl z-50'
         role='dialog'
         aria-modal='true'
         aria-labelledby='modal-title'

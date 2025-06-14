@@ -4,7 +4,7 @@
 import { useUserContext } from "@/contexts/UserContext";
 import { Session } from "next-auth";
 import { MobileSlider } from "../sideBar/MobileSidebar";
-import { ShoppingCart, X, Trash2, Minus, Plus } from "lucide-react";
+import { ShoppingCart, X, Trash, Minus, Plus } from "lucide-react";
 // import { CartItem as CartItemType } from "@/types/cart"; // Using GuestCartProductItem directly
 import {
   getGuestCart,
@@ -41,36 +41,40 @@ const CartItemCard = ({
   };
 
   return (
-    <div className='flex gap-2 py-3 px-1'>
+    <div className='relative flex text-start transition-all border-1 hover:border-gray-400 cursor-pointer'>
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-2 overflow-clip'>
-        <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
+        <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Cart Item"} width={90} height={90} />
       </div>
-      <div className='flex-grow flex flex-col justify-between'>
+      <div className='w-full flex flex-col justify-center px-2'>
         <div>
           <h4 className='text-sm font-medium line-clamp-1'>{item.title}</h4>
           <p className='text-xs text-gray-500'>Size: {item.size}</p>
           <p className='text-xs text-gray-500'>Price: {item.unitPrice?.toFixed(2)} MAD</p>
         </div>
-        <div className="flex w-full items-center-safe justify-between">
+        <div className='flex w-full items-center-safe justify-around'>
           <div className='flex items-center gap-2 mt-2 border rounded-full'>
-            <button onClick={() => handleQuantityChange(item.quantity - 1)} className={`px-3 py-0  h-full hover:bg-grey-light rounded-l-full text-sm ${item.quantity === 1 ? "text-grey-dark" : ""}`} disabled={item.quantity === 1}>
+            <button
+              onClick={() => handleQuantityChange(item.quantity - 1)}
+              className={`px-3 py-0  h-full hover:bg-grey-light rounded-l-full text-sm ${item.quantity === 1 ? "text-grey-dark" : ""}`}
+              disabled={item.quantity === 1}
+            >
               <Minus size={16} height={24} />
             </button>
-            <span className="px-1">{item.quantity}</span>
+            <span className='px-1'>{item.quantity}</span>
             <button onClick={() => handleQuantityChange(item.quantity + 1)} className='text-[14px] px-3 py-0  h-full hover:bg-grey-light rounded-r-full text-sm'>
               <Plus size={16} height={24} />
             </button>
           </div>
-          <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue pt-1'>
-            {item.totalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
-          </p>
+          <div className='flex w-full justify-end'>
+            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue pt-1'>
+              {item.totalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
+            </p>
+          </div>
         </div>
       </div>
-      <div className='text-right flex-shrink-0'>
-        <button onClick={handleRemove} className='text-red-500 hover:text-red-700 text-xs mt-1'>
-          <Trash2 size={16} />
-        </button>
-      </div>
+      <button onClick={handleRemove} className='flex px-1.5 items-center justify-center h-full w-[24px] hover:bg-primary group'>
+        <Trash size={12} className='text-grey-darker group-hover:text-white' />
+      </button>
     </div>
   );
 };
@@ -164,7 +168,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
     <MobileSlider
       side='right'
       showDefaultCloseButton={false}
-      className="w-[450px] p-0"
+      className='w-[450px] p-0'
       trigger={
         <div className='relative flex flex-col items-center group cursor-pointer'>
           <ShoppingCart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
@@ -190,11 +194,9 @@ export default function CartSlider({ session }: { session: Session | null }) {
         </div>
 
         {/* Cart Items */}
-        <div ref={parent} className='flex-grow overflow-y-auto p-2'>
+        <div ref={parent} className='flex flex-col flex-grow overflow-y-auto p-2 gap-2'>
           {displayCartItems.length > 0 ? (
-            displayCartItems.map((item) => (
-              <CartItemCard key={item.productId + item.size} item={item} onRemove={handleRemoveItem} onQuantityChange={handleQuantityChange} />
-            ))
+            displayCartItems.map((item) => <CartItemCard key={item.productId + item.size} item={item} onRemove={handleRemoveItem} onQuantityChange={handleQuantityChange} />)
           ) : (
             <div className='p-8 pt-12 text-center text-gray-500'>
               <ShoppingCart size={48} className='mx-auto mb-4 opacity-50' />

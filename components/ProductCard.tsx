@@ -11,8 +11,8 @@ import React, { useState, useEffect } from "react";
 import { addItemToGuestWishlist, removeItemFromGuestWishlist, isItemInGuestWishlist } from "@/lib/guestWishlistStore";
 import { addItemToGuestCart } from "@/lib/guestCartStore";
 import { getProductWithStock } from "@/actions/cartActions";
-import { ProductDocument } from "@/models/Product";
-import { StockDocument } from "@/models/Stock";
+import { ProductType } from "@/models/Product";
+import { StockType } from "@/models/Stock";
 import { Modal } from "./Modal";
 import ProductInfo from "./customerUI/ProductInfo";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -50,8 +50,8 @@ interface ProductCard {
 }
 
 type ModalDataType = {
-  product: ProductDocument;
-  stock: StockDocument | null;
+  product: ProductType;
+  stock: StockType | null;
 } | null;
 
 function ProductCard({ product }: { product: ProductCard }) {

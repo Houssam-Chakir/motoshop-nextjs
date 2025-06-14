@@ -1,8 +1,8 @@
 "use server";
 
 import connectDB from "@/config/database";
-import Product, { ProductDocument } from "@/models/Product";
-import Stock, { StockDocument } from "@/models/Stock";
+import Product, { ProductDocument, ProductType } from "@/models/Product";
+import Stock, { StockDocument, StockType } from "@/models/Stock";
 import makeSerializable from "@/utils/convertToObj";
 import { getServerSession } from "next-auth/next";
 import authOptions from "@/utils/authOptions";
@@ -14,8 +14,8 @@ interface ProductAndStockResult {
   success: boolean;
   message?: string;
   data?: {
-    product: ProductDocument;
-    stock: StockDocument | null;
+    product: ProductType;
+    stock: StockType | null;
   } | null;
 }
 
@@ -34,8 +34,8 @@ export async function getProductWithStock(productId: string): Promise<ProductAnd
     }
 
     const serializableData = {
-      product: makeSerializable(productDoc),
-      stock: makeSerializable(stockDoc),
+      product: makeSerializable(productDoc) as ProductType,
+      stock: makeSerializable(stockDoc) as StockType | null,
     };
 
     return {

@@ -14,3 +14,29 @@ export interface CartItem {
   // };
   identifiers?: { brand: string; categoryType: string; category: string };
 }
+
+// For Authenticated User Cart (from database)
+export interface CartProductItemType {
+  productId: {
+    _id: string;
+    title: string;
+    images: { secure_url: string; public_id?: string }[];
+    retailPrice: number;
+    slug: string;
+  };
+  size: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  addedAt: string | Date;
+}
+
+export interface CartType {
+  _id: string;
+  userId: string;
+  products: CartProductItemType[];
+  quantity: number;
+  totalAmount: number;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}

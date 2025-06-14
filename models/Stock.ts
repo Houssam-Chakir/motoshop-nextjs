@@ -38,13 +38,12 @@ const StockSchema = new Schema<StockDocument>(
 );
 
 const Stock = models.Stock || model<StockDocument>("Stock", StockSchema);
-// Refined StockType for serialized data
 export type StockType = Omit<StockDocument, keyof Document | 'productId' | 'createdAt' | 'updatedAt'> & {
   _id: string;
-  productId: string; // ObjectId is serialized to string
-  sizes: SizeQuantityType[]; // This structure is fine, assuming SizeQuantityType is defined above
-  createdAt?: string; // Date is often serialized to string
-  updatedAt?: string; // Date is often serialized to string
+  productId: string;
+  sizes: SizeQuantityType[];
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export default Stock;

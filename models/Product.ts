@@ -1,6 +1,7 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
 import slug from "mongoose-slug-updater";
 import { nanoid } from "nanoid";
+import mongooseLeanVirtuals from "mongoose-lean-virtuals";
 
 mongoose.plugin(slug);
 
@@ -77,7 +78,7 @@ const ProductSchema: Schema = new Schema(
     category: { type: Schema.Types.ObjectId, ref: "Category", required: [true, "Please choose a category"], index: true },
     type: { type: Schema.Types.ObjectId, ref: "Type", required: [true, "Please choose a type"], index: true },
 
-    stock: { type: mongoose.Types.ObjectId, unique: true},
+    stock: { type: mongoose.Types.ObjectId, unique: true },
     inStock: { type: Boolean, default: true },
     specifications: [
       {
@@ -91,19 +92,19 @@ const ProductSchema: Schema = new Schema(
   },
 
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
-
 );
 
+ProductSchema.plugin(mongooseLeanVirtuals);
 // --- Virtuals ---
 ProductSchema.virtual("sale", {
   ref: "Sale",
   localField: "saleInfo",
   foreignField: "_id",
   justOne: true,
-  match: { isActive: true, startDate: { $lte: new Date() }, endDate: { $gte: new Date() } }
+  match: { isActive: true, startDate: { $lte: new Date() }, endDate: { $gte: new Date() } },
 });
 
-ProductSchema.virtual("salePrice").get(function(this: ProductDocument) {
+ProductSchema.virtual("salePrice").get(function (this: ProductDocument) {
   if (!this.saleInfo) return undefined;
 
   // determine discount based on discountType
@@ -118,7 +119,6 @@ ProductSchema.virtual("salePrice").get(function(this: ProductDocument) {
 
   return Math.max(price, 0); // avoid negative
 });
-
 
 // --- Helper function to generate attribute codes (define before use) ---
 function getAttributeCode(attributeValue: string | undefined | null, length = 3): string {
@@ -209,8 +209,8 @@ const Product = models.Product || model("Product", ProductSchema);
 // Export a type without the Document methods for use in functions
 export type ProductType = Omit<ProductDocument, keyof Document> & {
   _id: string;
-  brand?: { _id: string, name: string };
-  category?: { _id: string, name: string };
+  brand?: { _id: string; name: string };
+  category?: { _id: string; name: string };
   stock?: {
     _id: string;
     sizes: string[];

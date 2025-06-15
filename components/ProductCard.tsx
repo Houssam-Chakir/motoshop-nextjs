@@ -16,6 +16,7 @@ import { StockType } from "@/models/Stock";
 import { Modal } from "./Modal";
 import ProductInfo from "./customerUI/ProductInfo";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { SaleDocument } from "@/models/Sale";
 
 interface ProductCard {
   barcode: string;
@@ -33,6 +34,7 @@ interface ProductCard {
   likes: number;
   productModel: string;
   retailPrice: number;
+  salePrice: number;
   reviews: ReviewType[];
   season: string;
   sku: string;
@@ -45,6 +47,7 @@ interface ProductCard {
   type: string;
   updatedAt: string;
   wholesalePrice: number;
+  saleInfo: SaleDocument
   _id: string;
   __v: number;
 }
@@ -69,6 +72,8 @@ function ProductCard({ product }: { product: ProductCard }) {
     isLoadingWishlist,
     isLoadingProfile,
   } = useUserContext();
+
+  const finalePrice = product.salePrice ? product.salePrice : product.retailPrice;
 
   const isLoggedIn = !!profile;
   const [isGuestItemInWishlist, setIsGuestItemInWishlist] = useState(false);
@@ -241,11 +246,13 @@ function ProductCard({ product }: { product: ProductCard }) {
         {/* Image */}
         <CldImage className='object-contain w-full h-full' width={236} height={236} src={product.images[0].public_id} alt='Description of my image' />
         {/* On sale tag */}
-        <div
-          className={`bg-primary ${isDesktop ? "group-hover:-translate-y-9" : ""} transition-all text-white absolute uppercase font-bold text-[9px] px-1 py-0.5 bottom-0 left-0`}
-        >
-          on sale!
-        </div>
+        {product.salePrice > 0 && (
+          <div
+            className={`bg-primary ${isDesktop ? "group-hover:-translate-y-9" : ""} transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}
+          >
+            {product.saleInfo.discountType === "percentage" ? `-${product.saleInfo.discountValue}%` : `-${product.saleInfo.discountValue} MAD`}
+          </div>
+        )}
       </div>
       {/* Product Info */}
       <div className='flex flex-col py-1 leading-5'>
@@ -255,18 +262,21 @@ function ProductCard({ product }: { product: ProductCard }) {
         </div>
       </div>
       {/* Product Price */}
-      <div className='flex gap-1 items-baseline'>
-        <div className='font-bold text-blue text-[clamp(15px,1.5vw,16px)]'>
-          {product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+      <div className='flex gap-1 items-center'>
+        <div className='flex gap-1 items-center'>
+          <div className='font-bold text-blue text-[clamp(15px,1.5vw,16px)]'>{finalePrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+          <div className='text-[clamp(10px,1.5vw,14px)] text-blue'>
+            <span className='font-bold text-[clamp(15px,1.5vw,16px)]'> MAD</span>
+          </div>
         </div>
-        <div className='text-[clamp(10px,1.5vw,14px)] text-blue'>
-          {product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split(",")[1] !== "00" && (
-            <span className='text-[clamp(10px,1.5vw,14px)]'>
-              ,{product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split(",")[1]}
-            </span>
-          )}
-          <span className='font-bold text-[clamp(15px,1.5vw,16px)]'> MAD</span>
-        </div>
+        {product.saleInfo && (
+          <div className='flex gap-1 text-success-green items-center line-through italic'>
+            <div className=' text-[clamp(8px,1.5vw,11px)]'>{product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+            <div className='text-[clamp(8px,1.5vw,11px)]'>
+              <span className='text-[clamp(8px,1.5vw,11px)]'> MAD</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

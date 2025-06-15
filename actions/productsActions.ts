@@ -1,4 +1,4 @@
-import { Document, FilterQuery, Types } from 'mongoose';
+import { Document, FilterQuery, Types } from "mongoose";
 import Product, { ProductDocument } from "@/models/Product";
 import Sale, { SaleDocument } from "@/models/Sale";
 import connectDB from "@/config/database";
@@ -9,7 +9,7 @@ export type { SaleDocument } from "@/models/Sale";
 type ImageType = { secure_url: string; public_id: string };
 type CategoryType = { _id: Types.ObjectId; name: string };
 // Define more specific types for Stock and Banner to replace 'any'
-type StockType = { quantity: number; inStock: boolean; }; // Example type
+type StockType = { quantity: number; inStock: boolean }; // Example type
 type BannerType = string; // Example type for banner URL
 
 // Define types for the transformed product with sale info
@@ -31,7 +31,7 @@ export interface ProductWithSale {
     name: string;
     color: string;
     banner: BannerType | null;
-    discountType: 'percentage' | 'fixed_amount';
+    discountType: "percentage" | "fixed_amount";
     discountValue: number;
   } | null;
 }
@@ -76,8 +76,8 @@ function transformProduct(product: LeanProductDocument): ProductWithSale {
   return {
     _id: product._id.toString(),
     name: product.name,
-    slug: product.slug || '',
-    description: product.description || '',
+    slug: product.slug || "",
+    description: product.description || "",
     images: product.images || [],
     category: product.category,
     stock: product.stock || null,
@@ -92,7 +92,7 @@ function transformProduct(product: LeanProductDocument): ProductWithSale {
           name: sale.name,
           color: sale.color,
           banner: sale.banner || null,
-          discountType: sale.discountType as 'percentage' | 'fixed_amount',
+          discountType: sale.discountType as "percentage" | "fixed_amount",
           discountValue: sale.discountValue,
         }
       : null,
@@ -104,7 +104,7 @@ interface PaginationOptions {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
   minPrice?: number;
   maxPrice?: number;
   brands?: string[];
@@ -118,7 +118,7 @@ interface PaginationOptions {
  * @returns {Promise<ProductWithSale[]>} A promise that resolves to an array of products with sale details.
  * @throws {Error} If there is an issue fetching the products.
  */
-export async function getProductsWithSales(filters: FilterQuery<ProductDocument> = {}){
+export async function getProductsWithSales(filters: FilterQuery<ProductDocument> = {}) {
   await connectDB();
   try {
     const currentDate = new Date();
@@ -129,9 +129,9 @@ export async function getProductsWithSales(filters: FilterQuery<ProductDocument>
         match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } }, // Temporarily disabled for debugging
         select: "name discountType discountValue startDate endDate isActive", // Explicitly select fields for matching
       })
-      .exec()
+      .lean({ virtuals: true });
 
-    return products
+    return products;
   } catch (error) {
     console.error("Error fetching products with sales:", error);
     throw new Error("Failed to fetch products with sales");
@@ -178,9 +178,9 @@ export async function getProductsByCategoryWithSales(
   await connectDB();
   try {
     const currentDate = new Date();
-    const { page = 1, limit = 10, sortBy = 'name', sortOrder = 'asc' } = options;
+    const { page = 1, limit = 10, sortBy = "name", sortOrder = "asc" } = options;
     const query: FilterQuery<ProductDocument> = { category: categoryId };
-    const sort: { [key: string]: 'asc' | 'desc' } = { [sortBy]: sortOrder };
+    const sort: { [key: string]: "asc" | "desc" } = { [sortBy]: sortOrder };
 
     const products = await Product.find(query)
       .select("name retailPrice images category slug stock description saleInfo")
@@ -239,9 +239,7 @@ export async function getProductsOnSale(limit: number = 10): Promise<ProductWith
       .limit(limit)
       .lean<LeanProductDocument[]>();
 
-    const productsWithSales = products
-      .filter(product => product.saleInfo)
-      .map(transformProduct);
+    const productsWithSales = products.filter((product) => product.saleInfo).map(transformProduct);
 
     return productsWithSales;
   } catch (error) {
@@ -259,11 +257,7 @@ export async function getProductsOnSale(limit: number = 10): Promise<ProductWith
  */
 export async function updateProductSale(productId: string, saleId: string): Promise<ProductDocument> {
   await connectDB();
-  const product = await Product.findByIdAndUpdate(
-    productId,
-    { $set: { saleInfo: saleId } },
-    { new: true }
-  );
+  const product = await Product.findByIdAndUpdate(productId, { $set: { saleInfo: saleId } }, { new: true });
   if (!product) {
     throw new Error(`Product with ID ${productId} not found.`);
   }
@@ -278,11 +272,7 @@ export async function updateProductSale(productId: string, saleId: string): Prom
  */
 export async function removeProductSale(productId: string): Promise<ProductDocument> {
   await connectDB();
-  const product = await Product.findByIdAndUpdate(
-    productId,
-    { $unset: { saleInfo: "" } },
-    { new: true }
-  );
+  const product = await Product.findByIdAndUpdate(productId, { $unset: { saleInfo: "" } }, { new: true });
   if (!product) {
     throw new Error(`Product with ID ${productId} not found.`);
   }

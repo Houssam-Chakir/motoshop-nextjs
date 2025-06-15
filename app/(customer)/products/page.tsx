@@ -2,19 +2,26 @@ import ProductCardTest from "@/components/Card";
 import ProductCard from "@/components/ProductCard";
 import connectDB from "@/config/database";
 import Product, { ProductType } from "@/models/Product";
-import Sale, { SaleType } from "@/models/Sale";
+import Sale, { SaleDocument, SaleType } from "@/models/Sale";
 import makeSerializable from "@/utils/convertToObj";
 // import convertToSerializableObject from "@/utils/convertToObj";
 
 const ProductsPage = async () => {
   await connectDB();
-  const productsDoc = await Product.find({}).lean();
+  const currentDate = new Date();
+  const productsDoc = await Product.find({})
+    .populate<{ saleInfo: SaleDocument | null }>({
+      path: "saleInfo",
+      match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } }, // Temporarily disabled for debugging
+      select: "name discountType discountValue startDate endDate isActive", // Explicitly select fields for matching
+    })
+    .lean({ virtuals: true });
   const products = makeSerializable(productsDoc) as ProductType[];
   console.log("products: ", products);
 
-  const salesDoc = await Sale.find({}).lean();
-  const sales = makeSerializable(salesDoc) as SaleType[];
-  console.log("sales: ", sales);
+  // const salesDoc = await Sale.find({}).lean();
+  // const sales = makeSerializable(salesDoc) as SaleType[];
+  // console.log("sales: ", sales);
   return (
     <>
       <div className='py-4'>
@@ -24,24 +31,6 @@ const ProductsPage = async () => {
         {/* {products.map((product) => {
           return <ProductCardTest product={product} key={product.sku} />;
         })} */}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
         {products.map((product) => {
           return <ProductCard product={product} key={product.sku} />;
         })}

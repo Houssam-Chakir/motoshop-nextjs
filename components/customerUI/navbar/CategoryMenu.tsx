@@ -11,20 +11,19 @@ interface CategoryMenuProps {
 
 const CategoryMenu = ({ section, onMouseLeave, ridingStyleSection }: CategoryMenuProps) => {
   return (
-    <div onMouseLeave={onMouseLeave} className='absolute bg-white w-[100vw] -left-8 border-t-4 border-primary shadow-xl pt-12'>
-
+    <div onMouseLeave={onMouseLeave} className='absolute w-full left-0 bg-white border-t-4 border-primary shadow-xl pt-12'>
       <Container className=' justify-center pb-12'>
         <SectionMenu section={section} isHelmetsSection={section.section === "Helmets"} />
       </Container>
       {section.section !== "Helmets" && (
-        <div className=''>
-          <Container className='flex gap-3 bg-grey-light justify-end'>
+        <div className='bg-grey-light'>
+          <Container className='flex gap-3 justify-end'>
             <p className='flex items-center gap-1 p-4 text-sm font-light text-gray-800 cursor-default'>Riding Styles:</p>
             {ridingStyleSection &&
               ridingStyleSection.categories.map((category: Category, i: number) => {
                 return (
                   <div className='w-fit flex items-center gap-1 p-4 text-sm font-light text-gray-800 cursor-pointer hover:text-primary-dark' key={i}>
-                    <img width={24} src={'/' + category.name.toLowerCase().replace(" ", "-") + ".svg"} alt={category.name.toLowerCase()} />
+                    <img width={24} src={"/" + category.name.toLowerCase().replace(" ", "-") + ".svg"} alt={category.name.toLowerCase()} />
                     <div>{category.name}</div>
                   </div>
                 );
@@ -42,12 +41,14 @@ function SectionMenu({ section, isHelmetsSection }: { section: Section; isHelmet
   return (
     <div className='flex justify-center'>
       <div className='flex justify-around'>
-        {!isHelmetsSection && section.categories.map((category: Category, i: number) => {
-          return <CategoryBlock key={i} category={category} />;
-        })}
-        {isHelmetsSection && section.categories.map((category: Category, i: number) => {
-          return <HelmetBlock key={i} category={category} />;
-        })}
+        {!isHelmetsSection &&
+          section.categories.map((category: Category, i: number) => {
+            return <CategoryBlock key={i} category={category} />;
+          })}
+        {isHelmetsSection &&
+          section.categories.map((category: Category, i: number) => {
+            return <HelmetBlock key={i} category={category} />;
+          })}
       </div>
     </div>
   );
@@ -81,7 +82,7 @@ function HelmetBlock({ category }: { category: Category }) {
   return (
     <button className='flex flex-col gap-2 py-6 px-8 justify-center items-center group hover:cursor-pointer'>
       <div className=''>
-        <img className='h-16' src={'/' + category.name.toLowerCase().replace(" ", "-") + ".svg"} alt={category.name.toLowerCase()} />
+        <img className='h-16' src={"/" + category.name.toLowerCase().replace(" ", "-") + ".svg"} alt={category.name.toLowerCase()} />
       </div>
       <div className='flex gap-1 flex-col'>
         <Link href={"#"} className={`group-hover:text-primary-dark font-light text-[14px] text-black pb-1 ${!category.applicableTypes ? "pt-2" : ""}`}>

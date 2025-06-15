@@ -6,7 +6,7 @@
 @theme inline {
   --breakpoint-xs: 562px;
   /* Fonts */
-  --font-sans: var(--font-inter);    /* Makes Inter the default sans-serif font */
+  --font-sans: var(--font-inter); /* Makes Inter the default sans-serif font */
   --font-display: var(--font-oxanium); /* Creates a new utility for Oxanium */
 
   /* Radius */
@@ -33,36 +33,36 @@
 
   /* Primary Colors */
   --color-primary-light: var(--primary-light); /* NEW (from your list) */
-  --color-primary: var(--primary);             /* Existing */
-  --color-primary-dark: var(--primary-dark);   /* NEW (from your list - fixes your original issue) */
+  --color-primary: var(--primary); /* Existing */
+  --color-primary-dark: var(--primary-dark); /* NEW (from your list - fixes your original issue) */
   --color-primary-foreground: var(--primary-foreground); /* Existing */
 
   /* Secondary Colors */
   --color-secondary-light: var(--secondary-light); /* NEW (from your list) */
-  --color-secondary: var(--secondary);             /* Existing */
+  --color-secondary: var(--secondary); /* Existing */
   --color-secondary-foreground: var(--secondary-foreground); /* Existing */
 
   /* Blues */
-  --color-blue: var(--blue);                       /* NEW (from your list) */
-  --color-blue-light: var(--blue-light);                       /* NEW (from your list) */
-  --color-blue-sky: var(--blue-sky);               /* NEW (from your list) */
-  --color-blue-sky-light: var(--blue-sky-light);   /* NEW (from your list) */
+  --color-blue: var(--blue); /* NEW (from your list) */
+  --color-blue-light: var(--blue-light); /* NEW (from your list) */
+  --color-blue-sky: var(--blue-sky); /* NEW (from your list) */
+  --color-blue-sky-light: var(--blue-sky-light); /* NEW (from your list) */
 
   /* Greys */
-  --color-grey: var(--grey);                       /* NEW (from your list) */
-  --color-grey-light: var(--grey-light);           /* NEW (from your list) */
-  --color-grey-medium: var(--grey-medium);         /* NEW (from your list) */
-  --color-grey-dark: var(--grey-dark);             /* NEW (from your list) */
-  --color-grey-darker: var(--grey-darker);         /* NEW (from your list) */
-  --color-grey-blue: var(--grey-blue);             /* NEW (from your list) */
-  --color-grey-blue-baby: var(--grey-blue-baby);   /* NEW (from your list) */
+  --color-grey: var(--grey); /* NEW (from your list) */
+  --color-grey-light: var(--grey-light); /* NEW (from your list) */
+  --color-grey-medium: var(--grey-medium); /* NEW (from your list) */
+  --color-grey-dark: var(--grey-dark); /* NEW (from your list) */
+  --color-grey-darker: var(--grey-darker); /* NEW (from your list) */
+  --color-grey-blue: var(--grey-blue); /* NEW (from your list) */
+  --color-grey-blue-baby: var(--grey-blue-baby); /* NEW (from your list) */
 
   /* State Colors */
-  --color-success-green: var(--success-green);     /* NEW (from your list) - will generate text-success-green etc. */
-  --color-link: var(--link);                       /* NEW (from your list) */
+  --color-success-green: var(--success-green); /* NEW (from your list) - will generate text-success-green etc. */
+  --color-link: var(--link); /* NEW (from your list) */
 
   /* Misc Colors */
-  --color-admin-blue: var(--admin-blue);           /* NEW (from your list) */
+  --color-admin-blue: var(--admin-blue); /* NEW (from your list) */
 
   /* Chart Colors (Existing) */
   --color-chart-1: var(--chart-1);
@@ -176,6 +176,16 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+/* Custom styles */
+.custom-dashed {
+  border-width: 1px;
+  border-style: solid; /* required for border-image */
+  border-image-source: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'>\
+<rect width='100%' height='100%' fill='none' stroke='oklch(0.8922 0.0011 17.18)' stroke-width='4' stroke-dasharray='10,10'/></svg>");
+  border-image-slice: 1;
 }
 
 @layer base {

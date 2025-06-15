@@ -43,11 +43,11 @@ const CartItemCard = ({
   };
 
   return (
-    <div className='relative flex text-start transition-all border-1 hover:border-gray-400 cursor-pointer'>
-      <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-2 overflow-clip'>
+    <div className='relative flex text-start transition-all hover:border-gray-400 cursor-pointer'>
+      <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-1 overflow-clip'>
         <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Cart Item"} width={90} height={90} />
       </div>
-      <div className='w-full flex flex-col justify-center px-2'>
+      <div className='w-full flex flex-col justify-around px-2'>
         <div>
           <h4 className='text-sm font-medium line-clamp-1'>{item.title}</h4>
           <p className='text-xs text-gray-500'>Size: {item.size}</p>
@@ -68,7 +68,9 @@ const CartItemCard = ({
             </button>
           </div>
           <div className='flex w-full justify-end'>
-            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue pt-1'>{item.totalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
+            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue pt-1'>
+              {item.totalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
+            </p>
           </div>
         </div>
       </div>
@@ -192,10 +194,10 @@ export default function CartSlider({ session }: { session: Session | null }) {
     >
       <div className='flex flex-col h-full min-h-0'>
         {/* Header */}
-        <div className='px-4 py-3 w-full flex justify-between items-center border-b'>
+        <div className='px-4 py-3 mb-2 w-full flex justify-between items-center border-b'>
           <div className='flex items-center gap-2'>
             <ShoppingCart className='h-5 w-5 text-gray-700' />
-            <span className='text-md font-semibold'>Shopping Cart</span>
+            <span className='text-md font-semibold'>Shopping Cart </span> <span className='text-xs text-gray-500 pt-0.5'> ({totalCartItems} items)</span>
           </div>
           <SheetClose asChild>
             <Button variant='ghost' size='icon' className='p-1 h-8 w-8 shrink-0 rounded-none'>
@@ -207,7 +209,12 @@ export default function CartSlider({ session }: { session: Session | null }) {
         {/* Cart Items */}
         <div ref={parent} className='flex flex-col flex-grow overflow-y-auto p-2 gap-2'>
           {displayCartItems.length > 0 ? (
-            displayCartItems.map((item) => <CartItemCard key={item.productId + item.size} item={item} onRemove={handleRemoveItem} onQuantityChange={handleQuantityChange} />)
+            displayCartItems.map((item, idx) => (
+              <React.Fragment key={item.productId + item.size}>
+                <CartItemCard item={item} onRemove={handleRemoveItem} onQuantityChange={handleQuantityChange} />
+                {idx !== displayCartItems.length - 1 && <hr className='my-2 border-gray-200' />}
+              </React.Fragment>
+            ))
           ) : (
             <div className='p-8 pt-12 text-center text-gray-500'>
               <ShoppingCart size={48} className='mx-auto mb-4 opacity-50' />
@@ -219,14 +226,37 @@ export default function CartSlider({ session }: { session: Session | null }) {
 
         {/* Footer - Summary & Checkout */}
         {displayCartItems.length > 0 && (
-          <div className='border-t p-4 space-y-3 shrink-0'>
-            <div className='flex justify-between text-sm font-medium'>
-              <span>Subtotal ({totalCartItems} items)</span>
-              <span>{totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+          <div className='absolute bottom-0 w-full border-t p-4 space-y-4 shrink-0 bg-white/90 backdrop-blur-xs'>
+             <div className='font-semibold'>Summary</div>
+            <div className='bg-grey-dark/20 py-2 px-4 mb-4 border custom-dashed space-y-2'>
+              {/* Subtotal */}
+              <div className='flex justify-between text-sm font-'>
+                <span>Subtotal:</span>
+                <span className="font-bold text-slate-700">{totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+              </div>
+              {/* Sales */}
+              <div className='flex justify-between text-sm font-'>
+                <span>Sales:</span>
+                <span className="font-bold text-success-green">- {totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+              </div>
+              {/* Shipping */}
+              {/* <div className='flex justify-between text-sm font-'>
+                <span>Shipping:</span>
+                <span className="font-bold text-success-green">{totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+              </div> */}
+              <hr className="border-grey-medium" />
+              {/* Total */}
+              <div className='flex justify-between text-sm font-bold'>
+                <span>Total:</span>
+                <span className="font-bold text-blue">{totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+              </div>
             </div>
-            <Button onClick={handleCheckout} className='w-full bg-primary hover:bg-primary-dark text-white'>
+            <div className="flex flex-col gap-2">
+            <span className="text-xs text-grey-darker italic">Shipping fee varies by address.s</span>
+            <Button onClick={handleCheckout} className='w-full bg-blue hover:bg-blue/90 rounded-full py-5 cursor-pointer text-white'>
               Proceed to Checkout
             </Button>
+            </div>
           </div>
         )}
       </div>

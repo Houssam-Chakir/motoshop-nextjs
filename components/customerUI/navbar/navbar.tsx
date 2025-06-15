@@ -2,7 +2,7 @@
 
 import { useQueryState } from "nuqs";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { AlignJustify, BoxIcon, Heart, LogOut, ShoppingCart, User, UserSearch } from "lucide-react";
+import { AlignJustify, BoxIcon, Heart, LogOut, ShoppingCart, Store, User, UserSearch } from "lucide-react";
 import Link from "next/link";
 import Container from "../../layout/Container";
 import CategoriesSection from "./CategoriesSection";
@@ -29,7 +29,7 @@ export default function Navbar({ sections }: { sections: Section[] }) {
   // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
 
-  const [parent]=useAutoAnimate()
+  const [parent] = useAutoAnimate();
 
   //Menus states
   const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState<number | null>(null);
@@ -46,9 +46,9 @@ export default function Navbar({ sections }: { sections: Section[] }) {
 
   const { session } = useSessionContext();
   const { profile } = useUserContext();
-  console.log("profile", profile);
   const [providers, setProviders] = useState<Record<string, { id: string; name: string }> | null>(null);
   const profileImage = session?.user?.image?.toString() as string;
+  const userRole = profile?.role as String;
 
   useEffect(() => {
     const setAuthProviders = async () => {
@@ -162,7 +162,7 @@ function UserButtonsSection({
     <>
       {isPhoneOrLarger && <WishlistSlider session={session} />}
 
-      <CartSlider session={session}/>
+      <CartSlider session={session} />
       <UserMenuSlider session={session} providers={providers} profileImage={profileImage} username={username} isUserMenuOpen={isUserMenuOpen} />
     </>
   );
@@ -171,6 +171,9 @@ function UserButtonsSection({
 // -- User Menu -------------------------------------------
 function UserMenu({ providers, session }: { session: Session | null; providers: Record<string, { id: string; name: string }> }) {
   const { wishlist } = useUserContext(); // Get wishlist from context
+  const { profile } = useUserContext();
+
+  const userRole = profile?.role as String;
   return (
     <>
       {session && (
@@ -193,6 +196,7 @@ function UserMenu({ providers, session }: { session: Session | null; providers: 
               <div>
                 <p className='font-semibold text-sm truncate'>{session.user?.name || "User Name"}</p>
                 <p className='text-xs text-gray-500 truncate'>{session.user?.email || "user@example.com"}</p>
+                <p className='text-xs text-gray-500 truncate'>{userRole}</p>
               </div>
             </div>
             <div className='bg-grey border-grey-medium border-1 border-dashed *:flex *:gap-1 rounded-full py-2 px-4 flex justify-around gap-2 text-center text-xs'>
@@ -233,6 +237,17 @@ function UserMenu({ providers, session }: { session: Session | null; providers: 
               <ShoppingCart size={22} className='text-gray-600 shrink-0' />
               <span className='text-sm text-gray-700'>Cart</span>
             </li>
+
+            <hr className='my-1.5 border-gray-200' />
+
+            {userRole === "admin" && (
+              <li className='hover:bg-grey-light cursor-pointer'>
+                <Link className='flex items-center gap-3 px-4 py-2.5 rounded-xs' href='/dashboard/inventory'>
+                  <Store size={22} className='text-gray-600 shrink-0' />
+                  <span className='text-sm text-gray-700'>Store dashboard</span>
+                </Link>
+              </li>
+            )}
           </ul>
           {/* Logout Button Section (at the bottom) */}
           <div className='mt-auto p-2 border-t shrink-0'>
@@ -249,26 +264,46 @@ function UserMenu({ providers, session }: { session: Session | null; providers: 
 
       {/* Guest View (Sign Up) */}
       {!session && (
-        <div className='flex flex-col flex-grow items-center pt-24 p-4'>
-          {providers &&
-            Object.values(providers).map((provider) => {
-              if (provider.id === "google") {
-                return (
-                  <>
-                    <h2 className='text-lg p-3 uppercase text-center pb-3 font-bold border-b shrink-0'>Sign Up</h2>
-                    <GoogleSignupButton
-                      onSignup={async () => {
-                        await signIn(provider.id, { callbackUrl: "/" });
-                      }}
-                      key={provider.id}
-                      className='w-full max-w-xs'
-                    />
-                  </>
-                );
-              }
-              return null;
-            })}
-          {!providers && <p className='text-sm text-gray-500'>Sign up options are currently unavailable.</p>}
+        <div className='flex flex-col h-full min-h-0'>
+          <div className='p-4 pb-6 border-b shrink-0'>
+            {providers &&
+              Object.values(providers).map((provider) => {
+                if (provider.id === "google") {
+                  return (
+                    <>
+                      <h2 className='text-lg p-3 uppercase text-center pb-3 font-bold shrink-0'>Sign Up</h2>
+                      <GoogleSignupButton
+                        onSignup={async () => {
+                          await signIn(provider.id, { callbackUrl: "/" });
+                        }}
+                        key={provider.id}
+                        className='w-full max-w-xs'
+                      />
+                    </>
+                  );
+                }
+                return null;
+              })}
+            {!providers && <p className='text-sm text-gray-500'>Sign up options are currently unavailable.</p>}
+          </div>
+          {/* Main Action Buttons List */}
+          <ul className='flex-grow w-full flex flex-col gap-1.5 px-2 py-3 text-md overflow-y-auto'>
+            {/* Section 1: Profile, Orders */}
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <BoxIcon size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Orders</span>
+            </li>
+
+            {/* Section 2: Wishlist, Cart */}
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <Heart size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Wishlist</span>
+            </li>
+            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
+              <ShoppingCart size={22} className='text-gray-600 shrink-0' />
+              <span className='text-sm text-gray-700'>Cart</span>
+            </li>
+          </ul>
         </div>
       )}
     </>
@@ -320,7 +355,6 @@ function UserMenuSlider({
       }
     >
       <UserMenu providers={providers ?? {}} session={session!} />
-
     </MobileSlider>
   );
 }

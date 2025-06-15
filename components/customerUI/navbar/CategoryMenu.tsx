@@ -3,15 +3,10 @@ import Container from "@/components/layout/Container";
 import Link from "next/link";
 import { Section, Category, Type } from "@/types/section";
 
-interface RidingStyleSection {
-  id: number;
-  section: string;
-  categories: Category[];
-}
 interface CategoryMenuProps {
   section: Section;
   onMouseLeave: () => void;
-  ridingStyleSection: RidingStyleSection;
+  ridingStyleSection: Section;
 }
 
 const CategoryMenu = ({ section, onMouseLeave, ridingStyleSection }: CategoryMenuProps) => {
@@ -86,7 +81,7 @@ function HelmetBlock({ category }: { category: Category }) {
   return (
     <button className='flex flex-col gap-2 py-6 px-8 justify-center items-center group hover:cursor-pointer'>
       <div className=''>
-        <img className='h-18' src={'/' + category.name.toLowerCase().replace(" ", "-") + ".svg"} alt={category.name.toLowerCase()} />
+        <img className='h-16' src={'/' + category.name.toLowerCase().replace(" ", "-") + ".svg"} alt={category.name.toLowerCase()} />
       </div>
       <div className='flex gap-1 flex-col'>
         <Link href={"#"} className={`group-hover:text-primary-dark font-light text-[14px] text-black pb-1 ${!category.applicableTypes ? "pt-2" : ""}`}>

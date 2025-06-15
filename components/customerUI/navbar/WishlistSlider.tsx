@@ -7,7 +7,7 @@ import { Heart, Trash, X } from "lucide-react";
 import { CldImage } from "next-cloudinary";
 import { WishlistItem as WishlistItemType } from "@/types/wishlist";
 import { getGuestWishlist, removeItemFromGuestWishlist } from "@/lib/guestWishlistStore";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,6 @@ export default function WishlistSlider({ session }: { session: Session | null })
   const [guestWishlistItems, setGuestWishlistItems] = useState<WishlistItemType[]>([]);
   console.log("WISHLIST RERENDERED", guestWishlistItems);
   useEffect(() => {
-
     // Function to update guest wishlist items from localStorage
     const updateGuestWishlist = () => {
       setGuestWishlistItems(getGuestWishlist());
@@ -46,8 +45,7 @@ export default function WishlistSlider({ session }: { session: Session | null })
     <MobileSlider
       side='right'
       showDefaultCloseButton={false}
-      className="md:w-[450px] xs:w-[90%]  p-0"
-
+      className='md:w-[450px] xs:w-[90%]  p-0'
       trigger={
         <div className='flex flex-col items-center group cursor-pointer'>
           <Heart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />
@@ -106,27 +104,24 @@ export default function WishlistSlider({ session }: { session: Session | null })
             </div>
           </div>
         )}
-        {/* wishlist items from logged in users */}
         <div ref={parent} className='flex flex-col gap-2 p-2'>
-          {wishlist &&
-            wishlist.map((item) => {
-              console.log(item);
-              return <WishlistItem key={item.id} item={item} session={session} />;
-            })}
-          {/* wishlist items from guest users */}
-          {guestWishlistItems.length > 0 &&
-            guestWishlistItems.map((item) => {
-              console.log(item);
-              return <WishlistItem item={item} session={session} />;
-            })}
-          {wishlist.length === 0 && guestWishlistItems.length === 0 && (
-            //Display empty svg
-            <div className="p-8 pt-12 text-center text-gray-500" >
-              <img className="opacity-80 w-40 mx-auto pb-4" src='/empty.svg' alt='empty wishlist' />
-              <p className='font-semibold'>Your wishlist is empty</p>
-              <p className='text-sm mt-1'>Looks like you haven't added anything to your wishlist yet.</p>
-            </div>
-          )}
+          {(() => {
+            const displayItems = [...wishlist, ...guestWishlistItems];
+            return displayItems.length > 0 ? (
+              displayItems.map((item, idx) => (
+                <React.Fragment key={item.id ?? idx}>
+                  <WishlistItem item={item} session={session} />
+                  {idx !== displayItems.length - 1 && <hr className='my-2 border-gray-200' />}
+                </React.Fragment>
+              ))
+            ) : (
+              <div className='p-8 pt-12 text-center text-gray-500'>
+                <img className='opacity-80 w-40 mx-auto pb-4' src='/empty.svg' alt='empty wishlist' />
+                <p className='font-semibold'>Your wishlist is empty</p>
+                <p className='text-sm mt-1'>Looks like you haven't added anything to your wishlist yet.</p>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </MobileSlider>
@@ -158,10 +153,10 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
   };
 
   return (
-    <div onClick={(e) => handleItemClick(e)} key={item.id} className='relative flex text-start gap-2 transition-all border-1 hover:border-gray-400 cursor-pointer'>
+    <div onClick={(e) => handleItemClick(e)} key={item.id} className='relative flex text-start gap-2 transition-all  hover:border-gray-400 cursor-pointer'>
       {/* Image */}
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-2 overflow-clip'>
-        <Image className='object-contain w-full h-full' src={item.imageUrl ?? '/noProductImage.png'} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
+        <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
       </div>
       {/* Product Info */}
       <div className='shrink-1 flex flex-col justify-center'>
@@ -174,7 +169,9 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
         <div className=' gap-2 items-center pl-0.5'>
           {item.inStock && <span className='text-emerald-500 text-xs'>In Stock</span>}
           {!item.inStock && <span className='text-red-500 text-xs'>Out of Stock</span>}
-          <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>{item.retailPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
+          <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>
+            {item.retailPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
+          </p>
         </div>
       </div>
       {/* Remove Button */}

@@ -20,7 +20,7 @@ export interface ProductWithSale {
   description: string;
   images: ImageType[];
   category: Types.ObjectId | CategoryType;
-  stock: StockType | null; 
+  stock: StockType | null;
   originalPrice: number;
   salePrice: number;
   discount: number;
@@ -30,7 +30,7 @@ export interface ProductWithSale {
     _id: string;
     name: string;
     color: string;
-    banner: BannerType | null; 
+    banner: BannerType | null;
     discountType: 'percentage' | 'fixed_amount';
     discountValue: number;
   } | null;
@@ -118,20 +118,20 @@ interface PaginationOptions {
  * @returns {Promise<ProductWithSale[]>} A promise that resolves to an array of products with sale details.
  * @throws {Error} If there is an issue fetching the products.
  */
-export async function getProductsWithSales(filters: FilterQuery<ProductDocument> = {}): Promise<ProductWithSale[]> {
+export async function getProductsWithSales(filters: FilterQuery<ProductDocument> = {}){
   await connectDB();
   try {
     const currentDate = new Date();
     const products = await Product.find(filters)
-      .select("name retailPrice images category slug stock description saleInfo")
+      .select("title retailPrice images identifiers slug inStock saleInfo")
       .populate<{ saleInfo: SaleDocument | null }>({
         path: "saleInfo",
-        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
-        select: "name discountType discountValue color banner startDate endDate",
+        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } }, // Temporarily disabled for debugging
+        select: "name discountType discountValue startDate endDate isActive", // Explicitly select fields for matching
       })
-      .lean<LeanProductDocument[]>();
+      .exec()
 
-    return products.map(transformProduct);
+    return products
   } catch (error) {
     console.error("Error fetching products with sales:", error);
     throw new Error("Failed to fetch products with sales");

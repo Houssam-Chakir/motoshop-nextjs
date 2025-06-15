@@ -90,8 +90,35 @@ const ProductSchema: Schema = new Schema(
     likes: { type: Number, default: 0, min: 0 },
   },
 
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+
 );
+
+// --- Virtuals ---
+ProductSchema.virtual("sale", {
+  ref: "Sale",
+  localField: "saleInfo",
+  foreignField: "_id",
+  justOne: true,
+  match: { isActive: true, startDate: { $lte: new Date() }, endDate: { $gte: new Date() } }
+});
+
+ProductSchema.virtual("salePrice").get(function(this: ProductDocument) {
+  if (!this.saleInfo) return undefined;
+
+  // determine discount based on discountType
+  const { discountType, discountValue } = this.saleInfo as any;
+  let price = this.retailPrice;
+
+  if (discountType === "percentage") {
+    price = price * (1 - discountValue / 100);
+  } else if (discountType === "fixed_amount") {
+    price = price - discountValue;
+  }
+
+  return Math.max(price, 0); // avoid negative
+});
+
 
 // --- Helper function to generate attribute codes (define before use) ---
 function getAttributeCode(attributeValue: string | undefined | null, length = 3): string {

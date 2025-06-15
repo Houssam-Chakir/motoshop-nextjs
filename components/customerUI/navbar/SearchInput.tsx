@@ -1,3 +1,4 @@
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Search, X } from "lucide-react";
@@ -13,7 +14,6 @@ interface SearchBarProps {
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({ searchQuery, setSearchQuery, isDesktop = false }) => {
-
   if (!isDesktop) {
     return (
       <>
@@ -37,6 +37,27 @@ const SearchInput: React.FC<SearchInputProps> = ({ searchQuery, setSearchQuery, 
 //f/ Search Bar Component
 export function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const [parent] = useAutoAnimate({ duration: 100 });
+
+  // Debounced search effect
+  React.useEffect(() => {
+    if (searchQuery === undefined) return;
+    const delayDebounce = setTimeout(async () => {
+      if (!searchQuery) return;
+      try {
+        const res = await fetch(`/api/products/search?q=${encodeURIComponent(searchQuery)}`);
+        if (res.ok) {
+          const data = await res.json();
+          console.log("Search results for", searchQuery, data);
+        } else {
+          console.log("Search request failed", res.status);
+        }
+      } catch (err) {
+        console.error("Search error", err);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
   return (
     <div ref={parent} className='relative'>
       <Input

@@ -30,6 +30,7 @@ export interface ProductDocument extends Document {
   description: string;
   wholesalePrice: number;
   retailPrice: number;
+  salePrice?: number;
   saleInfo?: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
   style: "None" | "Versitile" | "Racing" | "Adventure" | "Enduro" | "Urban" | "Touring";

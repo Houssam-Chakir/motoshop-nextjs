@@ -9,6 +9,7 @@ import authOptions from "@/utils/authOptions";
 import Cart, { CartDocument, CartProductItem } from "@/models/Cart";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
+import { SaleDocument } from "./productsActions";
 
 interface ProductAndStockResult {
   success: boolean;
@@ -26,8 +27,18 @@ export async function getProductWithStock(productId: string): Promise<ProductAnd
 
   try {
     await connectDB();
+    const currentDate = new Date();
 
-    const [productDoc, stockDoc] = await Promise.all([Product.findById(productId).lean(), Stock.findOne({ productId: productId }).lean()]);
+    const [productDoc, stockDoc] = await Promise.all([
+      Product.findById(productId)
+        .populate<{ saleInfo: SaleDocument | null }>({
+          path: "saleInfo",
+          match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } }, // Temporarily disabled for debugging
+          select: "name discountType discountValue startDate endDate isActive", // Explicitly select fields for matching
+        })
+        .lean({ virtuals: true }),
+      Stock.findOne({ productId: productId }).lean(),
+    ]);
 
     if (!productDoc) {
       return { success: false, message: "Product not found." };
@@ -106,7 +117,7 @@ export async function addItemToCart({ productId, size, quantity }: { productId: 
 
     let cart: CartDocument | null = await Cart.findOne({ userId: session.user.id });
 
-    const unitPrice = typeof product.price === "number" ? product.price : (typeof product.retailPrice === "number" ? product.retailPrice : 0);
+    const unitPrice = typeof product.price === "number" ? product.price : typeof product.retailPrice === "number" ? product.retailPrice : 0;
     const totalPrice = unitPrice * quantity;
 
     if (cart) {
@@ -217,9 +228,7 @@ export async function removeItemFromCart({ productId, size }: { productId: strin
     }
 
     const originalLength = cart.products.length;
-    cart.products = cart.products.filter(
-      (p: CartProductItem) => !(p.productId.toString() === productId && p.size === size)
-    );
+    cart.products = cart.products.filter((p: CartProductItem) => !(p.productId.toString() === productId && p.size === size));
 
     if (cart.products.length === originalLength) {
       return { success: false, message: "Item not found in cart." };

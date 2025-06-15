@@ -130,24 +130,25 @@ export default function WishlistSlider({ session }: { session: Session | null })
 
 function WishlistItem({ item, session }: { item: WishlistItemType; session: Session | null }) {
   const router = useRouter();
+  const { removeItemFromWishlist } = useUserContext(); // Get the context function
 
-  //Click handlers
+  // Click handlers
   const handleItemClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    //Takes you to product page
-    // If the click was on a button or its children, don't navigate
+    // Takes you to product page
     if ((e.target as HTMLElement).closest("button")) {
       return;
     }
-    // Navigate to product page
     router.push(`/products/${item.slug}`);
   };
-  //remove item from wishlist
+
+  // remove item from wishlist
   const handleRemoveItem = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    //remove item from wishlist
     if (session) {
-      removeItemFromDbWishlistAction(item.id);
+      // Use the context function for logged-in users
+      removeItemFromWishlist(item.id);
     } else {
+      // Use the direct function for guest users
       removeItemFromGuestWishlist(item.id);
     }
   };

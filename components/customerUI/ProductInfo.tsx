@@ -12,20 +12,23 @@ import { toast } from "react-toastify";
 import { addItemToGuestCart } from "@/lib/guestCartStore";
 import { addItemToCart } from "@/actions/cartActions";
 import { useUserContext } from "@/contexts/UserContext";
+import { SaleDocument } from "@/models/Sale";
 
 interface ProductInfoProps {
-  product: ProductType;
+  product: Omit<ProductType, "saleInfo"> & { saleInfo: SaleDocument | null };
   stock?: StockType | null;
   isLoggedIn?: boolean;
 }
 
 export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoProps) {
   const { fetchCart } = useUserContext();
-
+  console.log('Product in product info', product)
   const {
     _id,
     title,
     retailPrice,
+    salePrice,
+    saleInfo,
     images,
     brand,
     category,
@@ -33,11 +36,15 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
     style,
     description,
     specifications,
-    /*inStock, stock as productStockId,*/ identifiers,
+    inStock,
+    identifiers,
     productModel,
     wholesalePrice,
     slug,
   } = product;
+
+  const finalPrice = salePrice ? salePrice : retailPrice;
+  const savedAmount = salePrice ? retailPrice - salePrice : 0;
 
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -142,8 +149,8 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
             src={currentImage}
             alt={product.title}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-contain transition-transform duration-500 ease-in-out group-hover:scale-105"
+            sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+            className='object-contain transition-transform duration-500 ease-in-out group-hover:scale-105'
           />
           {images.length > 1 && (
             <>
@@ -185,12 +192,18 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
             {/* Price and badges */}
             <div className='space-y-0'>
               <div className='flex gap-1 md:gap-2 lg:gap-3 items-center'>
-                <span className='md:text-2xl text-3xl font-black tracking-wider text-blue-900'>{retailPrice?.toLocaleString("en-US")} MAD</span>
-                <Badge className='text-white rounded-none bg-primary'>ON SALE!</Badge>
-                <Badge className='text-white rounded-none bg-orange-600'>SUMMER SALE</Badge>
+                <span className='md:text-2xl text-3xl font-black tracking-wider text-blue-900'>{finalPrice?.toLocaleString("en-US")} MAD</span>
+                {saleInfo && (
+                  <>
+                    <Badge className='text-white rounded-none bg-primary'>
+                      {saleInfo.discountType === "percentage" ? `-${saleInfo.discountValue}%` : `${saleInfo.discountValue} MAD`}
+                    </Badge>
+                    <Badge className='text-white rounded-none bg-orange-600'>{saleInfo.name}</Badge>
+                  </>
+                )}
               </div>
               <p className='italic text-[13px] text-success-green'>
-                <span className='line-through text-grey-darker'>{retailPrice?.toLocaleString("en-US")} MAD</span> saving 1000.00 MAD + Free shipping
+                <span className='line-through text-grey-darker'>{retailPrice?.toLocaleString("en-US")} MAD</span> saving {savedAmount?.toLocaleString("en-US")} MAD + Free shipping
               </p>
             </div>
 

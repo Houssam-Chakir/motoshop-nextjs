@@ -1,7 +1,9 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
+import "./Sale"; // Import for model registration
 import slug from "mongoose-slug-updater";
 import { nanoid } from "nanoid";
 import mongooseLeanVirtuals from "mongoose-lean-virtuals";
+import { StockDocument } from "./Stock";
 
 mongoose.plugin(slug);
 
@@ -31,14 +33,14 @@ export interface ProductDocument extends Document {
   wholesalePrice: number;
   retailPrice: number;
   salePrice?: number;
-  saleInfo?: mongoose.Types.ObjectId;
+  saleInfo: mongoose.Types.ObjectId;
   season: "All seasons" | "Summer" | "Winter" | "Spring/Fall";
   style: "None" | "Versitile" | "Racing" | "Adventure" | "Enduro" | "Urban" | "Touring";
 
   category: mongoose.Types.ObjectId;
   type: mongoose.Types.ObjectId;
-  stock?: mongoose.Types.ObjectId;
-  inStock: boolean;
+  stock?: mongoose.Types.ObjectId | StockDocument;
+  quantity?: number;
 
   specifications: ProductSpec[];
   reviews: ProductReview[];
@@ -79,8 +81,7 @@ const ProductSchema: Schema = new Schema(
     category: { type: Schema.Types.ObjectId, ref: "Category", required: [true, "Please choose a category"], index: true },
     type: { type: Schema.Types.ObjectId, ref: "Type", required: [true, "Please choose a type"], index: true },
 
-    stock: { type: mongoose.Types.ObjectId, unique: true },
-    inStock: { type: Boolean, default: true },
+    stock: { type: mongoose.Types.ObjectId, ref: 'Stock', unique: true },
     specifications: [
       {
         name: { type: String, required: [true, "Please provide a name for the spec"] },
@@ -97,12 +98,12 @@ const ProductSchema: Schema = new Schema(
 
 ProductSchema.plugin(mongooseLeanVirtuals);
 // --- Virtuals ---
+// sale price
 ProductSchema.virtual("sale", {
   ref: "Sale",
   localField: "saleInfo",
   foreignField: "_id",
   justOne: true,
-  match: { isActive: true, startDate: { $lte: new Date() }, endDate: { $gte: new Date() } },
 });
 
 ProductSchema.virtual("salePrice").get(function (this: ProductDocument) {
@@ -119,6 +120,21 @@ ProductSchema.virtual("salePrice").get(function (this: ProductDocument) {
   }
 
   return Math.max(price, 0); // avoid negative
+});
+// // stock stat
+ProductSchema.virtual("stockInfo", {
+  ref: "Stock",
+  localField: "stock",
+  foreignField: "_id",
+  justOne: true,
+});
+
+ProductSchema.virtual("quantity").get(function (this: ProductDocument) {
+  if (this.stock && "sizes" in this.stock) {
+    const stock = this.stock as StockDocument;
+    return stock.sizes.reduce((total, size) => total + size.quantity, 0);
+  }
+  return 0;
 });
 
 // --- Helper function to generate attribute codes (define before use) ---

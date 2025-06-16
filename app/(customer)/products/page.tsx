@@ -1,8 +1,8 @@
 import ProductCardTest from "@/components/Card";
 import ProductCard from "@/components/ProductCard";
 import connectDB from "@/config/database";
-import Product, { ProductType } from "@/models/Product";
 import Sale, { SaleDocument, SaleType } from "@/models/Sale";
+import Product, { ProductType } from "@/models/Product";
 import makeSerializable from "@/utils/convertToObj";
 // import convertToSerializableObject from "@/utils/convertToObj";
 
@@ -10,10 +10,14 @@ const ProductsPage = async () => {
   await connectDB();
   const currentDate = new Date();
   const productsDoc = await Product.find({})
-    .populate<{ saleInfo: SaleDocument | null }>({
+    .populate({
       path: "saleInfo",
-      match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } }, // Temporarily disabled for debugging
-      select: "name discountType discountValue startDate endDate isActive", // Explicitly select fields for matching
+      match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+      select: "name discountType discountValue startDate endDate isActive",
+    })
+    .populate({
+      path: "stock",
+      select: "sizes",
     })
     .lean({ virtuals: true });
   const products = makeSerializable(productsDoc) as ProductType[];

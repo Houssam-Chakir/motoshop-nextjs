@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { SheetClose } from "@/components/ui/sheet";
 import { Section } from "@/types/section";
+import { Session } from "next-auth";
+import Image from "next/image";
+import { useUserContext } from "@/contexts/UserContext";
 
 // --- Type Definitions ---
 
@@ -35,11 +38,17 @@ const generateSlug = (name?: string): string => {
 // --- Main Component ---
 export interface CategoriesSliderProps {
   sections: Section[];
+  session: Session;
   onCategorySelect: (section: Section) => void;
   onTypeSelect: (type: { name: string }, section: Section) => void;
 }
 
-export function CategoriesSlider({ sections }: CategoriesSliderProps) {
+export function CategoriesSlider({ sections, session }: CategoriesSliderProps) {
+  console.log("session", session);
+
+  const { profile } = useUserContext();
+  const userRole = profile?.role as String;
+
   const [selectedSection, setSelectedSection] = React.useState<SectionSchema | null>(null);
 
   const { mainSections, ridingStyleSection } = React.useMemo(() => {
@@ -61,18 +70,20 @@ export function CategoriesSlider({ sections }: CategoriesSliderProps) {
   return (
     <div className='h-full flex flex-col bg-background'>
       {/* Header */}
-      <div className='flex items-center gap-2 p-3 sm:p-4 border-b bg-background sticky top-0 z-10'>
+      <div className='flex items-center '>
         {selectedSection && (
-          <Button variant='ghost' size='icon' onClick={handleBackClick} className='p-1 h-8 w-8 rounded-none shrink-0'>
-            <ArrowLeft className='h-5 w-5' />
-          </Button>
+          <>
+            <Button variant='ghost' size='icon' onClick={handleBackClick} className='px-4 py-2 h-8 w-8 rounded-none shrink-0'>
+              <ArrowLeft className='h-5 w-5' />
+            </Button>
+            <h2 className='text-lg p-4 font-semibold truncate flex-1'>{currentTitle}</h2>
+          </>
         )}
-        <h2 className='text-lg font-semibold truncate flex-1'>{currentTitle}</h2>
-        <SheetClose asChild>
+        {/* <SheetClose asChild>
           <Button variant='ghost' size='icon' className='p-1 h-8 w-8 shrink-0 rounded-none'>
             <X className='h-5 w-5' />
           </Button>
-        </SheetClose>
+        </SheetClose> */}
       </div>
 
       {/* Content Container */}
@@ -83,7 +94,30 @@ export function CategoriesSlider({ sections }: CategoriesSliderProps) {
             "absolute inset-0 transition-all duration-300 ease-out bg-background", // Added 'transition-all' for opacity too
             selectedSection ? "-translate-x-full opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
           )}
-        >
+          >
+          {session && (
+            <div className='p-4 border-b shrink-0'>
+              <div className='flex items-center gap-3'>
+                <div className='w-12 h-12 rounded-full overflow-hidden border border-gray-300 bg-gray-100'>
+                  <Image
+                    src={session.user?.image || "/default-avatar.png"} // Ensure you have a fallback avatar
+                    alt={session.user?.name || "User Avatar"}
+                    width={48}
+                    height={48}
+                    className='object-cover w-full h-full'
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/default-avatar.png";
+                    }} // Fallback for broken image links
+                  />
+                </div>
+                <div>
+                  <p className='font-semibold text-sm truncate'>{session.user?.name || "User Name"}</p>
+                  <p className='text-xs text-gray-500 truncate'>{session.user?.email || "user@example.com"}</p>
+                  <p className='text-xs text-gray-500 truncate'>{userRole}</p>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Only render ScrollArea if not selectedSection, to prevent rendering hidden content unnecessarily */}
           {!selectedSection && (
             <ScrollArea className='h-full'>

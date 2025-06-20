@@ -28,7 +28,6 @@ export default function Navbar({ sections }: { sections: Section[] }) {
   const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
 
-
   //Menus states
   const [whichSectionMenuOpen, setWhichSectionMenuOpen] = useState<number | null>(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -75,6 +74,8 @@ export default function Navbar({ sections }: { sections: Section[] }) {
                 }
               >
                 <CategoriesSlider
+                  providers={providers}
+                  session={session}
                   sections={sections}
                   onCategorySelect={(section: Section) => {
                     console.log("Selected category:", section.section);

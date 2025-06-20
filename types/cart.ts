@@ -23,6 +23,20 @@ export interface CartProductItemType {
     images: { secure_url: string; public_id?: string }[];
     retailPrice: number;
     slug: string;
+    // Populated fields from getCart action
+    saleInfo?: {
+      name: string;
+      discountType: "percentage" | "fixed";
+      discountValue: number;
+      isActive: boolean;
+    } | null;
+    stock?: {
+      sizes: {
+        size: string;
+        quantity: number;
+        inStock: boolean;
+      }[];
+    };
   };
   size: string;
   quantity: number;

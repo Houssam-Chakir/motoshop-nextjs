@@ -132,6 +132,9 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
   const router = useRouter();
   const { removeItemFromWishlist } = useUserContext(); // Get the context function
 
+  console.log("item from wishlist", item);
+  const finalPrice = item.salePrice ? item.salePrice : item.retailPrice;
+
   // Click handlers
   const handleItemClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     // Takes you to product page
@@ -158,6 +161,14 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
       {/* Image */}
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-2 overflow-clip'>
         <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
+        {item.salePrice && (
+          <div
+            className={`bg-primary transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}
+          >
+            {/* calculate percentage of discount from original price to unitprice and remove numbers after comma*/}
+            -{Math.floor(((item.retailPrice - item.salePrice) / item.retailPrice) * 100)}%
+          </div>
+        )}
       </div>
       {/* Product Info */}
       <div className='shrink-1 flex flex-col justify-center'>
@@ -167,12 +178,20 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
             {item.identifiers?.brand} {item.identifiers?.category}
           </p>
         </div>
-        <div className=' gap-2 items-center pl-0.5'>
-          {item.inStock && <span className='text-emerald-500 text-xs'>In Stock</span>}
-          {!item.inStock && <span className='text-red-500 text-xs'>Out of Stock</span>}
-          <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>
-            {item.retailPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
-          </p>
+        <div className='gap-2 items-center pl-0.5'>
+          {item.quantity > 0 && <span className='text-emerald-500 text-xs'>In Stock</span>}
+          {item.quantity === 0 || !item.quantity  && <span className='text-red-500 text-xs'>Out of Stock</span>}
+          <div className='flex gap-2 items-center'>
+            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>{finalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
+            {item.salePrice && (
+              <div className='flex gap-1 text-success-green items-center line-through italic'>
+                <div className=' text-[clamp(8px,1.5vw,11px)]'>{item.retailPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+                <div className='text-[clamp(8px,1.5vw,11px)]'>
+                  <span className='text-[clamp(8px,1.5vw,11px)]'> MAD</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       {/* Remove Button */}

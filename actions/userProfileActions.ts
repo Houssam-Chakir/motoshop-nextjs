@@ -18,8 +18,23 @@ export async function getMyDetailedProfile(userId: string): Promise<ActionResult
 
   try {
     await connectDB();
-    // Populate user wishlist with product details
-    const userFromDb = await User.findById(userId).populate("wishlist").lean();
+    const currentDate = new Date();
+    // Populate user wishlist with product details and stock information
+    const userFromDb = await User.findById(userId)
+      .populate({
+        path: "wishlist",
+        populate: [
+          {
+            path: "stock",
+          },
+          {
+            path: "saleInfo",
+            match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+            select: "name discountType discountValue",
+          },
+        ],
+      })
+      .lean({ virtuals: true });
     console.log("user from db:", userFromDb);
 
     if (!userFromDb) {
@@ -49,7 +64,9 @@ export async function getMyDetailedProfile(userId: string): Promise<ActionResult
             retailPrice: item.retailPrice,
             identifiers: item.identifiers, // Assuming structure matches
             slug: item.slug,
-            inStock: item.inStock,
+            quantity: item.quantity,
+            salePrice: item.salePrice,
+            saleInfo: item.saleInfo,
           }))
         : null,
       cart: userFromDb.cart || null,

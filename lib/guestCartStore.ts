@@ -78,14 +78,14 @@ const saveGuestCart = (cart: GuestCart): void => {
 type GuestCartActionResult = { success: boolean; message: string };
 
 export const addItemToGuestCart = (
-  product: Pick<ProductDocument, "_id" | "title" | "slug" | "images" | "retailPrice" | "inStock" | "identifiers">,
+  product: (Pick<ProductDocument, "_id" | "title" | "slug" | "images" | "retailPrice" | "identifiers"> & { inStock: boolean }),
   size: string,
-  quantity: number
+  selectedSizeQuantity: number
 ): GuestCartActionResult => {
   if (typeof window === "undefined") {
     return { success: false, message: "addItemToGuestCart can only be used in the browser." };
   }
-  if (quantity <= 0) {
+  if (selectedSizeQuantity <= 0) {
     return { success: false, message: "Quantity must be greater than 0." };
   }
 
@@ -95,7 +95,7 @@ export const addItemToGuestCart = (
 
   if (existingItemIndex > -1) {
     // Item with the same ID and size exists, update quantity
-    cart.products[existingItemIndex].quantity += quantity;
+    cart.products[existingItemIndex].quantity += selectedSizeQuantity;
     cart.products[existingItemIndex].totalPrice = cart.products[existingItemIndex].quantity * cart.products[existingItemIndex].unitPrice;
   } else {
     // Item does not exist, add as new
@@ -105,9 +105,9 @@ export const addItemToGuestCart = (
       slug: product.slug,
       imageUrl: product.images && product.images.length > 0 ? product.images[0].secure_url : undefined,
       size,
-      quantity,
+      quantity: selectedSizeQuantity,
       unitPrice: product.retailPrice,
-      totalPrice: product.retailPrice * quantity,
+      totalPrice: product.retailPrice * selectedSizeQuantity,
       inStock: product.inStock,
       brand: product.identifiers?.brand,
     };

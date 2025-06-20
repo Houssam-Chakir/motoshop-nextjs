@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { removeItemFromCart, updateCartItemQuantity } from "@/actions/cartActions";
 import { toast } from "react-toastify";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { useMemo } from "react";
 
 // Placeholder for CartItemCard component - will be created in a separate file
 const CartItemCard = ({
@@ -34,6 +35,7 @@ const CartItemCard = ({
   onRemove: (productId: string, size: string) => void; // Adjusted params
   onQuantityChange: (productId: string, size: string, newQuantity: number) => void; // Adjusted params
 }) => {
+  console.log("cart item", item);
   const handleRemove = () => {
     onRemove(item.productId, item.size); // Use productId and size
   };
@@ -46,6 +48,14 @@ const CartItemCard = ({
     <div className='relative flex text-start transition-all hover:border-gray-400 cursor-pointer'>
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-1 overflow-clip'>
         <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Cart Item"} width={90} height={90} />
+        {item.originalPrice !== item.unitPrice && (
+          <div
+            className={`bg-primary transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}
+          >
+            {/* calculate percentage of discount from original price to unitprice and remove numbers after comma*/}
+            -{Math.floor(((item.originalPrice - item.unitPrice) / item.originalPrice) * 100)}%
+          </div>
+        )}
       </div>
       <div className='w-full flex flex-col justify-around px-2'>
         <div>
@@ -53,7 +63,7 @@ const CartItemCard = ({
           <p className='text-xs text-gray-500'>Size: {item.size}</p>
           <p className='text-xs text-gray-500'>Price: {item.unitPrice?.toFixed(2)} MAD</p>
         </div>
-        <div className='flex w-full items-center-safe justify-around'>
+        <div className='flex pt-1 w-full items-center-safe justify-between'>
           <div className='flex items-center gap-2 mt-2 border rounded-full'>
             <button
               onClick={() => handleQuantityChange(item.quantity - 1)}
@@ -67,15 +77,28 @@ const CartItemCard = ({
               <Plus size={16} height={24} />
             </button>
           </div>
-          <div className='flex w-full justify-end'>
-            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue pt-1'>
-              {item.totalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD
-            </p>
+          <div className='-space-y-1 flex flex-col items-end'>
+            {item.originalPrice !== item.unitPrice && (
+              <div className='flex gap-1 text-success-green items-center line-through italic'>
+                <div className=' text-[clamp(8px,1.5vw,11px)]'>{item.originalPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+                <div className='text-[clamp(8px,1.5vw,11px)]'>
+                  <span className='text-[clamp(8px,1.5vw,11px)]'> MAD</span>
+                </div>
+              </div>
+            )}
+            <div className='flex gap-1 items-center'>
+              <div className='font-bold text-blue text-[clamp(15px,1.5vw,16px)]'>
+                {item.unitPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </div>
+              <div className='text-[clamp(10px,1.5vw,14px)] text-blue'>
+                <span className='font-bold text-[clamp(15px,1.5vw,16px)]'> MAD</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <button onClick={handleRemove} className='flex px-1.5 items-center justify-center h-full w-[24px] hover:bg-primary group'>
-        <Trash size={12} className='text-grey-darker group-hover:text-white' />
+      <button onClick={handleRemove} className='absolute top-0 right-0 flex px-1.5 items-center justify-center h-6 w-6 group hover:bg-red-50 rounded-full'>
+        <Trash size={12} className='text-grey-darker group-hover:text-primary' />
       </button>
     </div>
   );
@@ -89,45 +112,73 @@ export default function CartSlider({ session }: { session: Session | null }) {
   const isLoggedIn = !!profile;
 
   // Initialize with an empty cart to prevent hydration mismatch. Server will render 0 items.
-  const [guestCart, setGuestCart] = useState<GuestCart>({ products: [], totalQuantity: 0, totalAmount: 0 });
-  const [isClient, setIsClient] = useState(false);
+  const [guestCartItems, setGuestCartItems] = useState<GuestCartProductItem[]>([]);
 
+  // Effect for handling guest cart
   useEffect(() => {
-    // This effect runs only on the client, after the initial render.
-    setIsClient(true); // Mark that we are on the client.
-    setGuestCart(getGuestCart()); // Load the actual guest cart from sessionStorage.
-
     const handleGuestCartChange = (event: CustomEvent<GuestCart>) => {
-      setGuestCart(event.detail);
+      setGuestCartItems(event.detail.products);
     };
 
-    window.addEventListener("guestCartChanged", handleGuestCartChange as EventListener);
+    if (!session) {
+      const guestCart = getGuestCart();
+      setGuestCartItems(guestCart.products);
+      window.addEventListener("guestCartChanged", handleGuestCartChange as EventListener);
+    }
 
     return () => {
       window.removeEventListener("guestCartChanged", handleGuestCartChange as EventListener);
     };
-  }, []);
+  }, [session]);
 
-  // Convert authenticated cart items to GuestCartProductItem shape for unified rendering
-  const userCartItems: GuestCartProductItem[] =
-    cart?.products.map((item) => ({
-      productId: item.productId._id,
-      title: item.productId.title,
-      slug: item.productId.slug,
-      imageUrl: item.productId.images?.[0]?.secure_url,
-      size: item.size,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      totalPrice: item.totalPrice,
-      // The properties below are not in CartProductItemType, so we provide defaults.
-      inStock: true, // Assuming items in cart are in stock. For more accuracy, this would need a re-fetch.
-      brand: undefined,
-    })) || [];
+  const displayCartItems = useMemo(() => {
+    if (session && cart?.products) {
+      console.log("cart in cartSLider", cart);
+      return cart.products.map((item) => {
+        const finalUnitPrice = item.productId.salePrice ? item.productId.salePrice : item.productId.retailPrice;
+        const stockInfo = item.productId.stock?.sizes.find((s) => s.size === item.size);
+        const inStock = stockInfo ? stockInfo.inStock : false;
 
-  // After hydration, the guestCart state updates, and this will re-render with the correct data.
-  const displayCartItems = isLoggedIn ? userCartItems : guestCart.products;
-  const totalCartItems = isLoggedIn ? cart?.quantity || 0 : guestCart.totalQuantity;
-  const totalCartPrice = isLoggedIn ? cart?.totalAmount || 0 : guestCart.totalAmount;
+        return {
+          productId: item.productId._id.toString(),
+          title: item.productId.title,
+          imageUrl: item.productId.images?.[0]?.secure_url,
+          size: item.size,
+          quantity: item.quantity,
+          unitPrice: finalUnitPrice,
+          totalPrice: finalUnitPrice * item.quantity,
+          originalPrice: item.productId.retailPrice,
+          inStock: inStock, // Added required property
+          // Add other missing properties with default values if necessary
+          slug: item.productId.slug,
+        };
+      });
+    } else if (!session) {
+      // Guest cart items are assumed to be in stock when added.
+      return guestCartItems.map((item) => ({ ...item, originalPrice: item.unitPrice, inStock: true }));
+    }
+    return [];
+  }, [session, cart, guestCartItems]);
+
+  const { subtotal, totalDiscount, finalTotal, totalCartItems } = useMemo(() => {
+    const totals = displayCartItems.reduce(
+      (acc, item) => {
+        const originalTotal = (item.originalPrice || item.unitPrice) * item.quantity;
+        const finalTotal = item.totalPrice || 0;
+
+        acc.subtotal += originalTotal;
+        acc.finalTotal += finalTotal;
+        acc.totalCartItems += item.quantity;
+        return acc;
+      },
+      { subtotal: 0, finalTotal: 0, totalCartItems: 0 }
+    );
+
+    return {
+      ...totals,
+      totalDiscount: totals.subtotal - totals.finalTotal,
+    };
+  }, [displayCartItems]);
 
   const handleRemoveItem = async (productId: string, size: string) => {
     if (isLoggedIn) {
@@ -227,35 +278,33 @@ export default function CartSlider({ session }: { session: Session | null }) {
         {/* Footer - Summary & Checkout */}
         {displayCartItems.length > 0 && (
           <div className='absolute bottom-0 w-full border-t p-4 space-y-4 shrink-0 bg-white/90 backdrop-blur-xs'>
-             <div className='font-semibold'>Summary</div>
+            <div className='font-semibold'>Summary</div>
             <div className='bg-grey-dark/20 py-2 px-4 mb-4 border custom-dashed space-y-2'>
               {/* Subtotal */}
               <div className='flex justify-between text-sm font-'>
                 <span>Subtotal:</span>
-                <span className="font-bold text-slate-700">{totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+                <span className='font-bold text-slate-700'>{subtotal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
               </div>
               {/* Sales */}
-              <div className='flex justify-between text-sm font-'>
-                <span>Sales:</span>
-                <span className="font-bold text-success-green">- {totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
-              </div>
-              {/* Shipping */}
-              {/* <div className='flex justify-between text-sm font-'>
-                <span>Shipping:</span>
-                <span className="font-bold text-success-green">{totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
-              </div> */}
-              <hr className="border-grey-medium" />
+              {totalDiscount > 0 && (
+                <div className='flex justify-between text-sm font-'>
+                  <span>Sales:</span>
+                  <span className='font-bold text-success-green'>- {totalDiscount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+                </div>
+              )}
+              {/* Shipping - Placeholder */}
+              <hr className='border-grey-medium' />
               {/* Total */}
               <div className='flex justify-between text-sm font-bold'>
                 <span>Total:</span>
-                <span className="font-bold text-blue">{totalCartPrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+                <span className='font-bold text-blue'>{finalTotal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
-            <span className="text-xs text-grey-darker italic">Shipping fee varies by address.s</span>
-            <Button onClick={handleCheckout} className='w-full bg-blue hover:bg-blue/90 rounded-full py-5 cursor-pointer text-white'>
-              Proceed to Checkout
-            </Button>
+            <div className='flex flex-col gap-2'>
+              <span className='text-xs text-grey-darker italic'>Shipping fee varies by address.s</span>
+              <Button onClick={handleCheckout} className='w-full bg-blue hover:bg-blue/90 rounded-full py-5 cursor-pointer text-white'>
+                Proceed to Checkout
+              </Button>
             </div>
           </div>
         )}

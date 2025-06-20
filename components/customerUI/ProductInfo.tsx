@@ -15,33 +15,17 @@ import { useUserContext } from "@/contexts/UserContext";
 import { SaleDocument } from "@/models/Sale";
 
 interface ProductInfoProps {
-  product: Omit<ProductType, "saleInfo"> & { saleInfo: SaleDocument | null };
-  stock?: StockType | null;
+  product: Omit<ProductType, "saleInfo"> & {
+    saleInfo: SaleDocument | null;
+    stock: StockType;
+  };
   isLoggedIn?: boolean;
 }
 
-export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoProps) {
+export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
   const { fetchCart } = useUserContext();
-  console.log('Product in product info', product)
-  const {
-    _id,
-    title,
-    retailPrice,
-    salePrice,
-    saleInfo,
-    images,
-    brand,
-    category,
-    season,
-    style,
-    description,
-    specifications,
-    inStock,
-    identifiers,
-    productModel,
-    wholesalePrice,
-    slug,
-  } = product;
+  console.log("Product in product info", product);
+  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, category, season, style, identifiers, quantity: stockQuantity, slug, stock } = product;
 
   const finalPrice = salePrice ? salePrice : retailPrice;
   const savedAmount = salePrice ? retailPrice - salePrice : 0;
@@ -52,14 +36,16 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
   const [selectedSizeQuantity, setSelectedSizeQuantity] = useState(0);
 
   const availableSizes = stock?.sizes?.filter((s) => s.quantity > 0).map((s) => s.size) || [];
+  console.log(availableSizes);
   // const stockMap = new Map(stock?.sizes?.map(s => [s.size, s.quantity]));
 
   useEffect(() => {
-    if (selectedSize && stock) {
+    if (selectedSize && stock?.sizes) {
       const sizeInfo = stock.sizes.find((s) => s.size === selectedSize);
-      setSelectedSizeQuantity(sizeInfo?.quantity || 0);
+      const availableQuantity = sizeInfo?.quantity || 0;
+      setSelectedSizeQuantity(availableQuantity);
       // Reset quantity to 1 if selected size changes and new stock is less than current quantity
-      if ((sizeInfo?.quantity || 0) < quantity) {
+      if (availableQuantity < quantity) {
         setQuantity(1);
       }
     } else {
@@ -88,18 +74,26 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
   const handleQuantityChange = (amount: number) => {
     setQuantity((prevQuantity) => {
       const newQuantity = prevQuantity + amount;
+
+      // Don't allow quantity to go below 1
       if (newQuantity < 1) return 1;
-      // If a size is selected and has stock, cap by its quantity
-      if (selectedSize && selectedSizeQuantity > 0 && newQuantity > selectedSizeQuantity) {
-        return selectedSizeQuantity;
+
+      // If a size is selected and stock data is available
+      if (selectedSize && stock?.sizes) {
+        // Find the selected size in the stock data
+        const sizeInfo = stock.sizes.find((s) => s.size === selectedSize);
+        const maxQuantity = sizeInfo?.quantity || 0;
+
+        // Don't allow quantity to exceed available stock for the selected size
+        if (newQuantity > maxQuantity) {
+          return maxQuantity > 0 ? maxQuantity : 1;
+        }
+
+        return newQuantity;
       }
-      // If no size selected or selected size has no stock, user shouldn't be able to increment quantity beyond 1.
-      // The buttons for quantity change are already conditionally rendered or disabled,
-      // but this provides an additional safeguard.
-      if ((!selectedSize || selectedSizeQuantity === 0) && newQuantity > 1) {
-        return 1;
-      }
-      return newQuantity;
+
+      // If no size is selected or no stock data, don't allow adding to cart (quantity should be 1)
+      return 1;
     });
   };
 
@@ -109,7 +103,7 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
 
     if (isLoggedIn) {
       // add item to logged in user cart or create new cart for user
-      const result = await addItemToCart({ productId: product._id, size: selectedSize, quantity });
+      const result = await addItemToCart({ productId: product._id, size: selectedSize, quantity: quantity });
       if (result.success) {
         toast.success(result.message);
         await fetchCart();
@@ -118,7 +112,11 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
       }
     } else {
       // add item to guest cart
-      const result = addItemToGuestCart(product, selectedSize, quantity);
+      const productWithStockStatus = {
+        ...product,
+        inStock: product.stock?.sizes?.some((s) => s.quantity > 0) ?? false,
+      };
+      const result = addItemToGuestCart(productWithStockStatus, selectedSize, quantity);
       if (result.success) {
         toast.success(result.message);
       } else {
@@ -215,8 +213,8 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
                 </label>
                 <div className='flex flex-wrap gap-2'>
                   {/* Use availableSizes derived from stock prop */}
-                  {stock && stock.sizes && stock.sizes.length > 0 ? (
-                    stock.sizes.map((sizeInfo) => (
+                  {product.stock && product.stock.sizes && product.stock.sizes.length > 0 ? (
+                    product.stock.sizes.map((sizeInfo) => (
                       <button
                         key={sizeInfo.size}
                         className={`px-3 py-2 border rounded-full text-sm font-medium transition-colors ${
@@ -238,7 +236,7 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
                 </div>
               </div>
               {/* Quantity */}
-              {(stock?.sizes?.length ?? 0) > 0 && (
+              {(product.stock?.sizes?.length ?? 0) > 0 && (
                 <div>
                   <label className='block mb-3 text-sm font-medium text-gray-900'>Quantity:</label>
                   <div className={`flex gap-3 items-center rounded-full border w-fit *:border-none *:bg-white/0 transition-opacity ${!selectedSize ? "opacity-50" : ""}`}>
@@ -251,7 +249,7 @@ export default function ProductInfo({ product, stock, isLoggedIn }: ProductInfoP
                       variant='outline'
                       size='icon'
                       onClick={() => handleQuantityChange(1)}
-                      disabled={!selectedSize || quantity >= selectedSizeQuantity}
+                      disabled={!selectedSize || (selectedSizeQuantity > 0 && quantity >= selectedSizeQuantity)}
                     >
                       <Plus className='w-6 h-6' />
                     </Button>

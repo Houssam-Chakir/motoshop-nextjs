@@ -3,7 +3,7 @@ import "./Sale"; // Import for model registration
 import slug from "mongoose-slug-updater";
 import { nanoid } from "nanoid";
 import mongooseLeanVirtuals from "mongoose-lean-virtuals";
-import { StockDocument } from "./Stock";
+import { StockDocument, SizeQuantityType } from "./Stock";
 
 mongoose.plugin(slug);
 
@@ -81,7 +81,7 @@ const ProductSchema: Schema = new Schema(
     category: { type: Schema.Types.ObjectId, ref: "Category", required: [true, "Please choose a category"], index: true },
     type: { type: Schema.Types.ObjectId, ref: "Type", required: [true, "Please choose a type"], index: true },
 
-    stock: { type: mongoose.Types.ObjectId, ref: 'Stock', unique: true },
+    stock: { type: mongoose.Types.ObjectId, ref: "Stock", unique: true },
     specifications: [
       {
         name: { type: String, required: [true, "Please provide a name for the spec"] },
@@ -230,7 +230,7 @@ export type ProductType = Omit<ProductDocument, keyof Document> & {
   category?: { _id: string; name: string };
   stock?: {
     _id: string;
-    sizes: string[];
+    sizes: SizeQuantityType[];
   };
 };
 export default Product;

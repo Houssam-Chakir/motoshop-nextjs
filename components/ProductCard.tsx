@@ -41,13 +41,13 @@ interface ProductCard {
   slug: string;
   specifications: Array<{ name: string; description: string }>;
   stock: string;
-  inStock: boolean;
+  quantity: number;
   style: string;
   title: string;
   type: string;
   updatedAt: string;
   wholesalePrice: number;
-  saleInfo: SaleDocument
+  saleInfo: SaleDocument;
   _id: string;
   __v: number;
 }
@@ -166,7 +166,8 @@ function ProductCard({ product }: { product: ProductCard }) {
           retailPrice: product.retailPrice,
           identifiers: product.identifiers,
           slug: product.slug,
-          inStock: product.inStock,
+          quantity: product.quantity,
+          salePrice: product.salePrice ? product.salePrice : product.retailPrice,
         });
       }
     } else {
@@ -183,7 +184,8 @@ function ProductCard({ product }: { product: ProductCard }) {
           retailPrice: product.retailPrice,
           imageUrl: product.images[0].secure_url,
           slug: product.slug,
-          inStock: product.inStock,
+          quantity: product.quantity,
+          salePrice: product.salePrice ? product.salePrice : product.retailPrice,
         });
       }
       // Update local state for guest after action
@@ -248,7 +250,9 @@ function ProductCard({ product }: { product: ProductCard }) {
         {/* On sale tag */}
         {product.salePrice > 0 && (
           <div
-            className={`bg-primary ${isDesktop ? "group-hover:-translate-y-9" : ""} transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}
+            className={`bg-primary ${
+              isDesktop ? "group-hover:-translate-y-9" : ""
+            } transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}
           >
             {product.saleInfo.discountType === "percentage" ? `-${product.saleInfo.discountValue}%` : `-${product.saleInfo.discountValue} MAD`}
           </div>

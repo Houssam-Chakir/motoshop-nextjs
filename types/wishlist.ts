@@ -6,5 +6,6 @@ export interface WishlistItem {
   retailPrice?: number;
   identifiers?: { brand: string; categoryType: string; category: string };
   slug?: string;
-  inStock: boolean;
+  quantity: number;
+  salePrice?: number;
 }

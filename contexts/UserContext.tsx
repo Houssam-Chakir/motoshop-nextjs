@@ -48,6 +48,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setCartError(null);
     try {
       const result = await getCart();
+      console.log('results in userCOntext', result)
       if (result.success) {
         setCart(result.cart);
       } else {

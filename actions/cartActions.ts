@@ -16,7 +16,6 @@ interface ProductAndStockResult {
   message?: string;
   data?: {
     product: ProductType;
-    stock: StockType | null;
   } | null;
 }
 
@@ -29,16 +28,14 @@ export async function getProductWithStock(productId: string): Promise<ProductAnd
     await connectDB();
     const currentDate = new Date();
 
-    const [productDoc, stockDoc] = await Promise.all([
-      Product.findById(productId)
-        .populate<{ saleInfo: SaleDocument | null }>({
-          path: "saleInfo",
-          match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } }, // Temporarily disabled for debugging
-          select: "name discountType discountValue startDate endDate isActive", // Explicitly select fields for matching
-        })
-        .lean({ virtuals: true }),
-      Stock.findOne({ productId: productId }).lean(),
-    ]);
+    const productDoc = await Product.findById(productId)
+      .populate<{ saleInfo: SaleDocument | null }>({
+        path: "saleInfo",
+        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+        select: "name discountType discountValue",
+      })
+      .populate({ path: "stock", select: "sizes" })
+      .lean({ virtuals: true });
 
     if (!productDoc) {
       return { success: false, message: "Product not found." };
@@ -46,7 +43,6 @@ export async function getProductWithStock(productId: string): Promise<ProductAnd
 
     const serializableData = {
       product: makeSerializable(productDoc) as ProductType,
-      stock: makeSerializable(stockDoc) as StockType | null,
     };
 
     return {
@@ -68,13 +64,25 @@ export async function getCart() {
 
   try {
     await connectDB();
+    const currentDate = new Date();
     const cart = await Cart.findOne({ userId: session.user.id })
       .populate({
         path: "products.productId",
         model: "Product",
-        select: "title images retailPrice slug",
+        select: "title images retailPrice slug", // Keep original fields for UI
+        populate: [
+          {
+            path: "saleInfo",
+            match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+            select: "name discountType discountValue startDate endDate isActive",
+          },
+          {
+            path: "stock",
+            select: "sizes",
+          },
+        ],
       })
-      .lean();
+      .lean({ virtuals: true });
 
     if (!cart) {
       return { success: true, message: "Cart not found.", cart: null };
@@ -97,13 +105,13 @@ type AddToCartActionState = {
   message: string;
 };
 
-export async function addItemToCart({ productId, size, quantity }: { productId: string; size: string; quantity: number }): Promise<AddToCartActionState> {
+export async function addItemToCart({ productId, size, quantity: selectedSizeQuantity }: { productId: string; size: string; quantity: number }): Promise<AddToCartActionState> {
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.id) {
     return { success: false, message: "Unauthorized: Please log in." };
   }
 
-  if (!productId || !size || quantity <= 0) {
+  if (!productId || !size || selectedSizeQuantity <= 0) {
     return { success: false, message: "Invalid input data." };
   }
 
@@ -115,10 +123,12 @@ export async function addItemToCart({ productId, size, quantity }: { productId: 
       return { success: false, message: "Product not found." };
     }
 
+    console.log('* Product in cartActions: ',product)
+
     let cart: CartDocument | null = await Cart.findOne({ userId: session.user.id });
 
-    const unitPrice = typeof product.price === "number" ? product.price : typeof product.retailPrice === "number" ? product.retailPrice : 0;
-    const totalPrice = unitPrice * quantity;
+    const unitPrice = product.salePrice ? product.salePrice : product.retailPrice;
+    const totalPrice = unitPrice * selectedSizeQuantity;
 
     if (cart) {
       // Cart exists, check if product already exists
@@ -126,14 +136,14 @@ export async function addItemToCart({ productId, size, quantity }: { productId: 
 
       if (productIndex > -1) {
         // Product exists, update quantity
-        cart.products[productIndex].quantity += quantity;
+        cart.products[productIndex].quantity += selectedSizeQuantity;
         cart.products[productIndex].totalPrice = cart.products[productIndex].quantity * unitPrice;
       } else {
         // Product does not exist, add new item
         cart.products.push({
           productId: new mongoose.Types.ObjectId(productId),
           size,
-          quantity,
+          quantity: selectedSizeQuantity,
           unitPrice,
           totalPrice,
           addedAt: new Date(),
@@ -147,7 +157,7 @@ export async function addItemToCart({ productId, size, quantity }: { productId: 
           {
             productId: new mongoose.Types.ObjectId(productId),
             size,
-            quantity,
+            quantity: selectedSizeQuantity,
             unitPrice,
             totalPrice,
             addedAt: new Date(),
@@ -178,12 +188,12 @@ export async function addItemToCart({ productId, size, quantity }: { productId: 
 }
 
 // Remove item from cart for authenticated user
-export async function updateCartItemQuantity({ productId, size, quantity }: { productId: string; size: string; quantity: number }): Promise<AddToCartActionState> {
+export async function updateCartItemQuantity({ productId, size, quantity: newQuantity }: { productId: string; size: string; quantity: number }): Promise<AddToCartActionState> {
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.id) {
     return { success: false, message: "Unauthorized: Please log in." };
   }
-  if (!productId || !size || quantity <= 0) {
+  if (!productId || !size || newQuantity <= 0) {
     return { success: false, message: "Invalid input data." };
   }
   try {
@@ -196,8 +206,8 @@ export async function updateCartItemQuantity({ productId, size, quantity }: { pr
     if (!item) {
       return { success: false, message: "Item not found in cart." };
     }
-    item.quantity = quantity;
-    item.totalPrice = item.unitPrice * quantity;
+    item.quantity = newQuantity;
+    item.totalPrice = item.unitPrice * newQuantity;
     cart.totalAmount = cart.products.reduce((acc: number, p: CartProductItem) => acc + p.totalPrice, 0);
     cart.quantity = cart.products.reduce((acc: number, p: CartProductItem) => acc + p.quantity, 0);
     await cart.save();

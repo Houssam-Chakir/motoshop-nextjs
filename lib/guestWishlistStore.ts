@@ -18,7 +18,8 @@ export interface GuestWishlistItem {
   // Consider adding imageUrl if it's small or essential for a quick view, e.g.:
   imageUrl?: string;
   slug: string;
-  inStock: boolean;
+  quantity: number
+  salePrice?: number
 }
 
 /**
@@ -43,6 +44,7 @@ export const getGuestWishlist = (): GuestWishlistItem[] => {
  * @param {GuestWishlistItem} item - The wishlist item object to add.
  */
 export const addItemToGuestWishlist = (item: GuestWishlistItem): void => {
+  console.log('item to add to guest wishlist:', item);
   if (typeof window === "undefined") return;
   try {
     const currentWishlist = getGuestWishlist();

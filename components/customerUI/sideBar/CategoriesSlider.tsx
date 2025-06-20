@@ -12,6 +12,8 @@ import { Section } from "@/types/section";
 import { Session } from "next-auth";
 import Image from "next/image";
 import { useUserContext } from "@/contexts/UserContext";
+import GoogleSignupButton from "@/components/authentication/GoogleSignUpButton";
+import { signIn } from "next-auth/react";
 
 // --- Type Definitions ---
 
@@ -38,12 +40,13 @@ const generateSlug = (name?: string): string => {
 // --- Main Component ---
 export interface CategoriesSliderProps {
   sections: Section[];
-  session: Session;
+  session: Session | null;
+  providers: Record<string, { id: string; name: string }> | null;
   onCategorySelect: (section: Section) => void;
   onTypeSelect: (type: { name: string }, section: Section) => void;
 }
 
-export function CategoriesSlider({ sections, session }: CategoriesSliderProps) {
+export function CategoriesSlider({ sections, session, providers }: CategoriesSliderProps) {
   console.log("session", session);
 
   const { profile } = useUserContext();
@@ -94,7 +97,7 @@ export function CategoriesSlider({ sections, session }: CategoriesSliderProps) {
             "absolute inset-0 transition-all duration-300 ease-out bg-background", // Added 'transition-all' for opacity too
             selectedSection ? "-translate-x-full opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
           )}
-          >
+        >
           {session && (
             <div className='p-4 border-b shrink-0'>
               <div className='flex items-center gap-3'>
@@ -116,6 +119,29 @@ export function CategoriesSlider({ sections, session }: CategoriesSliderProps) {
                   <p className='text-xs text-gray-500 truncate'>{userRole}</p>
                 </div>
               </div>
+            </div>
+          )}
+          {!session && (
+            <div className='p-4 border-b shrink-0'>
+              {providers &&
+                Object.values(providers).map((provider) => {
+                  if (provider.id === "google") {
+                    return (
+                      <>
+                        <h2 className='text-lg p-3 uppercase text-center pb-3 font-bold shrink-0'>Sign Up</h2>
+                        <GoogleSignupButton
+                          onSignup={async () => {
+                            await signIn(provider.id, { callbackUrl: "/" });
+                          }}
+                          key={provider.id}
+                          className='w-full max-w-xs'
+                        />
+                      </>
+                    );
+                  }
+                  return null;
+                })}
+              {!providers && <p className='text-sm text-gray-500'>Sign up options are currently unavailable.</p>}
             </div>
           )}
           {/* Only render ScrollArea if not selectedSection, to prevent rendering hidden content unnecessarily */}

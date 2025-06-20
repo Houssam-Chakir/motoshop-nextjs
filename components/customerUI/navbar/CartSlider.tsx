@@ -49,21 +49,28 @@ const CartItemCard = ({
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-1 overflow-clip'>
         <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Cart Item"} width={90} height={90} />
         {item.originalPrice !== item.unitPrice && (
-          <div
-            className={`bg-primary transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}
-          >
-            {/* calculate percentage of discount from original price to unitprice and remove numbers after comma*/}
-            -{Math.floor(((item.originalPrice - item.unitPrice) / item.originalPrice) * 100)}%
+          <div className={`bg-primary transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}>
+            {/* calculate percentage of discount from original price to unitprice and remove numbers after comma*/}-
+            {Math.floor(((item.originalPrice - item.unitPrice) / item.originalPrice) * 100)}%
           </div>
         )}
       </div>
       <div className='w-full flex flex-col justify-around px-2'>
         <div>
           <h4 className='text-sm font-medium line-clamp-1'>{item.title}</h4>
+          <div className='flex text-xs text-gray-500 gap-1'>
+            <span className='text-success-green font-medium'>{item.unitPrice?.toFixed(2)} MAD</span>
+            <span>
+              {item.originalPrice !== item.unitPrice && (
+                <div className=' text-xs line-through text-gray-400 italic'>
+                  {item.originalPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MAD
+                </div>
+              )}
+            </span>
+          </div>
           <p className='text-xs text-gray-500'>Size: {item.size}</p>
-          <p className='text-xs text-gray-500'>Price: {item.unitPrice?.toFixed(2)} MAD</p>
         </div>
-        <div className='flex pt-1 w-full items-center-safe justify-between'>
+        <div className='flex flex-row-reverse pt-1 w-full items-center-safe justify-between'>
           <div className='flex items-center gap-2 mt-2 border rounded-full'>
             <button
               onClick={() => handleQuantityChange(item.quantity - 1)}
@@ -78,17 +85,9 @@ const CartItemCard = ({
             </button>
           </div>
           <div className='-space-y-1 flex flex-col items-end'>
-            {item.originalPrice !== item.unitPrice && (
-              <div className='flex gap-1 text-success-green items-center line-through italic'>
-                <div className=' text-[clamp(8px,1.5vw,11px)]'>{item.originalPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
-                <div className='text-[clamp(8px,1.5vw,11px)]'>
-                  <span className='text-[clamp(8px,1.5vw,11px)]'> MAD</span>
-                </div>
-              </div>
-            )}
             <div className='flex gap-1 items-center'>
               <div className='font-bold text-blue text-[clamp(15px,1.5vw,16px)]'>
-                {item.unitPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                {item.totalPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
               <div className='text-[clamp(10px,1.5vw,14px)] text-blue'>
                 <span className='font-bold text-[clamp(15px,1.5vw,16px)]'> MAD</span>
@@ -155,7 +154,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
       });
     } else if (!session) {
       // Guest cart items are assumed to be in stock when added.
-      return guestCartItems.map((item) => ({ ...item, originalPrice: item.unitPrice, inStock: true }));
+      return guestCartItems.map((item) => ({ ...item, inStock: true }));
     }
     return [];
   }, [session, cart, guestCartItems]);
@@ -200,6 +199,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
   };
 
   const handleQuantityChange = async (productId: string, size: string, newQuantity: number) => {
+    console.log("quantity change", newQuantity);
     if (isLoggedIn) {
       try {
         const result = await updateCartItemQuantity({ productId, size, quantity: newQuantity });
@@ -301,7 +301,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
               </div>
             </div>
             <div className='flex flex-col gap-2'>
-              <span className='text-xs text-grey-darker italic'>Shipping fee varies by address.s</span>
+              <span className='text-xs text-grey-darker italic'>Shipping fee varies by address.</span>
               <Button onClick={handleCheckout} className='w-full bg-blue hover:bg-blue/90 rounded-full py-5 cursor-pointer text-white'>
                 Proceed to Checkout
               </Button>

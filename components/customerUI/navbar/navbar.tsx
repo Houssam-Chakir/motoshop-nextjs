@@ -25,7 +25,7 @@ import CartSlider from "./CartSlider";
 export default function Navbar({ sections }: { sections: Section[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
   const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
-  // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
+  const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
 
 
@@ -122,7 +122,7 @@ export default function Navbar({ sections }: { sections: Section[] }) {
               </>
             )}
             <UserButtonsSection
-              isPhoneOrLarger={isPhoneOrLarger}
+              isTabletOrLarger={isTabletOrLarger}
               providers={providers}
               session={session!}
               profileImage={profileImage}
@@ -146,22 +146,21 @@ function UserButtonsSection({
   session,
   profileImage,
   isUserMenuOpen,
-  isPhoneOrLarger,
+  isTabletOrLarger,
 }: {
   providers: Record<string, { id: string; name: string }> | null;
   session: Session;
   profileImage: string;
   isUserMenuOpen: boolean;
   setIsUserMenuOpen: (value: boolean) => void;
-  isPhoneOrLarger: boolean;
+  isTabletOrLarger: boolean;
 }) {
   const username = session?.user?.name?.split(" ").at(0) || "username";
   return (
     <>
-      {isPhoneOrLarger && <WishlistSlider session={session} />}
-
+      <WishlistSlider session={session} />
       <CartSlider session={session} />
-      <UserMenuSlider session={session} providers={providers} profileImage={profileImage} username={username} isUserMenuOpen={isUserMenuOpen} />
+      {isTabletOrLarger && <UserMenuSlider session={session} providers={providers} profileImage={profileImage} username={username} isUserMenuOpen={isUserMenuOpen} />}
     </>
   );
 }
@@ -178,7 +177,7 @@ function UserMenu({ providers, session }: { session: Session | null; providers: 
         <div className='flex flex-col h-full min-h-0'>
           {/* Profile Info & Counts Section */}
           <div className='p-4 border-b shrink-0'>
-            <div className='flex items-center gap-3 mb-3'>
+            <div className='flex items-center gap-3'>
               <div className='w-12 h-12 rounded-full overflow-hidden border border-gray-300 bg-gray-100'>
                 <Image
                   src={session.user?.image || "/default-avatar.png"} // Ensure you have a fallback avatar
@@ -195,20 +194,6 @@ function UserMenu({ providers, session }: { session: Session | null; providers: 
                 <p className='font-semibold text-sm truncate'>{session.user?.name || "User Name"}</p>
                 <p className='text-xs text-gray-500 truncate'>{session.user?.email || "user@example.com"}</p>
                 <p className='text-xs text-gray-500 truncate'>{userRole}</p>
-              </div>
-            </div>
-            <div className='bg-grey border-grey-medium border-1 border-dashed *:flex *:gap-1 rounded-full py-2 px-4 flex justify-around gap-2 text-center text-xs'>
-              <div>
-                <p className='font-semibold'>{wishlist?.length ?? 0}</p>
-                <p className='text-slate-700'>Wishlist</p>
-              </div>
-              <div>
-                <p className='font-semibold'>0</p>
-                <p className='text-slate-700'>Cart</p>
-              </div>
-              <div>
-                <p className='font-semibold'>0</p>
-                <p className='text-slate-700'>Orders</p>
               </div>
             </div>
           </div>

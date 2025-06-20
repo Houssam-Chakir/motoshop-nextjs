@@ -1,5 +1,6 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
 import "./Sale"; // Import for model registration
+import './Stock'
 import slug from "mongoose-slug-updater";
 import { nanoid } from "nanoid";
 import mongooseLeanVirtuals from "mongoose-lean-virtuals";

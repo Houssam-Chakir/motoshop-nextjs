@@ -57,7 +57,7 @@ export default function WishlistSlider({ session }: { session: Session | null })
         {/* Profile Info & Counts Section */}
         {session && (
           <div className='p-4 border-b shrink-0'>
-            <div className='flex items-center gap-3 mb-3'>
+            <div className='flex items-center gap-3'>
               <div className='w-12 h-12 rounded-full overflow-hidden border border-gray-300 bg-gray-100'>
                 <Image
                   src={session.user?.image || "/default-avatar.png"}
@@ -73,20 +73,6 @@ export default function WishlistSlider({ session }: { session: Session | null })
               <div>
                 <p className='font-semibold text-sm truncate'>{session.user?.name || "User Name"}</p>
                 <p className='text-xs text-gray-500 truncate'>{session.user?.email || "user@example.com"}</p>
-              </div>
-            </div>
-            <div className='bg-grey border-grey-medium border-1 border-dashed *:flex *:gap-1 rounded-full py-2 px-4 flex justify-around gap-2 text-center text-xs'>
-              <div>
-                <p className='font-semibold'>{wishlist?.length ?? guestWishlistItems.length}</p>
-                <p className='text-slate-700'>Wishlist</p>
-              </div>
-              <div>
-                <p className='font-semibold'>0</p>
-                <p className='text-slate-700'>Cart</p>
-              </div>
-              <div>
-                <p className='font-semibold'>0</p>
-                <p className='text-slate-700'>Orders</p>
               </div>
             </div>
           </div>

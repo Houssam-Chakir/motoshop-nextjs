@@ -116,6 +116,7 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
         ...product,
         inStock: product.stock?.sizes?.some((s) => s.quantity > 0) ?? false,
       };
+      console.log('Product added to guest cart', productWithStockStatus);
       const result = addItemToGuestCart(productWithStockStatus, selectedSize, quantity);
       if (result.success) {
         toast.success(result.message);

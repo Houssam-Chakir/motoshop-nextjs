@@ -123,7 +123,7 @@ export async function addItemToCart({ productId, size, quantity: selectedSizeQua
       return { success: false, message: "Product not found." };
     }
 
-    console.log('* Product in cartActions: ',product)
+    console.log("* Product in cartActions: ", product);
 
     let cart: CartDocument | null = await Cart.findOne({ userId: session.user.id });
 

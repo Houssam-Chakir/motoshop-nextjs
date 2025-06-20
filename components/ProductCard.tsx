@@ -274,10 +274,10 @@ function ProductCard({ product }: { product: ProductCard }) {
           </div>
         </div>
         {product.saleInfo && (
-          <div className='flex gap-1 text-success-green items-center line-through italic'>
-            <div className=' text-[clamp(8px,1.5vw,11px)]'>{product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
-            <div className='text-[clamp(8px,1.5vw,11px)]'>
-              <span className='text-[clamp(8px,1.5vw,11px)]'> MAD</span>
+          <div className='flex gap-1 text-success-green items-center line-through italic font-medium'>
+            <div className=' text-[12px]'>{product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+            <div className='text-[12px]'>
+              <span className='text-[12px]'> MAD</span>
             </div>
           </div>
         )}

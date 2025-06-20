@@ -11,6 +11,7 @@ export interface GuestCartProductItem {
   size: string; // User-selected size
   quantity: number;
   unitPrice: number; // From ProductDocument.retailPrice
+  originalPrice: number; // From ProductDocument.retailPrice
   totalPrice: number; // Calculated as quantity * unitPrice
   inStock: boolean; // From ProductDocument.inStock
   brand?: string; // From ProductDocument.identifiers.brand
@@ -78,7 +79,7 @@ const saveGuestCart = (cart: GuestCart): void => {
 type GuestCartActionResult = { success: boolean; message: string };
 
 export const addItemToGuestCart = (
-  product: (Pick<ProductDocument, "_id" | "title" | "slug" | "images" | "retailPrice" | "identifiers"> & { inStock: boolean }),
+  product: Pick<ProductDocument, "_id" | "title" | "slug" | "images" | "retailPrice" | "salePrice" | "identifiers"> & { inStock: boolean },
   size: string,
   selectedSizeQuantity: number
 ): GuestCartActionResult => {
@@ -106,7 +107,8 @@ export const addItemToGuestCart = (
       imageUrl: product.images && product.images.length > 0 ? product.images[0].secure_url : undefined,
       size,
       quantity: selectedSizeQuantity,
-      unitPrice: product.retailPrice,
+      unitPrice: product.salePrice ?? product.retailPrice,
+      originalPrice: product.retailPrice,
       totalPrice: product.retailPrice * selectedSizeQuantity,
       inStock: product.inStock,
       brand: product.identifiers?.brand,

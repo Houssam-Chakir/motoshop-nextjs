@@ -98,7 +98,7 @@ export function CategoriesSlider({ sections, session, providers }: CategoriesSli
             selectedSection ? "-translate-x-full opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
           )}
         >
-          <div className=' bg-white/50 backdrop-blur-md w-full bottom-0 z-50'>
+          <div className='w-full bottom-0 z-50'>
             {session && (
               <div className='p-4 shrink-0'>
                 <div className='flex items-center gap-3'>
@@ -147,7 +147,7 @@ export function CategoriesSlider({ sections, session, providers }: CategoriesSli
             )}
             {/* Main Action Buttons List */}
             {session && (
-              <ul className='w-full flex px-3 py-3 text-md overflow-y-auto border-b'>
+              <ul className='w-full flex items-baseline px-3 py-3 text-md overflow-y-auto border-b'>
                 {userRole === "admin" && (
                   <li className='hover:bg-grey-light cursor-pointer'>
                     <Link className='flex flex-wrap justify-center items-center gap-3 px-4 py-2.5 rounded-xs' href='/dashboard/inventory'>
@@ -170,8 +170,8 @@ export function CategoriesSlider({ sections, session, providers }: CategoriesSli
           </div>
           {/* Only render ScrollArea if not selectedSection, to prevent rendering hidden content unnecessarily */}
           {!selectedSection && (
-            <ScrollArea className='h-full'>
-              <div className='h-full pb-24'>
+            <ScrollArea className='h-[calc(100vh-5rem)]'>
+              <div className='h-full pb-64'>
                 <div className='p-4 space-y-6 border-b'>
                   <h3 className='text-sm text-grey-darker font-medium mb-3 px-1'>Sections:</h3>
                   {mainSections.length > 0 && (

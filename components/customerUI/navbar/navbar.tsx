@@ -123,7 +123,7 @@ export default function Navbar({ sections }: { sections: Section[] }) {
               </>
             )}
             <UserButtonsSection
-              isTabletOrLarger={isTabletOrLarger}
+              isDesktop={isDesktop}
               providers={providers}
               session={session!}
               profileImage={profileImage}
@@ -147,21 +147,21 @@ function UserButtonsSection({
   session,
   profileImage,
   isUserMenuOpen,
-  isTabletOrLarger,
+  isDesktop,
 }: {
   providers: Record<string, { id: string; name: string }> | null;
   session: Session;
   profileImage: string;
   isUserMenuOpen: boolean;
   setIsUserMenuOpen: (value: boolean) => void;
-  isTabletOrLarger: boolean;
+  isDesktop: boolean;
 }) {
   const username = session?.user?.name?.split(" ").at(0) || "username";
   return (
     <>
       <WishlistSlider session={session} />
       <CartSlider session={session} />
-      {isTabletOrLarger && <UserMenuSlider session={session} providers={providers} profileImage={profileImage} username={username} isUserMenuOpen={isUserMenuOpen} />}
+      {isDesktop && <UserMenuSlider session={session} providers={providers} profileImage={profileImage} username={username} isUserMenuOpen={isUserMenuOpen} />}
     </>
   );
 }

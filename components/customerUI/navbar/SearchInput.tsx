@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Box, Loader2, Search, X } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import Container from "@/components/layout/Container";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -15,12 +15,11 @@ interface SearchInputProps {
 interface SearchBarProps {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
-  isDesktop: boolean;
 }
 export interface SearchItem {
   id: string; // Unique identifier for the item (e.g., product ID)
   title?: string; // Title of the item, typically from database
-  imageUrl?: string; // Optional
+  images: { secure_url: string }[];
   retailPrice?: number;
   identifiers?: { brand: string; categoryType: string; category: string };
   slug?: string;
@@ -41,7 +40,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ searchQuery, setSearchQuery, 
       {/* Desktop */}
       {isDesktop && (
         <div className='max-w-[518px] w-full mx-4'>
-          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} isDesktop={true} />
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
       )}
     </>
@@ -49,7 +48,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ searchQuery, setSearchQuery, 
 };
 
 //f/ Search Bar Component
-export function SearchBar({ searchQuery, setSearchQuery, isDesktop = false }: SearchBarProps) {
+export function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const [parent] = useAutoAnimate({ duration: 100 });
   const [searchResult, setSearchResult] = useState<SearchItem[] | null>(null);
 
@@ -146,11 +145,11 @@ function SearchItem({ item }: { item: SearchItem }) {
     <div onClick={handleItemClick} key={item.id} className='relative h-fit flex text-start gap-2 transition-all  hover:border-gray-400 cursor-pointer'>
       {/* Image */}
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-2 overflow-clip'>
-        <Image className='object-contain w-full h-full' src={item.images[0].secure_url ?? "/noProductImage.png"} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
-        {item.salePrice && (
+        <Image className='object-contain w-full h-full' src={item.images?.[0]?.secure_url ?? "/noProductImage.png"} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
+        {item.salePrice && item.retailPrice && (
           <div className={`bg-primary transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}>
             {/* calculate percentage of discount from original price to unitprice and remove numbers after comma*/}-
-            {Math.floor(((item?.retailPrice! - item?.salePrice!) / item?.retailPrice!) * 100)}%
+            {Math.floor(((item.retailPrice - item.salePrice) / item.retailPrice) * 100)}%
           </div>
         )}
       </div>

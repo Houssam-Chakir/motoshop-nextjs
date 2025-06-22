@@ -278,7 +278,7 @@ interface SidebarLinkButtonProps {
 function SidebarLinkButton({ item, onClick, href }: SidebarLinkButtonProps) {
   const slug = generateSlug(item.name); // Assuming icon uses item name
   const displayName = item.name || "Unnamed Link";
-
+  const icon = item.icon && item.icon.secure_url ? item.icon.secure_url : `/${slug}.svg`
   return (
     <SheetClose asChild>
       <Link
@@ -289,7 +289,7 @@ function SidebarLinkButton({ item, onClick, href }: SidebarLinkButtonProps) {
         <div className='flex items-center justify-start gap-3'>
           <img
             className='h-10 w-10 object-contain' // Adjusted size
-            src={`/${slug}.svg`}
+            src={icon}
             alt={displayName}
           />
           <h4 className='text-sm text-center font- text-gray-900'>{displayName}</h4> {/* Changed to h4 */}

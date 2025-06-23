@@ -103,7 +103,7 @@ export default function WishlistSlider({ session }: { session: Session | null })
               <div className='p-8 pt-12 text-center text-gray-500'>
                 <img className='opacity-80 w-40 mx-auto pb-4' src='/empty.svg' alt='empty wishlist' />
                 <p className='font-semibold'>Your wishlist is empty</p>
-                <p className='text-sm mt-1'>Looks like you haven't added anything to your wishlist yet.</p>
+                <p className='text-sm mt-1'>Looks like you haven&apos;t added anything to your wishlist yet.</p>
               </div>
             );
           })()}

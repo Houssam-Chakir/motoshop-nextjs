@@ -24,8 +24,8 @@ import CartSlider from "./CartSlider";
 // -- Navbar -------------------------------------------
 export default function Navbar({ sections }: { sections: Section[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
-  const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
-  const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
+  // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
+  // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   const isDesktop = useMediaQuery("lg");
 
   //Menus states
@@ -39,13 +39,14 @@ export default function Navbar({ sections }: { sections: Section[] }) {
       setWhichSectionMenuOpen(null);
       setIsUserMenuOpen(true);
     }
+    return setWhichSectionMenuOpen(null), setIsUserMenuOpen(false), setIsSearchOpen(false);
   }, [whichSectionMenuOpen, isUserMenuOpen]);
 
   const { session } = useSessionContext();
-  const { profile } = useUserContext();
+  // const { profile } = useUserContext();
   const [providers, setProviders] = useState<Record<string, { id: string; name: string }> | null>(null);
   const profileImage = session?.user?.image?.toString() as string;
-  const userRole = profile?.role as String;
+  // const userRole = profile?.role as String;
 
   useEffect(() => {
     const setAuthProviders = async () => {
@@ -168,10 +169,10 @@ function UserButtonsSection({
 
 // -- User Menu -------------------------------------------
 function UserMenu({ providers, session }: { session: Session | null; providers: Record<string, { id: string; name: string }> }) {
-  const { wishlist } = useUserContext(); // Get wishlist from context
+  // const { wishlist } = useUserContext(); // Get wishlist from context
   const { profile } = useUserContext();
 
-  const userRole = profile?.role as String;
+  const userRole = profile?.role;
   return (
     <>
       {session && (

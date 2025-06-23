@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, BoxIcon, ChevronRight, Store, UserSearch, X } from "lucide-react";
+import { ArrowLeft, BoxIcon, ChevronRight, Store, UserSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,9 @@ import { signIn } from "next-auth/react";
 
 interface SubCategory {
   name: string;
+  icon: {
+    secure_url: string
+  }
   // id?: string; // Consider adding unique IDs if available
   // href?: string; // For dynamic navigation
 }
@@ -50,7 +53,7 @@ export function CategoriesSlider({ sections, session, providers }: CategoriesSli
   console.log("session", session);
 
   const { profile } = useUserContext();
-  const userRole = profile?.role as String;
+  const userRole = profile?.role as string;
 
   const [selectedSection, setSelectedSection] = React.useState<SectionSchema | null>(null);
 

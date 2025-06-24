@@ -1,5 +1,5 @@
-import CategoryButton from "./CategoryButton";
-import CategoryMenu from "./CategoryMenu";
+import SectionButton from "./SectionButton";
+import SectionDropDown from "./SectionDropDown";
 import { Section } from "@/types/section";
 
 interface CategoriesSectionProps {
@@ -18,13 +18,13 @@ const CategoriesSection = ({ sections, whichSectionMenuOpen, setWhichSectionMenu
         mainSections.map((section: Section, i: number) => {
           return (
             <div key={i} className=''>
-              <CategoryButton
+              <SectionButton
                 inFocus={whichSectionMenuOpen === i ? true : false}
                 onClick={() => setWhichSectionMenuOpen(whichSectionMenuOpen === i ? null : i)}
                 section={section}
               />
               {/* Category Menu */}
-              {whichSectionMenuOpen === i && <CategoryMenu onMouseLeave={() => setWhichSectionMenuOpen(null)} section={section} ridingStyleSection={ridingStyleSection[0]} />}
+              {whichSectionMenuOpen === i && <SectionDropDown onMouseLeave={() => setWhichSectionMenuOpen(null)} section={section} ridingStyleSection={ridingStyleSection[0]} />}
             </div>
           );
         })}

@@ -49,7 +49,7 @@ export async function GET() {
     const helmetsCategory = ridingGearSection?.categories?.find((category) => category.name === "Helmets");
     const helmetsApplicableTypes = helmetsCategory?.applicableTypes ?? [];
 
-    sections.at(0)?.categories.push(...(helmetsApplicableTypes as any));
+    sections.at(0)?.categories.push(...(helmetsApplicableTypes as Category[]));
 
     // Map to match the Section interface
     const finalSections = sections.map((s) => ({

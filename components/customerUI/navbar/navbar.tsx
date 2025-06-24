@@ -20,9 +20,11 @@ import { useSessionContext } from "@/contexts/SessionContext";
 import { useUserContext } from "@/contexts/UserContext";
 import WishlistSlider from "./WishlistSlider";
 import CartSlider from "./CartSlider";
+import { useSections } from "@/contexts/SectionsContext";
 
 // -- Navbar -------------------------------------------
-export default function Navbar({ sections }: { sections: Section[] }) {
+export default function Navbar() {
+  const { sections } = useSections();
   const [searchQuery, setSearchQuery] = useQueryState("q", { defaultValue: "" });
   // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
   // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
@@ -39,7 +41,6 @@ export default function Navbar({ sections }: { sections: Section[] }) {
       setWhichSectionMenuOpen(null);
       setIsUserMenuOpen(true);
     }
-    return setWhichSectionMenuOpen(null), setIsUserMenuOpen(false), setIsSearchOpen(false);
   }, [whichSectionMenuOpen, isUserMenuOpen]);
 
   const { session } = useSessionContext();
@@ -142,6 +143,9 @@ export default function Navbar({ sections }: { sections: Section[] }) {
   );
 }
 
+///
+//f/ NAVBAR COMPONENTS ------------------------------------------------------------------
+///
 // -- User Buttons Section -------------------------------------------
 function UserButtonsSection({
   providers,

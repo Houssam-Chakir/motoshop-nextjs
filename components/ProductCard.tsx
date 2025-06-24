@@ -140,7 +140,7 @@ function ProductCard({ product }: { product: ProductCard }) {
       return;
     }
     // Navigate to product page
-    router.push(`/products/${product.slug}`);
+    router.push(`/product/${product.slug}`);
   };
 
   const handlePlusClick = (e: React.MouseEvent) => {

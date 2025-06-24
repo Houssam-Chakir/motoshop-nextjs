@@ -51,7 +51,7 @@ export default async function getSections() {
   const helmetsCategory = ridingGearSection?.categories?.find((category) => category.name === "Helmets");
   const helmetsApplicableTypes = helmetsCategory?.applicableTypes ?? [];
 
-  sections.at(0)?.categories.push(...(helmetsApplicableTypes as any));
+  sections.at(0)?.categories.push(...(helmetsApplicableTypes as Category[]));
 
   // Log the sections structure before mapping
   // console.log("sections: ", sections);

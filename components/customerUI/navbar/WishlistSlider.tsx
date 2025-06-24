@@ -126,7 +126,7 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
     if ((e.target as HTMLElement).closest("button")) {
       return;
     }
-    router.push(`/products/${item.slug}`);
+    router.push(`/product/${item.slug}`);
   };
 
   // remove item from wishlist

@@ -8,6 +8,7 @@ import TopBanner from "@/components/customerUI/layout/TopBanner";
 import Container from "@/components/layout/Container";
 import { SessionProvider } from "@/contexts/SessionContext";
 import { UserProvider } from "@/contexts/UserContext";
+import { SectionsProvider } from "@/contexts/SectionsContext";
 
 export const metadata: Metadata = {
   title: "Motoshop",
@@ -16,16 +17,17 @@ export const metadata: Metadata = {
 
 //f// Layout ------------------------------------------------------------------------------------
 export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
-  const sections = await getSections();
 
   return (
     <div className=''>
       <NuqsAdapter>
         <SessionProvider>
           <UserProvider>
-            <TopBanner />
-            <Navbar sections={sections} />
-            <Container>{children}</Container>
+            <SectionsProvider>
+              <TopBanner />
+              <Navbar/>
+              <Container>{children}</Container>
+            </SectionsProvider>
           </UserProvider>
         </SessionProvider>
       </NuqsAdapter>

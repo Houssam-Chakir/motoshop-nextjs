@@ -47,10 +47,18 @@ const SearchInput: React.FC<SearchInputProps> = ({ searchQuery, setSearchQuery, 
   );
 };
 
-//f/ Search Bar Component
+//f/ Search Bar Component ------------------------------------------------------------------------
 export function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const [parent] = useAutoAnimate({ duration: 100 });
   const [searchResult, setSearchResult] = useState<SearchItem[] | null>(null);
+
+  const handleResetSearchQuery = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if ((e.target as HTMLElement).closest("#SearchResults")) {
+      return;
+    }
+    setSearchQuery("")
+  }
 
   // Debounced search effect
   React.useEffect(() => {
@@ -95,8 +103,8 @@ export function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
         </button>
       )}
       {searchQuery && (
-        <div className={`fixed mt-4 left-0 w-full h-full bg-black/50 shadow z-50`}>
-          <div className='w-full h-[60%] bg-white'>
+        <div onClick={(e) => handleResetSearchQuery(e)} className={`fixed mt-4 left-0 w-full h-full bg-black/50 shadow z-50`}>
+          <div id="SearchResults" className='w-full h-[60%] bg-white'>
             <Container className='pt-4 flex flex-col items-center h-full overflow-y-auto inset-shadow-cyan-800'>
               {searchResult && searchResult.length === 0 && (
                 <div className='p-8 pt-12 text-center text-gray-500'>

@@ -63,20 +63,18 @@ function SectionMenu({ section, isHelmetsSection }: { section: Section; isHelmet
 function CategoryBlock({ category }: { category: Category }) {
   const router = useRouter();
   const handleCategoryClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
+    e.stopPropagation();
     // Navigate to product page
 
-    console.log('category', category)
+    console.log("category", category);
     router.push(`/products/${category.slug}`);
   };
-  const handleTypeClick = (e, typeSlug) => {
-    e.stopPropagation()
+  const handleTypeClick = (e: React.MouseEvent, typeSlug: string) => {
+    e.stopPropagation();
     // Navigate to product page
-
 
     router.push(`/products/${category.slug}/${typeSlug}`);
   };
-
 
   return (
     <div onClick={handleCategoryClick} className='flex gap-6 py-6 pl-6 pr-12'>
@@ -84,13 +82,15 @@ function CategoryBlock({ category }: { category: Category }) {
         <img className='h-12' src={category.icon?.secure_url ? category.icon?.secure_url : "/full-face-helmet.svg"} alt='racing' />
       </div>
       <div className='flex gap-1 flex-col'>
-        <p className={`hover:text-primary-dark cursor-pointer  font-medium text-[18px] text-black pb-1 ${!category.applicableTypes ? "pt-2" : ""}`}>
-          {category.name}
-        </p>
+        <p className={`hover:text-primary-dark cursor-pointer  font-medium text-[18px] text-black pb-1 ${!category.applicableTypes ? "pt-2" : ""}`}>{category.name}</p>
         {category.applicableTypes &&
           category.applicableTypes.map((type: Type, i: number) => {
             return (
-              <p onClick={(e) => handleTypeClick(e, type.slug)} key={i} className='cursor-pointer relative text-sm text-slate-700 font-light hover:text-slate-950 hover:underline duration-100'>
+              <p
+                onClick={(e) => handleTypeClick(e, type.slug)}
+                key={i}
+                className='cursor-pointer relative text-sm text-slate-700 font-light hover:text-slate-950 hover:underline duration-100'
+              >
                 {type.name}
               </p>
             );
@@ -101,8 +101,16 @@ function CategoryBlock({ category }: { category: Category }) {
 }
 // blocks of helmets
 function HelmetBlock({ category }: { category: Category }) {
+  const router = useRouter();
+
+  const handleTypeClick = (e: React.MouseEvent, typeSlug: string) => {
+    e.stopPropagation();
+    // Navigate to product page
+
+    router.push(`/products/helmets/${typeSlug}`);
+  };
   return (
-    <button className='flex flex-col gap-2 py-6 px-8 justify-center items-center group hover:cursor-pointer'>
+    <button onClick={(e) => handleTypeClick(e, category.slug)} className='flex flex-col gap-2 py-6 px-8 justify-center items-center group hover:cursor-pointer'>
       <div className=''>
         <img className='h-16' src={"/" + category.name.toLowerCase().replace(" ", "-") + ".svg"} alt={category.name.toLowerCase()} />
       </div>
@@ -110,14 +118,6 @@ function HelmetBlock({ category }: { category: Category }) {
         <Link href={"#"} className={`group-hover:text-primary-dark font-light text-[14px] text-black pb-1 ${!category.applicableTypes ? "pt-2" : ""}`}>
           {category.name}
         </Link>
-        {category.applicableTypes &&
-          category.applicableTypes.map((type: Type, i: number) => {
-            return (
-              <Link href={"#"} key={i} className='relative text-sm text-slate-700 font-light hover:text-slate-950 hover:underline duration-100'>
-                {type.name}
-              </Link>
-            );
-          })}
       </div>
     </button>
   );

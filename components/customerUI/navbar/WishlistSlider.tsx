@@ -1,10 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useUserContext } from "@/contexts/UserContext";
 import { Session } from "next-auth";
 import { MobileSlider } from "../sideBar/MobileSidebar";
 import { Heart, Trash, X } from "lucide-react";
-import { CldImage } from "next-cloudinary";
 import { WishlistItem as WishlistItemType } from "@/types/wishlist";
 import { getGuestWishlist, removeItemFromGuestWishlist } from "@/lib/guestWishlistStore";
 import React, { useState, useEffect } from "react";
@@ -12,7 +12,6 @@ import Image from "next/image";
 import { SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { removeItemFromDbWishlistAction } from "@/actions/wishlistActions";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export default function WishlistSlider({ session }: { session: Session | null }) {
@@ -104,7 +103,7 @@ export default function WishlistSlider({ session }: { session: Session | null })
               <div className='p-8 pt-12 text-center text-gray-500'>
                 <img className='opacity-80 w-40 mx-auto pb-4' src='/empty.svg' alt='empty wishlist' />
                 <p className='font-semibold'>Your wishlist is empty</p>
-                <p className='text-sm mt-1'>Looks like you haven't added anything to your wishlist yet.</p>
+                <p className='text-sm mt-1'>Looks like you haven&apos;t added anything to your wishlist yet.</p>
               </div>
             );
           })()}
@@ -122,12 +121,12 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
   const finalPrice = item.salePrice ? item.salePrice : item.retailPrice;
 
   // Click handlers
-  const handleItemClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleItemClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Takes you to product page
     if ((e.target as HTMLElement).closest("button")) {
       return;
     }
-    router.push(`/products/${item.slug}`);
+    router.push(`/product/${item.slug}`);
   };
 
   // remove item from wishlist
@@ -143,7 +142,7 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
   };
 
   return (
-    <div onClick={(e) => handleItemClick(e)} key={item.id} className='relative flex text-start gap-2 transition-all  hover:border-gray-400 cursor-pointer'>
+    <div onClick={handleItemClick} key={item.id} className='relative flex text-start gap-2 transition-all  hover:border-gray-400 cursor-pointer'>
       {/* Image */}
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-2 overflow-clip'>
         <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
@@ -152,7 +151,7 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
             className={`bg-primary transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}
           >
             {/* calculate percentage of discount from original price to unitprice and remove numbers after comma*/}
-            -{Math.floor(((item.retailPrice - item.salePrice) / item.retailPrice) * 100)}%
+            -{Math.floor(((item.retailPrice! - item.salePrice!) / item.retailPrice!) * 100)}%
           </div>
         )}
       </div>

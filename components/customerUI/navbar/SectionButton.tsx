@@ -7,7 +7,7 @@ interface CategoryButtonProps {
   onClick: () => void;
 }
 
-const CategoryButton = ({ section, inFocus, onClick }: CategoryButtonProps) => {
+const SectionButton = ({ section, inFocus, onClick }: CategoryButtonProps) => {
   return (
     <>
       <button onClick={onClick} className={`flex items-center group h-[52px] px-4 ${inFocus ? "bg-primary" : ""} hover:bg-primary`}>
@@ -22,4 +22,4 @@ const CategoryButton = ({ section, inFocus, onClick }: CategoryButtonProps) => {
 
 // whats inside the drop down
 
-export default CategoryButton;
+export default SectionButton;

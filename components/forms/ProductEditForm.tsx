@@ -293,7 +293,7 @@ function SizeInput({
                 {size}
               </SelectItem>
             ))}
-            <SelectItem value='custom'>+ Add new size</SelectItem>
+            {/* <SelectItem value='custom'>+ Add new size</SelectItem> */}
           </SelectContent>
         </Select>
       ) : (
@@ -339,6 +339,7 @@ interface ProductFormProps {
   categories: { _id: string; name: string }[];
   editProduct: ProductType & { _id: string };
   productStock?: { _id: string; sizes: { size: string; quantity: number }[] };
+  sizes: { value: string }[];
 }
 
 export interface images {
@@ -346,19 +347,23 @@ export interface images {
   public_id: string;
 }
 
-export default function ProductEditForm({ brands, types, categories, editProduct, productStock }: ProductFormProps) {
+export default function ProductEditForm({ brands, types, categories, editProduct, productStock, sizes }: ProductFormProps) {
   if (!editProduct) {
     throw new Error("Error recieving the product info");
   }
   if (!productStock) toast.warning("cant find any stock document related to this product!");
   console.log("productStock: ", productStock);
 
+  const sizesValue = sizes.map((size) => {
+    return size.value;
+  });
+
   const [images, setImages] = useState<images[]>(editProduct.images || []);
   const [imagesToDelete, setImagesToDelete] = useState<images[]>([]);
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
 
   const [imageError, setImageError] = useState("");
-  const [availableSizes, setAvailableSizes] = useState<string[]>(["XXS", "XS", "S", "M", "L", "XL", "XXL"]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>(sizesValue);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

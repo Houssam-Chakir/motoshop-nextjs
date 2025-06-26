@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, BoxIcon, ChevronRight, Store, UserSearch, X } from "lucide-react";
+import { ArrowLeft, BoxIcon, ChevronRight, Store, UserSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,9 @@ import { signIn } from "next-auth/react";
 
 interface SubCategory {
   name: string;
+  icon: {
+    secure_url: string
+  }
   // id?: string; // Consider adding unique IDs if available
   // href?: string; // For dynamic navigation
 }
@@ -50,7 +53,7 @@ export function CategoriesSlider({ sections, session, providers }: CategoriesSli
   console.log("session", session);
 
   const { profile } = useUserContext();
-  const userRole = profile?.role as String;
+  const userRole = profile?.role as string;
 
   const [selectedSection, setSelectedSection] = React.useState<SectionSchema | null>(null);
 
@@ -278,7 +281,7 @@ interface SidebarLinkButtonProps {
 function SidebarLinkButton({ item, onClick, href }: SidebarLinkButtonProps) {
   const slug = generateSlug(item.name); // Assuming icon uses item name
   const displayName = item.name || "Unnamed Link";
-
+  const icon = item.icon && item.icon.secure_url ? item.icon.secure_url : `/${slug}.svg`
   return (
     <SheetClose asChild>
       <Link
@@ -289,7 +292,7 @@ function SidebarLinkButton({ item, onClick, href }: SidebarLinkButtonProps) {
         <div className='flex items-center justify-start gap-3'>
           <img
             className='h-10 w-10 object-contain' // Adjusted size
-            src={`/${slug}.svg`}
+            src={icon}
             alt={displayName}
           />
           <h4 className='text-sm text-center font- text-gray-900'>{displayName}</h4> {/* Changed to h4 */}

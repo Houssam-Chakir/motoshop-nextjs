@@ -35,7 +35,8 @@ const CartItemCard = ({
   onRemove: (productId: string, size: string) => void; // Adjusted params
   onQuantityChange: (productId: string, size: string, newQuantity: number) => void; // Adjusted params
 }) => {
-  console.log("cart item", item);
+  const router = useRouter();
+
   const handleRemove = () => {
     onRemove(item.productId, item.size); // Use productId and size
   };
@@ -44,8 +45,16 @@ const CartItemCard = ({
     onQuantityChange(item.productId, item.size, newQuantity); // Use productId, size, and newQuantity
   };
 
+  const handleItemClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Takes you to product page
+    if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+    router.push(`/product/${item.slug}`);
+  };
+
   return (
-    <div className='relative flex text-start transition-all hover:border-gray-400 cursor-pointer'>
+    <div onClick={handleItemClick} className='relative flex text-start transition-all hover:border-gray-400 cursor-pointer'>
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-1 overflow-clip'>
         <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Cart Item"} width={90} height={90} />
         {item.originalPrice !== item.unitPrice && (

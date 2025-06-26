@@ -4,7 +4,7 @@ import makeSerializable from "@/utils/convertToObj";
 import { getSessionUser } from "@/utils/getSessionUser";
 
 import ProductEditForm from "@/components/forms/ProductEditForm";
-import { getCachedBrands, getCachedCategories, getCachedTypes } from "@/utils/getCachedLists";
+import { getCachedBrands, getCachedCategories, getCachedSizes, getCachedTypes } from "@/utils/getCachedLists";
 import Stock, { StockDocument } from "@/models/Stock";
 
 const ProductEditPage = async ({ params }: { params: { id: string } }) => {
@@ -26,13 +26,15 @@ const ProductEditPage = async ({ params }: { params: { id: string } }) => {
   const brands = (await getCachedBrands()) as [{ _id: string; name: string }];
   const types = (await getCachedTypes()) as [{ _id: string; name: string }];
   const categories = (await getCachedCategories()) as [{ _id: string; name: string }];
+  const sizes = await getCachedSizes()
+
 
   console.log("product: ", product);
   return (
     <section className='flex justify-center bg-slate-100'>
       <div className='px-12 py-6 border my-6 rounded-xs bg-white'>
         <h1 className='font-display text-3xl pb-4 mb-8 text-center border-b'>Edit product</h1>
-        <ProductEditForm brands={brands} types={types} categories={categories} editProduct={product} productStock={stock} />
+        <ProductEditForm brands={brands} types={types} categories={categories} editProduct={product} productStock={stock} sizes={sizes} />
       </div>
     </section>
   );

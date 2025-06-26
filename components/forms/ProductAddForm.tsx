@@ -286,12 +286,12 @@ function SizeInput({
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
-            {existingSizes.map((size) => (
-              <SelectItem key={size} value={size}>
+            {existingSizes.map((size, i) => (
+              <SelectItem key={i} value={size}>
                 {size}
               </SelectItem>
             ))}
-            <SelectItem value='custom'>+ Add new size</SelectItem>
+            {/* <SelectItem value='custom'>+ Add new size</SelectItem> */}
           </SelectContent>
         </Select>
       ) : (
@@ -335,12 +335,17 @@ interface ProductFormProps {
   brands: { _id: string; name: string }[];
   types: { _id: string; name: string }[];
   categories: { _id: string; name: string }[];
+  sizes: { value: string }[];
 }
 
-export default function ProductForm({ brands, types, categories }: ProductFormProps) {
+export default function ProductForm({ brands, types, categories, sizes }: ProductFormProps) {
+  const sizesValue = sizes.map((size) => {
+    return size.value;
+  });
+  console.log("sizes", sizes);
   const [images, setImages] = useState<File[]>([]);
   const [imageError, setImageError] = useState("");
-  const [availableSizes, setAvailableSizes] = useState<string[]>(["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44"]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>(sizesValue);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -763,7 +768,7 @@ export default function ProductForm({ brands, types, categories }: ProductFormPr
         </div>
 
         {/* Submit Button */}
-        <Button type='submit' className='w-full md:w-auto'>
+        <Button type='submit' className='w-full bg-blue-800 hover:bg-blue cursor-pointer md:w-auto'>
           Create Product
         </Button>
       </form>

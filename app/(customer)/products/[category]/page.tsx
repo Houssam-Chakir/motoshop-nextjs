@@ -13,9 +13,9 @@ const ProductsPage = async ({ params }: { params: { category: string } }) => {
 
   const { category } = params;
   const categoryDoc = await Category.findOne({slug: category})
-  console.log(categoryDoc)
+  const categoryId = categoryDoc._id.toString()
 
-  const productsDoc = await Product.find({})
+  const productsDoc = await Product.find({category: categoryId})
     .populate({
       path: "saleInfo",
       match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },

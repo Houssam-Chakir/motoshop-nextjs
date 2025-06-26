@@ -5,6 +5,7 @@ import convertToSerializableObject from "@/utils/convertToObj";
 import TypeModel from "@/models/Type";
 import Category from "@/models/Category";
 import { Category as CategoryType, Type } from "@/types/section";
+import size, { SizeType } from "@/models/size";
 
 /**
  * Fetches and caches the list of Brands / types / Categories.
@@ -71,3 +72,18 @@ export const getCachedCategories = nextCache(
     // If not set, it might cache indefinitely until manually revalidated or a new deployment occurs.
   }
 );
+
+export const getCachedSizes = nextCache(
+  async() => {
+    console.log("Fetching Sizes from database...");
+    await connectDB();
+    const sizesDoc = await size.find({}).lean().exec()
+    const sizes = convertToSerializableObject(sizesDoc) as SizeType
+    return sizes
+  },
+  ['all_sizes_list'],
+  {
+    tags: ['sizes'],
+    revalidate: 3600,
+  }
+)

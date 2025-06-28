@@ -17,7 +17,7 @@ import { SaleDocument } from "@/models/Sale";
 interface ProductInfoProps {
   product: Omit<ProductType, "saleInfo"> & {
     saleInfo: SaleDocument | null;
-    stock: StockType;
+    stock: StockType | null;
   };
   isLoggedIn?: boolean;
 }

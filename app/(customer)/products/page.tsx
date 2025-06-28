@@ -1,9 +1,8 @@
-import ProductCardTest from "@/components/Card";
-import ProductCard from "@/components/ProductCard";
 import connectDB from "@/config/database";
-import Sale, { SaleDocument, SaleType } from "@/models/Sale";
-import Product, { ProductType } from "@/models/Product";
+import Product from "@/models/Product";
 import makeSerializable from "@/utils/convertToObj";
+import ProductsSection from "@/components/customerUI/productsPageContent/ProductsSection";
+import { getCachedBrands, getCachedSizes, getCachedTypes } from "@/utils/getCachedLists";
 // import convertToSerializableObject from "@/utils/convertToObj";
 
 const ProductsPage = async () => {
@@ -20,27 +19,20 @@ const ProductsPage = async () => {
       select: "sizes",
     })
     .lean({ virtuals: true });
-  const products = makeSerializable(productsDoc) as ProductType[];
+  const products = makeSerializable(productsDoc);
   console.log("products: ", products);
+
+  const brands = (await getCachedBrands()) as [{ _id: string; name: string }];
+  const types = (await getCachedTypes()) as [{ _id: string; name: string }];
+  const sizes = await getCachedSizes();
+  const sizesValue = sizes.map((size) => size.value);
+  const brandsName = brands.map((brand) => brand.name);
+  const typesName = types.map((type) => type.name);
 
   // const salesDoc = await Sale.find({}).lean();
   // const sales = makeSerializable(salesDoc) as SaleType[];
   // console.log("sales: ", sales);
-  return (
-    <>
-      <div className='py-4'>
-        <div className='text-[16px]'>Products ({products.length})</div>
-      </div>
-      <div className='grid xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 gap-x-2 md:gap-y-16 sm:gap-y-8 gap-y-4'>
-        {/* {products.map((product) => {
-          return <ProductCardTest product={product} key={product.sku} />;
-        })} */}
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
-      </div>
-    </>
-  );
+  return <ProductsSection products={products} sizes={sizesValue} types={typesName} brands={brandsName} />;
 };
 
 export default ProductsPage;

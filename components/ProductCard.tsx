@@ -49,7 +49,6 @@ interface ProductCard {
   wholesalePrice: number;
   saleInfo: SaleDocument;
   _id: string;
-  __v: number;
 }
 
 type ModalDataType = {

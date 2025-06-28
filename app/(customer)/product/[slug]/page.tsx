@@ -17,18 +17,17 @@ const ProductDetailsPage = async ({ params }: { params: { slug: string } }) => {
     notFound();
   }
 
-  const product: ProductType = makeSerializable(productDoc);
+  const product = makeSerializable(productDoc);
 
   let stockData: StockType | null = null;
   if (productDoc._id) {
     const stockDoc = await Stock.findOne({ productId: productDoc._id }).lean<StockDocument>();
 
     if (stockDoc) {
-      stockData = makeSerializable(stockDoc) as StockType; // Use StockType
+      stockData = makeSerializable(stockDoc);
     }
   }
 
-  // The 'stock' prop error will remain until ProductInfo.tsx is updated.
   return <ProductInfo product={product} stock={stockData} />;
 };
 

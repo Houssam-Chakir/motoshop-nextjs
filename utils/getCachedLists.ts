@@ -78,7 +78,7 @@ export const getCachedSizes = nextCache(
     console.log("Fetching Sizes from database...");
     await connectDB();
     const sizesDoc = await size.find({}).lean().exec()
-    const sizes = convertToSerializableObject(sizesDoc) as SizeType
+    const sizes = convertToSerializableObject(sizesDoc)
     return sizes
   },
   ['all_sizes_list'],

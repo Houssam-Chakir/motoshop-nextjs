@@ -11,23 +11,25 @@ import { Type } from "@/types/section";
 
 interface SectionTypes {
   products: ProductCard[];
-  sizes: string;
-  brands: string;
-  types: string;
+  sizes: string[];
+  brands: string[];
+  types: string[];
 }
 
 export default function ProductsSection({ products, sizes, types, brands }: SectionTypes) {
-  console.log("Sizes: ", sizes);
-  console.log("brands: ", brands);
-  console.log("types: ", types);
+  // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
+  // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
+  // const isDesktop = useMediaQuery("lg");
+
   const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
   const [size, setSize] = useQueryState("size", parseAsArrayOf(parseAsString).withDefault([]));
   const [type, setType] = useQueryState("type", parseAsArrayOf(parseAsString).withDefault([]));
   const [brand, setBrand] = useQueryState("brand", parseAsArrayOf(parseAsString).withDefault([]));
+  const [style, setStyle] = useQueryState("style", parseAsArrayOf(parseAsString).withDefault([]));
   const [maxPrice, setMaxPrice] = useQueryState("max-price", parseAsInteger.withDefault(30000));
   const [minPrice, setMinPrice] = useQueryState("min-price", parseAsInteger.withDefault(0));
   return (
-    <>
+    <main>
       <div className='flex justify-between items-center py-4'>
         <div className='text-[16px]'>
           Products <span className='rounded-full px-2 py-1 bg-grey-light text-gray-800'>{products.length}</span>
@@ -40,7 +42,25 @@ export default function ProductsSection({ products, sizes, types, brands }: Sect
             </button>
           }
         >
-          <FiltersPage sizes={sizes} size={size} setSize={setSize} brands={brands} brand={brand}  setBrand={setBrand} types={types} type={type} setType={setType} setSort={setSort} />
+          <FiltersPage
+            sort={sort}
+            sizes={sizes}
+            size={size}
+            setSize={setSize}
+            brands={brands}
+            brand={brand}
+            setBrand={setBrand}
+            types={types}
+            type={type}
+            maxPrice={maxPrice}
+            minPrice={minPrice}
+            setMaxPrice={setMaxPrice}
+            setMinPrice={setMinPrice}
+            setType={setType}
+            setSort={setSort}
+            style={style}
+            setStyle={setStyle}
+          />
         </FiltersSidebar>
       </div>
       <div className='grid xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 gap-x-2 md:gap-y-16 sm:gap-y-8 gap-y-4'>
@@ -51,6 +71,6 @@ export default function ProductsSection({ products, sizes, types, brands }: Sect
           return <ProductCard product={product} key={product.sku} />;
         })}
       </div>
-    </>
+    </main>
   );
 }

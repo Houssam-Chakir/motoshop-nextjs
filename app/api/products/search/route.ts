@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getProductsWithSales } from "@/actions/productsActions";
+import { getProducts } from "@/actions/productsActions";
 
 // /api/products/search?q=term
 export async function GET(req: Request) {
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     // Case-insensitive regex search on product name or slug. Extend as needed.
     const regex = new RegExp(q, "i");
 
-    const products = await getProductsWithSales({
+    const products = await getProducts({
       $or: [{ title: regex }, { slug: regex }, { description: regex }],
     });
 

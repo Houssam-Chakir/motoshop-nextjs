@@ -16,36 +16,67 @@ interface FilterState {
   selectedBrands: string[];
   selectedTypes: string[];
   selectedSizes: string[];
+  selectedStyle: string[];
 }
 
 interface FiltersPage {
+  sort: string
   sizes: string[];
   brands: string[];
   types: string[];
   size: string[];
   brand: string[];
   type: string[];
+  style: string[];
+  maxPrice: number;
+  minPrice: number;
   setSize: (value: string[] | ((prev: string[]) => string[])) => void;
   setBrand: (value: string[] | ((prev: string[]) => string[])) => void;
   setType: (value: string[] | ((prev: string[]) => string[])) => void;
+  setStyle: (value: string[] | ((prev: string[]) => string[])) => void;
+  setMaxPrice: (value: number) => void;
+  setMinPrice: (value: number) => void;
   setSort: (value: string) => void;
 }
 
-export default function FiltersPage({ size, type, brand, sizes, types, brands, setSize, setBrand, setType, setSort }: FiltersPage) {
+export default function FiltersPage({
+  sort,
+  size,
+  type,
+  brand,
+  style,
+  sizes,
+  types,
+  brands,
+  maxPrice,
+  minPrice,
+  setSize,
+  setBrand,
+  setType,
+  setSort,
+  setStyle,
+  setMaxPrice,
+  setMinPrice,
+}: FiltersPage) {
+  const ridingStyles = ["Racing", "Adventure", "Versitile", "Touring", "Urban", "Enduro"];
   const [filters, setFilters] = useState<FilterState>({
-    sortBy: "featured",
-    priceRange: [0, 30000],
+    sortBy: sort,
+    priceRange: [minPrice, maxPrice],
     selectedBrands: brand,
     selectedTypes: type,
     selectedSizes: size,
+    selectedStyle: style,
   });
 
   const handleSortChange = (value: string) => {
     setFilters({ ...filters, sortBy: value });
+    setSort(value)
   };
 
   const handlePriceRangeChange = (value: [number, number]) => {
     setFilters({ ...filters, priceRange: value });
+    setMaxPrice(value[0])
+    setMinPrice(value[1])
   };
 
   const handleBrandChange = (brand: string, checked: boolean) => {
@@ -62,6 +93,13 @@ export default function FiltersPage({ size, type, brand, sizes, types, brands, s
     setType((prev: string[]) => (prev = updatedTypes));
   };
 
+  const handleStyleChange = (style: string, checked: boolean) => {
+    const updatedStyle = checked ? [...filters.selectedStyle, style] : filters.selectedStyle.filter((s) => s !== style);
+    setFilters({ ...filters, selectedStyle: updatedStyle });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    setStyle((prev: string[]) => (prev = updatedStyle));
+  };
+
   const handleSizeChange = (size: string, checked: boolean) => {
     const updatedSizes = checked ? [...filters.selectedSizes, size] : filters.selectedSizes.filter((s) => s !== size);
     setFilters({ ...filters, selectedSizes: updatedSizes });
@@ -76,6 +114,7 @@ export default function FiltersPage({ size, type, brand, sizes, types, brands, s
       selectedBrands: [],
       selectedTypes: [],
       selectedSizes: [],
+      selectedStyle: [],
     });
     setSize([]);
     setType([]);
@@ -87,7 +126,7 @@ export default function FiltersPage({ size, type, brand, sizes, types, brands, s
     filters.selectedBrands.length + filters.selectedTypes.length + filters.selectedSizes.length + (filters.priceRange[0] > 0 || filters.priceRange[1] < 300 ? 1 : 0);
 
   return (
-    <div className='relative overflow-scroll'>
+    <div className={`relative overflow-scroll`}>
       {/* Header */}
       <div className='pb-6'>
         <div className='sticky flex items-center justify-between mb-4 border-b-1 px-2 py-3'>
@@ -117,11 +156,11 @@ export default function FiltersPage({ size, type, brand, sizes, types, brands, s
                 <SelectValue placeholder='Sort by' />
               </SelectTrigger>
               <SelectContent className='rounded-lg'>
-                <SelectItem value='featured'>Featured</SelectItem>
-                <SelectItem value='name'>Name A-Z</SelectItem>
-                <SelectItem value='price-low'>Price: Low to High</SelectItem>
-                <SelectItem value='price-high'>Price: High to Low</SelectItem>
-                <SelectItem value='rating'>Highest Rated</SelectItem>
+                <SelectItem value='newest'>Featured</SelectItem>
+                <SelectItem value='name-asc'>Name A-Z</SelectItem>
+                <SelectItem value='price-asc'>Price: Low to High</SelectItem>
+                <SelectItem value='price-desc'>Price: High to Low</SelectItem>
+                {/* <SelectItem value='rating'>Highest Rated</SelectItem> */}
               </SelectContent>
             </Select>
           </div>
@@ -182,6 +221,24 @@ export default function FiltersPage({ size, type, brand, sizes, types, brands, s
                     <Checkbox id={`type-${type}`} checked={filters.selectedTypes.includes(type)} onCheckedChange={(checked) => handleTypeChange(type, checked as boolean)} />
                     <Label htmlFor={`type-${type}`} className='text-sm font-normal cursor-pointer'>
                       {type}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <hr />
+          {/* Type Filter */}
+          <Card className='border-none py-0 shadow-none text-black'>
+            <CardContent className='p-4'>
+              <h3 className='font-medium mb-4'>Riding Style</h3>
+              <div className='space-y-3'>
+                {ridingStyles.map((style) => (
+                  <div key={style} className='flex items-center space-x-2'>
+                    <Checkbox id={`style-${style}`} checked={filters.selectedStyle.includes(style)} onCheckedChange={(checked) => handleStyleChange(style, checked as boolean)} />
+                    <Label htmlFor={`style-${style}`} className='text-sm font-normal cursor-pointer'>
+                      {style}
                     </Label>
                   </div>
                 ))}

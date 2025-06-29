@@ -5,7 +5,6 @@ export const searchParamsCache = {
 
   sort: parseAsString.withDefault(''),
   size: parseAsArrayOf(parseAsString).withDefault([]),
-  type: parseAsArrayOf(parseAsString).withDefault([]),
   brand: parseAsArrayOf(parseAsString).withDefault([]),
   style: parseAsArrayOf(parseAsString).withDefault([]),
   maxPrice: parseAsInteger.withDefault(30000),

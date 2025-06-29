@@ -14,7 +14,6 @@ interface FilterState {
   sortBy: string;
   priceRange: [number, number];
   selectedBrands: string[];
-  selectedTypes: string[];
   selectedSizes: string[];
   selectedStyle: string[];
 }
@@ -23,7 +22,6 @@ interface FiltersPage {
   sort: string
   sizes: string[];
   brands: string[];
-  types: string[];
   size: string[];
   brand: string[];
   type: string[];
@@ -32,7 +30,6 @@ interface FiltersPage {
   minPrice: number;
   setSize: (value: string[] | ((prev: string[]) => string[])) => void;
   setBrand: (value: string[] | ((prev: string[]) => string[])) => void;
-  setType: (value: string[] | ((prev: string[]) => string[])) => void;
   setStyle: (value: string[] | ((prev: string[]) => string[])) => void;
   setMaxPrice: (value: number) => void;
   setMinPrice: (value: number) => void;
@@ -42,17 +39,14 @@ interface FiltersPage {
 export default function FiltersPage({
   sort,
   size,
-  type,
   brand,
   style,
   sizes,
-  types,
   brands,
   maxPrice,
   minPrice,
   setSize,
   setBrand,
-  setType,
   setSort,
   setStyle,
   setMaxPrice,
@@ -63,7 +57,6 @@ export default function FiltersPage({
     sortBy: sort,
     priceRange: [minPrice, maxPrice],
     selectedBrands: brand,
-    selectedTypes: type,
     selectedSizes: size,
     selectedStyle: style,
   });
@@ -75,8 +68,8 @@ export default function FiltersPage({
 
   const handlePriceRangeChange = (value: [number, number]) => {
     setFilters({ ...filters, priceRange: value });
-    setMaxPrice(value[0])
-    setMinPrice(value[1])
+    setMaxPrice(value[1])
+    setMinPrice(value[0])
   };
 
   const handleBrandChange = (brand: string, checked: boolean) => {
@@ -86,12 +79,6 @@ export default function FiltersPage({
     setBrand((prev: string[]) => (prev = updatedBrands));
   };
 
-  const handleTypeChange = (type: string, checked: boolean) => {
-    const updatedTypes = checked ? [...filters.selectedTypes, type] : filters.selectedTypes.filter((t) => t !== type);
-    setFilters({ ...filters, selectedTypes: updatedTypes });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setType((prev: string[]) => (prev = updatedTypes));
-  };
 
   const handleStyleChange = (style: string, checked: boolean) => {
     const updatedStyle = checked ? [...filters.selectedStyle, style] : filters.selectedStyle.filter((s) => s !== style);
@@ -110,20 +97,18 @@ export default function FiltersPage({
   const clearAllFilters = () => {
     setFilters({
       sortBy: "featured",
-      priceRange: [0, 300],
+      priceRange: [0, 30000],
       selectedBrands: [],
-      selectedTypes: [],
       selectedSizes: [],
       selectedStyle: [],
     });
     setSize([]);
-    setType([]);
     setBrand([]);
     setSort("");
   };
 
   const activeFiltersCount =
-    filters.selectedBrands.length + filters.selectedTypes.length + filters.selectedSizes.length + (filters.priceRange[0] > 0 || filters.priceRange[1] < 300 ? 1 : 0);
+    filters.selectedBrands.length + filters.selectedSizes.length + (filters.priceRange[0] > 0 || filters.priceRange[1] < 300 ? 1 : 0);
 
   return (
     <div className={`relative overflow-scroll`}>
@@ -157,7 +142,6 @@ export default function FiltersPage({
               </SelectTrigger>
               <SelectContent className='rounded-lg'>
                 <SelectItem value='newest'>Featured</SelectItem>
-                <SelectItem value='name-asc'>Name A-Z</SelectItem>
                 <SelectItem value='price-asc'>Price: Low to High</SelectItem>
                 <SelectItem value='price-desc'>Price: High to Low</SelectItem>
                 {/* <SelectItem value='rating'>Highest Rated</SelectItem> */}
@@ -214,24 +198,6 @@ export default function FiltersPage({
           {/* Type Filter */}
           <Card className='border-none py-0 shadow-none text-black'>
             <CardContent className='p-4'>
-              <h3 className='font-medium mb-4'>Type</h3>
-              <div className='space-y-3'>
-                {types.map((type) => (
-                  <div key={type} className='flex items-center space-x-2'>
-                    <Checkbox id={`type-${type}`} checked={filters.selectedTypes.includes(type)} onCheckedChange={(checked) => handleTypeChange(type, checked as boolean)} />
-                    <Label htmlFor={`type-${type}`} className='text-sm font-normal cursor-pointer'>
-                      {type}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <hr />
-          {/* Type Filter */}
-          <Card className='border-none py-0 shadow-none text-black'>
-            <CardContent className='p-4'>
               <h3 className='font-medium mb-4'>Riding Style</h3>
               <div className='space-y-3'>
                 {ridingStyles.map((style) => (
@@ -276,12 +242,6 @@ export default function FiltersPage({
                   <Badge key={brand} variant='secondary' className='text-xs gap-1 bg-grey-light'>
                     {brand}
                     <X className='h-3 w-3 cursor-pointer' onClick={() => handleBrandChange(brand, false)} />
-                  </Badge>
-                ))}
-                {filters.selectedTypes.map((type) => (
-                  <Badge key={type} variant='secondary' className='text-xs gap-1 bg-grey-light'>
-                    {type}
-                    <X className='h-3 w-3 cursor-pointer' onClick={() => handleTypeChange(type, false)} />
                   </Badge>
                 ))}
                 {filters.selectedSizes.map((size) => (

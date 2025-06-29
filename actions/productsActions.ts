@@ -2,9 +2,6 @@ import { FilterQuery, Types } from "mongoose";
 import Product, { ProductDocument } from "@/models/Product";
 import Sale, { SaleDocument } from "@/models/Sale";
 import connectDB from "@/config/database";
-import { searchParamsCache } from "@/lib/searchParams";
-import Stock from "@/models/Stock";
-import { getCachedBrands, getCachedTypes } from "@/utils/getCachedLists";
 
 // Re-export the SaleDocument type for use in other files
 export type { SaleDocument } from "@/models/Sale";
@@ -115,11 +112,17 @@ interface PaginationOptions {
   styles?: string[];
 }
 
-interface getProductsTypes {
-  filters: object[];
-  sizes: string[];
-  brands: string[];
-  types: string[];
+interface paramType {
+  _id: string;
+  name: string;
+}
+interface filtersType {
+  sort: string;
+  type: string[];
+  brand: string[];
+  size: string[];
+  minPrice: number;
+  maxPrice: number;
 }
 
 /**
@@ -128,26 +131,49 @@ interface getProductsTypes {
  * @returns {Promise<ProductWithSale[]>} A promise that resolves to an array of products with sale details.
  * @throws {Error} If there is an issue fetching the products.
  */
-export async function getProducts(filters, brands, types, sizes) {
+export async function getProducts(filters: filtersType, brands: paramType[], categoryId: string = "") {
   await connectDB();
   try {
     console.log("filters form server action", filters);
-    const typeIds = types.filter((type) => filters.type.includes(type.name)).map((type) => type._id);
     const brandIds = brands.filter((brand) => filters.brand.includes(brand.name)).map((brand) => brand._id);
     const sizeFilters = filters.size;
 
     // Build the MongoDB query
-    const query = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query: Record<string, any> = {};
 
-    if (typeIds.length > 0) {
-      query.type = { $in: typeIds };
-    }
     if (brandIds.length > 0) {
       query.brand = { $in: brandIds };
     }
 
+    if (categoryId) {
+      query.category = { $in: categoryId };
+    }
+
+    if (filters.minPrice > 0 || filters.maxPrice < 30000) {
+      query.retailPrice = { $gte: filters.minPrice, $lte: filters.maxPrice };
+    }
+
+    // Build the sort object
+    let sortOptions = {};
+    switch (filters.sort) {
+      case "newest":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "price-asc":
+        sortOptions = { retailPrice: 1 };
+        break;
+      case "price-desc":
+        sortOptions = { retailPrice: -1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+        break;
+    }
+
     const currentDate = new Date();
     const products = await Product.find(query)
+      .sort(sortOptions)
       .select("title retailPrice images identifiers slug inStock saleInfo")
       .populate<{ saleInfo: SaleDocument | null }>({
         path: "saleInfo",
@@ -162,7 +188,15 @@ export async function getProducts(filters, brands, types, sizes) {
       .lean({ virtuals: true });
 
     // Optional: filter by size (client-side style)
-    const filteredBySize = sizeFilters.length > 0 ? products.filter((product) => product.stock?.sizes?.some((s) => sizeFilters.includes(s.size))) : products;
+    // Fix: Add type guards and handle missing 'stock' property
+    const filteredBySize =
+      sizeFilters.length > 0
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          products.filter(
+            (product: any) =>
+              Array.isArray(product?.stock?.sizes) && product.stock.sizes.some((s: { size?: string }) => s && typeof s.size === "string" && sizeFilters.includes(s.size))
+          )
+        : products;
 
     return filteredBySize;
   } catch (error) {
@@ -222,6 +256,7 @@ export async function getProductsByCategoryWithSales(
         match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
         select: "name discountType discountValue color banner startDate endDate",
       })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .sort(sort as any)
       .skip((page - 1) * limit)
       .limit(limit)

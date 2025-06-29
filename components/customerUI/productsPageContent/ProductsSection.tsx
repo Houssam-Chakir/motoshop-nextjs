@@ -13,21 +13,19 @@ interface SectionTypes {
   products: ProductCard[];
   sizes: string[];
   brands: string[];
-  types: string[];
 }
 
-export default function ProductsSection({ products, sizes, types, brands }: SectionTypes) {
+export default function ProductsSection({ products, sizes, brands }: SectionTypes) {
   // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
   // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   // const isDesktop = useMediaQuery("lg");
 
   const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
   const [size, setSize] = useQueryState("size", parseAsArrayOf(parseAsString).withDefault([]));
-  const [type, setType] = useQueryState("type", parseAsArrayOf(parseAsString).withDefault([]));
   const [brand, setBrand] = useQueryState("brand", parseAsArrayOf(parseAsString).withDefault([]));
   const [style, setStyle] = useQueryState("style", parseAsArrayOf(parseAsString).withDefault([]));
-  const [maxPrice, setMaxPrice] = useQueryState("max-price", parseAsInteger.withDefault(30000));
-  const [minPrice, setMinPrice] = useQueryState("min-price", parseAsInteger.withDefault(0));
+  const [maxPrice, setMaxPrice] = useQueryState("maxPrice", parseAsInteger.withDefault(30000));
+  const [minPrice, setMinPrice] = useQueryState("minPrice", parseAsInteger.withDefault(0));
   return (
     <main>
       <div className='flex justify-between items-center py-4'>
@@ -50,13 +48,10 @@ export default function ProductsSection({ products, sizes, types, brands }: Sect
             brands={brands}
             brand={brand}
             setBrand={setBrand}
-            types={types}
-            type={type}
             maxPrice={maxPrice}
             minPrice={minPrice}
             setMaxPrice={setMaxPrice}
             setMinPrice={setMinPrice}
-            setType={setType}
             setSort={setSort}
             style={style}
             setStyle={setStyle}

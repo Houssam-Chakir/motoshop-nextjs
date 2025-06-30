@@ -22,10 +22,10 @@ const ProductsPage = async ({ searchParams }: PageProps) => {
   try {
     await connectDB();
     const filters = await loadSearchParams(searchParams);
-    console.log('filters in products page', filters)
     const [brands, sizes] = await Promise.all([getCachedBrands() as Promise<Brand[]>, getCachedSizes() as Promise<Size[]>]);
 
-    const productsDoc = await getProducts(filters, brands);
+
+    const productsDoc = await getProducts(filters, {brands});
     const products = makeSerializable(productsDoc);
 
     const sizesValue = sizes.map((size) => size.value);

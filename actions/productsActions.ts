@@ -117,12 +117,18 @@ interface paramType {
   name: string;
 }
 interface filtersType {
-  sort: string;
-  type: string[];
-  brand: string[];
-  size: string[];
-  minPrice: number;
-  maxPrice: number;
+  sort?: string;
+  type?: string[];
+  brand?: string[];
+  size?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+interface filterInfo {
+  brands: paramType[];
+  categoryId?: string;
+  typeId?: string;
 }
 
 /**
@@ -131,7 +137,7 @@ interface filtersType {
  * @returns {Promise<ProductWithSale[]>} A promise that resolves to an array of products with sale details.
  * @throws {Error} If there is an issue fetching the products.
  */
-export async function getProducts(filters: filtersType, brands: paramType[], categoryId: string = "") {
+export async function getProducts(filters: filtersType, { brands, categoryId = "", typeId = '' }: filterInfo) {
   await connectDB();
   try {
     console.log("filters form server action", filters);
@@ -148,6 +154,9 @@ export async function getProducts(filters: filtersType, brands: paramType[], cat
 
     if (categoryId) {
       query.category = { $in: categoryId };
+    }
+    if (typeId) {
+      query.type = { $in: typeId };
     }
 
     if (filters.minPrice > 0 || filters.maxPrice < 30000) {

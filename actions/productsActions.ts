@@ -123,6 +123,8 @@ interface filtersType {
   size?: string[];
   minPrice?: number;
   maxPrice?: number;
+  page: number;
+  limit: number;
 }
 
 interface filterInfo {
@@ -143,6 +145,7 @@ export async function getProducts(filters: filtersType, { brands, categoryId = "
     console.log("filters form server action", filters);
     const brandIds = brands.filter((brand) => filters.brand.includes(brand.name)).map((brand) => brand._id);
     const sizeFilters = filters.size;
+    const { page, limit } = filters;
 
     // Build the MongoDB query
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,37 +184,62 @@ export async function getProducts(filters: filtersType, { brands, categoryId = "
     }
 
     const currentDate = new Date();
+
+    // Light query ONLY for getting distinct sizes
+    const productsForSizes = await Product.find(query)
+      .select("_id") // Only select the minimum needed for populate to work
+      .populate({
+        path: "stock",
+        select: "sizes", // Only get sizes from stock
+      })
+      .lean();
+
+    // Extract unique sizes
+    const distinctSizes = [...new Set(productsForSizes.flatMap((product: any) => product?.stock?.sizes?.map((s: { size?: string }) => s?.size).filter(Boolean) || []))];
+
+    // Main paginated query for actual products
     const products = await Product.find(query)
       .sort(sortOptions)
+      .skip(page * limit)
+      .limit(limit)
       .select("title retailPrice images identifiers slug inStock saleInfo")
       .populate<{ saleInfo: SaleDocument | null }>({
         path: "saleInfo",
-        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } }, // Temporarily disabled for debugging
-        select: "name discountType discountValue startDate endDate isActive", // Explicitly select fields for matching
+        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+        select: "name discountType discountValue startDate endDate isActive",
       })
       .populate({
         path: "stock",
-        match: {}, // Temporarily disabled for debugging
-        select: "sizes", // Explicitly select fields for matching
+        match: {},
+        select: "sizes",
       })
       .lean({ virtuals: true });
 
-    // Optional: filter by size (client-side style)
-    // Fix: Add type guards and handle missing 'stock' property
-    const filteredBySize =
+    // Apply size filtering to paginated results (if needed)
+    const filteredProducts =
       sizeFilters.length > 0
         ? products.filter(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (product: any) =>
               Array.isArray(product?.stock?.sizes) && product.stock.sizes.some((s: { size?: string }) => s && typeof s.size === "string" && sizeFilters.includes(s.size))
           )
         : products;
 
-    // Get uniques set of sizes from fetched products
-    const distinctSizes = [...new Set(products.flatMap((product: any) => product?.stock?.sizes?.map((s: { size?: string }) => s?.size).filter(Boolean) || []))];
-    console.log("Distinct Sizes: ", distinctSizes);
+    // Get total count for pagination metadata (if needed)
+    const totalProducts = await Product.countDocuments(query);
+    const totalPages = Math.ceil(totalProducts / limit);
 
-    return {productsDoc: filteredBySize, sizes: distinctSizes};
+    return {
+      productsDoc: filteredProducts,
+      sizes: distinctSizes,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalProducts,
+        hasNextPage: page + 1 < totalPages,
+        hasPrevPage: page > 0,
+        limit,
+      },
+    };
   } catch (error) {
     console.error("Error fetching products with sales:", error);
     throw new Error("Failed to fetch products with sales");

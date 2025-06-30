@@ -1,4 +1,4 @@
-import { parseAsString, parseAsInteger, parseAsArrayOf, createLoader } from 'nuqs/server'
+import { parseAsString, parseAsInteger, parseAsArrayOf, createLoader, parseAsIndex } from 'nuqs/server'
 
 // Define the search parameters we want to track
 export const searchParamsCache = {
@@ -11,8 +11,8 @@ export const searchParamsCache = {
   minPrice: parseAsInteger.withDefault(0),
 
   // Pagination
-  page: parseAsInteger.withDefault(1),
-  limit: parseAsInteger.withDefault(2),
+  page: parseAsIndex.withDefault(0),
+  limit: parseAsInteger.withDefault(3),
 }
 
 export const loadSearchParams = createLoader(searchParamsCache)

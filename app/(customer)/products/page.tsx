@@ -1,7 +1,7 @@
 import connectDB from "@/config/database";
 import makeSerializable from "@/utils/convertToObj";
 import ProductsSection from "@/components/customerUI/productsPageContent/ProductsSection";
-import { getCachedBrands, getCachedSizes} from "@/utils/getCachedLists";
+import { getCachedBrands, getCachedSizes } from "@/utils/getCachedLists";
 import { getProducts } from "@/actions/productsActions";
 import { SearchParams } from "nuqs/server";
 import { loadSearchParams } from "@/lib/searchParams";
@@ -21,17 +21,13 @@ type PageProps = {
 const ProductsPage = async ({ searchParams }: PageProps) => {
   try {
     await connectDB();
-    const filters = await loadSearchParams(searchParams);
-    const [brands, sizes] = await Promise.all([getCachedBrands() as Promise<Brand[]>, getCachedSizes() as Promise<Size[]>]);
+    const [filters, brands] = await Promise.all([loadSearchParams(searchParams), getCachedBrands()]);
+    const { productsDoc, sizes } = await getProducts(filters, { brands });
 
-
-    const productsDoc = await getProducts(filters, {brands});
+    const brandsName = brands.map((brand) => brand.name);
     const products = makeSerializable(productsDoc);
 
-    const sizesValue = sizes.map((size) => size.value);
-    const brandsName = brands.map((brand) => brand.name);
-
-    return <ProductsSection products={products} sizes={sizesValue} brands={brandsName} />;
+    return <ProductsSection products={products} sizes={sizes} brands={brandsName} />;
   } catch (error) {
     console.error("Failed to fetch products page data:", error);
     // Return a user-friendly error UI instead of crashing the page

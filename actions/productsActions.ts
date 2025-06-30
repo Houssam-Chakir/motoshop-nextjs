@@ -137,7 +137,7 @@ interface filterInfo {
  * @returns {Promise<ProductWithSale[]>} A promise that resolves to an array of products with sale details.
  * @throws {Error} If there is an issue fetching the products.
  */
-export async function getProducts(filters: filtersType, { brands, categoryId = "", typeId = '' }: filterInfo) {
+export async function getProducts(filters: filtersType, { brands, categoryId = "", typeId = "" }: filterInfo) {
   await connectDB();
   try {
     console.log("filters form server action", filters);
@@ -200,14 +200,18 @@ export async function getProducts(filters: filtersType, { brands, categoryId = "
     // Fix: Add type guards and handle missing 'stock' property
     const filteredBySize =
       sizeFilters.length > 0
-        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          products.filter(
+        ? products.filter(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (product: any) =>
               Array.isArray(product?.stock?.sizes) && product.stock.sizes.some((s: { size?: string }) => s && typeof s.size === "string" && sizeFilters.includes(s.size))
           )
         : products;
 
-    return filteredBySize;
+    // Get uniques set of sizes from fetched products
+    const distinctSizes = [...new Set(products.flatMap((product: any) => product?.stock?.sizes?.map((s: { size?: string }) => s?.size).filter(Boolean) || []))];
+    console.log("Distinct Sizes: ", distinctSizes);
+
+    return {productsDoc: filteredBySize, sizes: distinctSizes};
   } catch (error) {
     console.error("Error fetching products with sales:", error);
     throw new Error("Failed to fetch products with sales");

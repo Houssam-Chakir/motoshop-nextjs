@@ -31,16 +31,13 @@ const ProductsPage = async ({ params, searchParams }: PageProps) => {
     const categoryDoc = await Category.findOne({ slug: category });
     const categoryId = categoryDoc._id.toString();
 
-    const filters = await loadSearchParams(searchParams);
-    const [brands, sizes] = await Promise.all([getCachedBrands() as Promise<Brand[]>, getCachedSizes() as Promise<Size[]>]);
+    const [filters, brands] = await Promise.all([loadSearchParams(searchParams), getCachedBrands()]);
+    const { productsDoc, sizes } = await getProducts(filters, { brands, categoryId });
 
-    const productsDoc = await getProducts(filters, { brands, categoryId });
+    const brandsName = brands.map((brand) => brand.name);
     const products = makeSerializable(productsDoc);
 
-    const sizesValue = sizes.map((size) => size.value);
-    const brandsName = brands.map((brand) => brand.name);
-
-    return <ProductsSection products={products} sizes={sizesValue} brands={brandsName} />;
+    return <ProductsSection products={products} sizes={sizes} brands={brandsName} />;
   } catch (error) {
     console.error("Failed to fetch products page data:", error);
     // Return a user-friendly error UI instead of crashing the page

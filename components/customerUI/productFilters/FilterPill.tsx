@@ -2,10 +2,17 @@ import { X } from "lucide-react";
 
 export default function FilterPill({ filters, handleRemoveFilter }) {
   const { sort, size, brand, style, maxPrice, minPrice } = filters;
+  const isFilter = (sort || size.length > 0 || brand.length > 0 || style.length > 0 || maxPrice < 30000 || minPrice > 0)
 
 
   return (
     <>
+      {isFilter && (
+        <Pill>
+          <p>Clear all</p>
+          <PillButton onClick={() => handleRemoveFilter('all')} />
+        </Pill>
+      )}
       {sort && (
         <Pill>
           <p>{sort}</p>

@@ -59,7 +59,8 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
       case "style":
         await setStyle([]);
         break;
-      default:
+      case "all":
+        await Promise.all([setSize([]), setBrand([]), setSort(""), setStyle([]), setMaxPrice(30000), setMinPrice(0)]);
         break;
     }
     await refetchProducts();
@@ -71,7 +72,7 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
         <div className='text-[16px] grow'>
           Products <span className='rounded-full px-2 py-1 bg-grey-light text-gray-800'>{totalProducts}</span>
         </div>
-        <div className="flex gap-2 px-2">
+        <div className='flex gap-2 px-2'>
           <FilterPill filters={{ sort, size, brand, style, maxPrice, minPrice }} handleRemoveFilter={handleRemoveFilter} />
         </div>
         <FiltersSidebar
@@ -110,7 +111,7 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
           return <ProductCard product={product} key={product.sku} />;
         })}
       </div>
-      <ProductsPagination />
+      <ProductsPagination {...pagination} currentPage={page} setPage={setPage} refetchProducts={refetchProducts} />
     </main>
   );
 }

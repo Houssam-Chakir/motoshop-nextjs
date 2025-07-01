@@ -12,7 +12,7 @@ export const searchParamsCache = {
 
   // Pagination
   page: parseAsIndex.withDefault(0),
-  limit: parseAsInteger.withDefault(3),
+  limit: parseAsInteger.withDefault(20),
 }
 
 export const loadSearchParams = createLoader(searchParamsCache)

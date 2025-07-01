@@ -2,7 +2,7 @@
 
 import { ReviewType } from "@/models/Review";
 import { CldImage } from "next-cloudinary";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { Heart, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useMediaQuery from "@/hooks/useMediaQuery";
@@ -13,8 +13,8 @@ import { addItemToGuestCart } from "@/lib/guestCartStore";
 import { getProductWithStock } from "@/actions/cartActions";
 import { ProductType } from "@/models/Product";
 import { StockType } from "@/models/Stock";
-import { Modal } from "./Modal";
-import ProductInfo from "./customerUI/ProductInfo";
+import { Modal } from "../Modal";
+import ProductInfo from "./ProductInfo";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { SaleDocument } from "@/models/Sale";
 

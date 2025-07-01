@@ -33,6 +33,7 @@
     "next-auth": "^4.24.11",
     "next-cloudinary": "^6.16.0",
     "node": "^22.15.0",
+    "nodejs": "^0.0.0",
     "nuqs": "^2.4.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

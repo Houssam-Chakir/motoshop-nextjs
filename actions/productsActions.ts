@@ -2,6 +2,8 @@ import { FilterQuery, Types } from "mongoose";
 import Product, { ProductDocument } from "@/models/Product";
 import Sale, { SaleDocument } from "@/models/Sale";
 import connectDB from "@/config/database";
+import { unstable_cache as next_cache } from "next/cache";
+
 
 // Re-export the SaleDocument type for use in other files
 export type { SaleDocument } from "@/models/Sale";
@@ -139,112 +141,122 @@ interface filterInfo {
  * @returns {Promise<ProductWithSale[]>} A promise that resolves to an array of products with sale details.
  * @throws {Error} If there is an issue fetching the products.
  */
-export async function getProducts(filters: filtersType, { brands, categoryId = "", typeId = "" }: filterInfo) {
-  await connectDB();
-  try {
-    console.log("filters form server action", filters);
-    const brandIds = brands.filter((brand) => filters.brand.includes(brand.name)).map((brand) => brand._id);
-    const sizeFilters = filters.size;
-    const { page, limit } = filters;
+export const getProducts = next_cache(
+  async (filters: filtersType, { brands, categoryId = "", typeId = "" }: filterInfo) => {
+    await connectDB();
+    try {
+      console.log("filters form server action", filters);
+      const brandIds = brands.filter((brand) => filters.brand.includes(brand.name)).map((brand) => brand._id);
+      const sizeFilters = filters.size;
+      const { page, limit, style } = filters;
 
-    // Build the MongoDB query
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: Record<string, any> = {};
+      // Build the MongoDB query
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const query: Record<string, any> = {};
 
-    if (brandIds.length > 0) {
-      query.brand = { $in: brandIds };
+      if (brandIds.length > 0) {
+        query.brand = { $in: brandIds };
+      }
+
+      if (categoryId) {
+        query.category = { $in: categoryId };
+      }
+      if (typeId) {
+        query.type = { $in: typeId };
+      }
+      if (style.length > 0) {
+        query.style = { $in: style };
+      }
+
+      if (filters.minPrice > 0 || filters.maxPrice < 30000) {
+        query.retailPrice = { $gte: filters.minPrice, $lte: filters.maxPrice };
+      }
+
+      // Build the sort object
+      let sortOptions = {};
+      switch (filters.sort) {
+        case "newest":
+          sortOptions = { createdAt: -1 };
+          break;
+        case "price-asc":
+          sortOptions = { retailPrice: 1 };
+          break;
+        case "price-desc":
+          sortOptions = { retailPrice: -1 };
+          break;
+        default:
+          sortOptions = { createdAt: -1 };
+          break;
+      }
+
+      const currentDate = new Date();
+
+      // Light query ONLY for getting distinct sizes
+      const productsForSizes = await Product.find(query)
+        .select("_id") // Only select the minimum needed for populate to work
+        .populate({
+          path: "stock",
+          select: "sizes", // Only get sizes from stock
+        })
+        .lean();
+
+      // Extract unique sizes
+      const distinctSizes = [...new Set(productsForSizes.flatMap((product: any) => product?.stock?.sizes?.map((s: { size?: string }) => s?.size).filter(Boolean) || []))];
+
+      // Main paginated query for actual products
+      const products = await Product.find(query)
+        .sort(sortOptions)
+        .skip(page * limit)
+        .limit(limit)
+        .select("title retailPrice images identifiers slug inStock saleInfo")
+        .populate<{ saleInfo: SaleDocument | null }>({
+          path: "saleInfo",
+          match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+          select: "name discountType discountValue startDate endDate isActive",
+        })
+        .populate({
+          path: "stock",
+          match: {},
+          select: "sizes",
+        })
+        .lean({ virtuals: true });
+
+      // Apply size filtering to paginated results (if needed)
+      const filteredProducts =
+        sizeFilters.length > 0
+          ? products.filter(
+              (product: any) =>
+                Array.isArray(product?.stock?.sizes) && product.stock.sizes.some((s: { size?: string }) => s && typeof s.size === "string" && sizeFilters.includes(s.size))
+            )
+          : products;
+
+      // Get total count for pagination metadata (if needed)
+      const totalProducts = await Product.countDocuments(query);
+      const totalPages = Math.ceil(totalProducts / limit);
+
+      return {
+        productsDoc: filteredProducts,
+        sizes: distinctSizes,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalProducts,
+          hasNextPage: page + 1 < totalPages,
+          hasPrevPage: page > 0,
+          limit,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching products with sales:", error);
+      throw new Error("Failed to fetch products with sales");
     }
-
-    if (categoryId) {
-      query.category = { $in: categoryId };
-    }
-    if (typeId) {
-      query.type = { $in: typeId };
-    }
-
-    if (filters.minPrice > 0 || filters.maxPrice < 30000) {
-      query.retailPrice = { $gte: filters.minPrice, $lte: filters.maxPrice };
-    }
-
-    // Build the sort object
-    let sortOptions = {};
-    switch (filters.sort) {
-      case "newest":
-        sortOptions = { createdAt: -1 };
-        break;
-      case "price-asc":
-        sortOptions = { retailPrice: 1 };
-        break;
-      case "price-desc":
-        sortOptions = { retailPrice: -1 };
-        break;
-      default:
-        sortOptions = { createdAt: -1 };
-        break;
-    }
-
-    const currentDate = new Date();
-
-    // Light query ONLY for getting distinct sizes
-    const productsForSizes = await Product.find(query)
-      .select("_id") // Only select the minimum needed for populate to work
-      .populate({
-        path: "stock",
-        select: "sizes", // Only get sizes from stock
-      })
-      .lean();
-
-    // Extract unique sizes
-    const distinctSizes = [...new Set(productsForSizes.flatMap((product: any) => product?.stock?.sizes?.map((s: { size?: string }) => s?.size).filter(Boolean) || []))];
-
-    // Main paginated query for actual products
-    const products = await Product.find(query)
-      .sort(sortOptions)
-      .skip(page * limit)
-      .limit(limit)
-      .select("title retailPrice images identifiers slug inStock saleInfo")
-      .populate<{ saleInfo: SaleDocument | null }>({
-        path: "saleInfo",
-        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
-        select: "name discountType discountValue startDate endDate isActive",
-      })
-      .populate({
-        path: "stock",
-        match: {},
-        select: "sizes",
-      })
-      .lean({ virtuals: true });
-
-    // Apply size filtering to paginated results (if needed)
-    const filteredProducts =
-      sizeFilters.length > 0
-        ? products.filter(
-            (product: any) =>
-              Array.isArray(product?.stock?.sizes) && product.stock.sizes.some((s: { size?: string }) => s && typeof s.size === "string" && sizeFilters.includes(s.size))
-          )
-        : products;
-
-    // Get total count for pagination metadata (if needed)
-    const totalProducts = await Product.countDocuments(query);
-    const totalPages = Math.ceil(totalProducts / limit);
-
-    return {
-      productsDoc: filteredProducts,
-      sizes: distinctSizes,
-      pagination: {
-        currentPage: page,
-        totalPages,
-        totalProducts,
-        hasNextPage: page + 1 < totalPages,
-        hasPrevPage: page > 0,
-        limit,
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching products with sales:", error);
-    throw new Error("Failed to fetch products with sales");
+  },
+  ["products"],
+  {
+    tags: ["products"],
   }
-}
+);
+
 
 /**
  * Fetches a single product by its ID, along with active sale information.

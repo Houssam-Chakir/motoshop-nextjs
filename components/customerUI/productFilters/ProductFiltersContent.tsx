@@ -19,12 +19,11 @@ interface FilterState {
 }
 
 interface FiltersPage {
-  sort: string
+  sort: string;
   sizes: string[];
   brands: string[];
   size: string[];
   brand: string[];
-  type: string[];
   style: string[];
   maxPrice: number;
   minPrice: number;
@@ -34,6 +33,7 @@ interface FiltersPage {
   setMaxPrice: (value: number) => void;
   setMinPrice: (value: number) => void;
   setSort: (value: string) => void;
+  refetchProducts: () => Promise<void>;
 }
 
 export default function FiltersPage({
@@ -45,6 +45,7 @@ export default function FiltersPage({
   brands,
   maxPrice,
   minPrice,
+  refetchProducts,
   setSize,
   setBrand,
   setSort,
@@ -63,38 +64,34 @@ export default function FiltersPage({
 
   const handleSortChange = (value: string) => {
     setFilters({ ...filters, sortBy: value });
-    setSort(value)
+    // setSort(value);
   };
 
   const handlePriceRangeChange = (value: [number, number]) => {
     setFilters({ ...filters, priceRange: value });
-    setMaxPrice(value[1])
-    setMinPrice(value[0])
+    // setMaxPrice(value[1]);
+    // setMinPrice(value[0]);
   };
 
   const handleBrandChange = (brand: string, checked: boolean) => {
     const updatedBrands = checked ? [...filters.selectedBrands, brand] : filters.selectedBrands.filter((b) => b !== brand);
     setFilters({ ...filters, selectedBrands: updatedBrands });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setBrand((prev: string[]) => (prev = updatedBrands));
+    // setBrand((prev: string[]) => (prev = updatedBrands));
   };
-
 
   const handleStyleChange = (style: string, checked: boolean) => {
     const updatedStyle = checked ? [...filters.selectedStyle, style] : filters.selectedStyle.filter((s) => s !== style);
     setFilters({ ...filters, selectedStyle: updatedStyle });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setStyle((prev: string[]) => (prev = updatedStyle));
+    // setStyle((prev: string[]) => (prev = updatedStyle));
   };
 
   const handleSizeChange = (size: string, checked: boolean) => {
     const updatedSizes = checked ? [...filters.selectedSizes, size] : filters.selectedSizes.filter((s) => s !== size);
     setFilters({ ...filters, selectedSizes: updatedSizes });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setSize((prev: string[]) => (prev = updatedSizes));
+    // setSize((prev: string[]) => (prev = updatedSizes));
   };
 
-  const clearAllFilters = () => {
+  const clearAllFilters = async () => {
     setFilters({
       sortBy: "featured",
       priceRange: [0, 30000],
@@ -102,18 +99,35 @@ export default function FiltersPage({
       selectedSizes: [],
       selectedStyle: [],
     });
-    setSize([]);
-    setBrand([]);
-    setSort("");
+    await Promise.all([
+      setSize([]),
+      setBrand([]),
+      setSort(""),
+      setStyle([]),
+      setMaxPrice(30000),
+      setMinPrice(0),
+    ]);
+    await refetchProducts();
   };
 
-  const activeFiltersCount =
-    filters.selectedBrands.length + filters.selectedSizes.length + (filters.priceRange[0] > 0 || filters.priceRange[1] < 300 ? 1 : 0);
+  const applyFilters = async () => {
+    await Promise.all([
+      setSize(filters.selectedSizes),
+      setBrand(filters.selectedBrands),
+      setSort(filters.sortBy),
+      setStyle(filters.selectedStyle),
+      setMaxPrice(filters.priceRange[1]),
+      setMinPrice(filters.priceRange[0]),
+    ]);
+    await refetchProducts();
+  };
+
+  const activeFiltersCount = filters.selectedBrands.length + filters.selectedStyle.length + filters.selectedSizes.length + (filters.priceRange[0] > 0 || filters.priceRange[1] < 30000 ? 1 : 0);
 
   return (
-    <div className={`relative overflow-scroll`}>
+    <div className={` flex flex-col bg-white overflow-scroll`}>
       {/* Header */}
-      <div className='pb-6'>
+      <div className='pb-6 overflow-scroll p-4'>
         <div className='sticky flex items-center justify-between mb-4 border-b-1 px-2 py-3'>
           <div className='flex items-center gap-2'>
             <Filter className='h-5 w-5' />
@@ -131,136 +145,148 @@ export default function FiltersPage({
             </Button>
           )}
         </div>
-        <div className='flex flex-col p-2'>
-          {/* Sort By */}
-          <div className='space-y-2'>
-            <Label className='text-sm font-medium'>Sort By</Label>
-            <Select value={filters.sortBy} onValueChange={handleSortChange}>
-              <SelectTrigger className='w-full rounded-full shadow-none'>
-                <ArrowUpDown className='h-4 w-4 mr-2' />
-                <SelectValue placeholder='Sort by' />
-              </SelectTrigger>
-              <SelectContent className='rounded-lg'>
-                <SelectItem value='newest'>Featured</SelectItem>
-                <SelectItem value='price-asc'>Price: Low to High</SelectItem>
-                <SelectItem value='price-desc'>Price: High to Low</SelectItem>
-                {/* <SelectItem value='rating'>Highest Rated</SelectItem> */}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Scrollable Content */}
-        <div className='flex-1 overflow-y-auto pt-6 space-y-6'>
-          {/* Price Range Filter */}
-          <Card className='border-none py-0 shadow-none h-fit text-black'>
-            <CardContent className='p-4'>
-              <h3 className='font-medium mb-4'>Price Range</h3>
-              <div className='space-y-4'>
-                <div className='px-2'>
-                  <Slider value={filters.priceRange} onValueChange={handlePriceRangeChange} max={30000} min={0} step={5} className='w-full' minStepsBetweenThumbs={1} />
-                </div>
-                <div className='flex justify-between items-center'>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-sm text-muted-foreground'>Min:</span>
-                    <Badge variant='outline'>{filters.priceRange[0]} MAD</Badge>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-sm text-muted-foreground'>Max:</span>
-                    <Badge variant='outline'>{filters.priceRange[1]} MAD</Badge>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <hr />
-
-          {/* Size Filter */}
-          <Card className='border-none py-0 shadow-none text-black'>
-            <CardContent className='p-4'>
-              <h3 className='font-medium mb-4'>Size</h3>
-              <div className='grid grid-cols-3 gap-3'>
-                {sizes.map((size) => (
-                  <div key={size} className='flex items-center space-x-2'>
-                    <Checkbox id={`size-${size}`} checked={filters.selectedSizes.includes(size)} onCheckedChange={(checked) => handleSizeChange(size, checked as boolean)} />
-                    <Label htmlFor={`size-${size}`} className='text-sm font-normal cursor-pointer'>
-                      {size}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <hr />
-
-          {/* Type Filter */}
-          <Card className='border-none py-0 shadow-none text-black'>
-            <CardContent className='p-4'>
-              <h3 className='font-medium mb-4'>Riding Style</h3>
-              <div className='space-y-3'>
-                {ridingStyles.map((style) => (
-                  <div key={style} className='flex items-center space-x-2'>
-                    <Checkbox id={`style-${style}`} checked={filters.selectedStyle.includes(style)} onCheckedChange={(checked) => handleStyleChange(style, checked as boolean)} />
-                    <Label htmlFor={`style-${style}`} className='text-sm font-normal cursor-pointer'>
-                      {style}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <hr />
-
-          {/* Brand Filter */}
-          <Card className='border-none py-0 shadow-none text-black'>
-            <CardContent className='p-4'>
-              <h3 className='font-medium mb-4'>Brand</h3>
-              <div className='space-y-3 overflow-y-auto'>
-                {brands.map((brand) => (
-                  <div key={brand} className='flex items-center space-x-2'>
-                    <Checkbox id={`brand-${brand}`} checked={filters.selectedBrands.includes(brand)} onCheckedChange={(checked) => handleBrandChange(brand, checked as boolean)} />
-                    <Label htmlFor={`brand-${brand}`} className='text-sm font-normal cursor-pointer'>
-                      {brand}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Active Filters Footer */}
-        {activeFiltersCount > 0 && (
-          <div className=' border-t pt-4 mt-6'>
+        <div className='overflow-scroll grow pb-8'>
+          <div className='flex flex-col p-2'>
+            {/* Sort By */}
             <div className='space-y-2'>
-              <h4 className='text-sm font-medium'>Active Filters:</h4>
-              <div className='flex flex-wrap gap-1'>
-                {filters.selectedBrands.map((brand) => (
-                  <Badge key={brand} variant='secondary' className='text-xs gap-1 bg-grey-light'>
-                    {brand}
-                    <X className='h-3 w-3 cursor-pointer' onClick={() => handleBrandChange(brand, false)} />
-                  </Badge>
-                ))}
-                {filters.selectedSizes.map((size) => (
-                  <Badge key={size} variant='secondary' className='text-xs gap-1 bg-grey-light'>
-                    Size {size}
-                    <X className='h-3 w-3 cursor-pointer' onClick={() => handleSizeChange(size, false)} />
-                  </Badge>
-                ))}
-                {(filters.priceRange[0] > 0 || filters.priceRange[1] < 300) && (
-                  <Badge variant='secondary' className='text-xs gap-1 bg-grey-light'>
-                    ${filters.priceRange[0]} - ${filters.priceRange[1]}
-                    <X className='h-3 w-3 cursor-pointer' onClick={() => handlePriceRangeChange([0, 300])} />
-                  </Badge>
-                )}
-              </div>
+              <Label className='text-sm font-medium'>Sort By</Label>
+              <Select value={filters.sortBy} onValueChange={handleSortChange}>
+                <SelectTrigger className='w-full rounded-full shadow-none'>
+                  <ArrowUpDown className='h-4 w-4 mr-2' />
+                  <SelectValue placeholder='Sort by' />
+                </SelectTrigger>
+                <SelectContent className='rounded-lg'>
+                  <SelectItem value='newest'>Featured</SelectItem>
+                  <SelectItem value='price-asc'>Price: Low to High</SelectItem>
+                  <SelectItem value='price-desc'>Price: High to Low</SelectItem>
+                  {/* <SelectItem value='rating'>Highest Rated</SelectItem> */}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        )}
+
+          {/* Scrollable Content */}
+          <div className='flex-1 overflow-y-auto pt-6 space-y-6'>
+            {/* Price Range Filter */}
+            <Card className='border-none py-0 shadow-none h-fit text-black'>
+              <CardContent className='p-4'>
+                <h3 className='font-medium mb-4'>Price Range</h3>
+                <div className='space-y-4'>
+                  <div className='px-2'>
+                    <Slider value={filters.priceRange} onValueChange={handlePriceRangeChange} max={30000} min={0} step={5} className='w-full' minStepsBetweenThumbs={1} />
+                  </div>
+                  <div className='flex justify-between items-center'>
+                    <div className='flex items-center gap-2'>
+                      <span className='text-sm text-muted-foreground'>Min:</span>
+                      <Badge variant='outline'>{filters.priceRange[0]} MAD</Badge>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      <span className='text-sm text-muted-foreground'>Max:</span>
+                      <Badge variant='outline'>{filters.priceRange[1]} MAD</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <hr />
+
+            {/* Size Filter */}
+            <Card className='border-none py-0 shadow-none text-black'>
+              <CardContent className='p-4'>
+                <h3 className='font-medium mb-4'>Size</h3>
+                <div className='grid grid-cols-3 gap-3'>
+                  {sizes.map((size) => (
+                    <div key={size} className='flex items-center space-x-2'>
+                      <Checkbox id={`size-${size}`} checked={filters.selectedSizes.includes(size)} onCheckedChange={(checked) => handleSizeChange(size, checked as boolean)} />
+                      <Label htmlFor={`size-${size}`} className='text-sm font-normal cursor-pointer'>
+                        {size}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <hr />
+
+            {/* Type Filter */}
+            <Card className='border-none py-0 shadow-none text-black'>
+              <CardContent className='p-4'>
+                <h3 className='font-medium mb-4'>Riding Style</h3>
+                <div className='space-y-3'>
+                  {ridingStyles.map((style) => (
+                    <div key={style} className='flex items-center space-x-2'>
+                      <Checkbox id={`style-${style}`} checked={filters.selectedStyle.includes(style)} onCheckedChange={(checked) => handleStyleChange(style, checked as boolean)} />
+                      <Label htmlFor={`style-${style}`} className='text-sm font-normal cursor-pointer'>
+                        {style}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <hr />
+
+            {/* Brand Filter */}
+            <Card className='border-none py-0 shadow-none text-black'>
+              <CardContent className='p-4'>
+                <h3 className='font-medium mb-4'>Brand</h3>
+                <div className='space-y-3 overflow-y-auto'>
+                  {brands.map((brand) => (
+                    <div key={brand} className='flex items-center space-x-2'>
+                      <Checkbox
+                        id={`brand-${brand}`}
+                        checked={filters.selectedBrands.includes(brand)}
+                        onCheckedChange={(checked) => handleBrandChange(brand, checked as boolean)}
+                      />
+                      <Label htmlFor={`brand-${brand}`} className='text-sm font-normal cursor-pointer'>
+                        {brand}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Active Filters Footer */}
+          {activeFiltersCount > 0 && (
+            <div className=' border-t pt-4 mt-6'>
+              <div className='space-y-2'>
+                <h4 className='text-sm font-medium'>Active Filters:</h4>
+                <div className='flex flex-wrap gap-1'>
+                  {filters.selectedBrands.map((brand) => (
+                    <Badge key={brand} variant='secondary' className='text-xs gap-1 bg-grey-light'>
+                      {brand}
+                      <X className='h-3 w-3 cursor-pointer' onClick={() => handleBrandChange(brand, false)} />
+                    </Badge>
+                  ))}
+                  {filters.selectedSizes.map((size) => (
+                    <Badge key={size} variant='secondary' className='text-xs gap-1 bg-grey-light'>
+                      Size {size}
+                      <X className='h-3 w-3 cursor-pointer' onClick={() => handleSizeChange(size, false)} />
+                    </Badge>
+                  ))}
+                  {(filters.priceRange[0] > 0 || filters.priceRange[1] < 300) && (
+                    <Badge variant='secondary' className='text-xs gap-1 bg-grey-light'>
+                      ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                      <X className='h-3 w-3 cursor-pointer' onClick={() => handlePriceRangeChange([0, 300])} />
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+        <button
+          onClick={applyFilters}
+          className='h-16 w-full bg-gray-800/70 backdrop-blur-md absolute cursor-pointer -bottom-0.5 flex justify-center items-center group hover:bg-blue-700 '
+        >
+          <p className='font-medium text-white'>Apply filters</p>
+        </button>
     </div>
   );
 }

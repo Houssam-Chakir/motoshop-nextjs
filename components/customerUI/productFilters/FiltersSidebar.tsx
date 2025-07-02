@@ -16,7 +16,7 @@ function filtersSidebar({
   trigger,
   children,
   side = "right",
-  className = "w-[320px] p-0",
+  className = "w-[360px] p-0",
   showDefaultCloseButton = false, // Added prop here
 }: FiltersSidebarProps) {
   return (

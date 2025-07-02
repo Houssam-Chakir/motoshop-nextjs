@@ -125,10 +125,9 @@ export default function FiltersPage({
   const activeFiltersCount = filters.selectedBrands.length + filters.selectedStyle.length + filters.selectedSizes.length + (filters.priceRange[0] > 0 || filters.priceRange[1] < 30000 ? 1 : 0);
 
   return (
-    <div className={` flex flex-col bg-white overflow-scroll`}>
+    <div className={` flex flex-col bg-white h-full`}>
       {/* Header */}
-      <div className='pb-6 overflow-scroll p-4'>
-        <div className='sticky flex items-center justify-between mb-4 border-b-1 px-2 py-3'>
+        <div className='sticky flex items-center justify-between mb-4 border-b-1 px-6 py-4'>
           <div className='flex items-center gap-2'>
             <Filter className='h-5 w-5' />
             <h2 className='text-lg font-semibold'>Filters</h2>
@@ -145,6 +144,7 @@ export default function FiltersPage({
             </Button>
           )}
         </div>
+      <div className='overflow-scroll p-4 h-'>
         <div className='overflow-scroll grow pb-8'>
           <div className='flex flex-col p-2'>
             {/* Sort By */}
@@ -283,7 +283,7 @@ export default function FiltersPage({
       </div>
         <button
           onClick={applyFilters}
-          className='h-16 w-full bg-gray-800/70 backdrop-blur-md absolute cursor-pointer -bottom-0.5 flex justify-center items-center group hover:bg-blue-700 '
+          className=' h-24 w-full bg-gray-700 backdrop-blur-md cursor-pointer  flex justify-center items-center group hover:bg-blue-700 '
         >
           <p className='font-medium text-white'>Apply filters</p>
         </button>

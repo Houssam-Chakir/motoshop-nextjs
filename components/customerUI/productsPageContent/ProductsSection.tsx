@@ -76,7 +76,7 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
           <FilterPill filters={{ sort, size, brand, style, maxPrice, minPrice }} handleRemoveFilter={handleRemoveFilter} />
         </div>
         <FiltersSidebar
-          className='h-[100vh] border-none'
+          className='h-full border-none'
           trigger={
             <button className='flex items-center text-blue-600 font-medium cursor-pointer rounded-full py-2 px-4 hover:bg-blue-50 gap-1'>
               <Filter size={18} />

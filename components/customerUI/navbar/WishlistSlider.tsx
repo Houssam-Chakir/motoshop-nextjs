@@ -19,26 +19,21 @@ export default function WishlistSlider({ session }: { session: Session | null })
 
   const { wishlist } = useUserContext();
   const [guestWishlistItems, setGuestWishlistItems] = useState<WishlistItemType[]>([]);
-  console.log("WISHLIST RERENDERED", guestWishlistItems);
+
   useEffect(() => {
     // Function to update guest wishlist items from localStorage
     const updateGuestWishlist = () => {
       setGuestWishlistItems(getGuestWishlist());
     };
-
     // Initial load
     updateGuestWishlist();
-
     // Listen for custom event
     window.addEventListener("guestWishlistChanged", updateGuestWishlist);
-
     // Cleanup listener on component unmount
     return () => {
       window.removeEventListener("guestWishlistChanged", updateGuestWishlist);
     };
   }, []);
-
-  console.log("Guest wishlist from state:", guestWishlistItems);
 
   return (
     <MobileSlider
@@ -147,11 +142,9 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
       <div className='shrink-0 aspect-square w-[100px] flex items-center justify-center bg-grey-light p-2 overflow-clip'>
         <Image className='object-contain w-full h-full' src={item.imageUrl ?? "/noProductImage.png"} alt={item.title ?? "Wishlist Item"} width={90} height={90} />
         {item.salePrice && (
-          <div
-            className={`bg-primary transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}
-          >
-            {/* calculate percentage of discount from original price to unitprice and remove numbers after comma*/}
-            -{Math.floor(((item.retailPrice! - item.salePrice!) / item.retailPrice!) * 100)}%
+          <div className={`bg-primary transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}>
+            {/* calculate percentage of discount from original price to unitprice and remove numbers after comma*/}-
+            {Math.floor(((item.retailPrice! - item.salePrice!) / item.retailPrice!) * 100)}%
           </div>
         )}
       </div>
@@ -165,7 +158,7 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
         </div>
         <div className='gap-2 items-center pl-0.5'>
           {item.quantity > 0 && <span className='text-emerald-500 text-xs'>In Stock</span>}
-          {item.quantity === 0 || !item.quantity  && <span className='text-red-500 text-xs'>Out of Stock</span>}
+          {item.quantity === 0 || (!item.quantity && <span className='text-red-500 text-xs'>Out of Stock</span>)}
           <div className='flex gap-2 items-center'>
             <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>{finalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
             {item.salePrice && (

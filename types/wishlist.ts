@@ -7,5 +7,5 @@ export interface WishlistItem {
   identifiers?: { brand: string; categoryType: string; category: string };
   slug?: string;
   quantity: number;
-  salePrice?: number;
+  salePrice?: number | null;
 }

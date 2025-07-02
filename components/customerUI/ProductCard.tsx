@@ -9,13 +9,11 @@ import useMediaQuery from "@/hooks/useMediaQuery";
 import { useUserContext } from "@/contexts/UserContext";
 import React, { useState, useEffect } from "react";
 import { addItemToGuestWishlist, removeItemFromGuestWishlist, isItemInGuestWishlist } from "@/lib/guestWishlistStore";
-import { addItemToGuestCart } from "@/lib/guestCartStore";
 import { getProductWithStock } from "@/actions/cartActions";
 import { ProductType } from "@/models/Product";
 import { StockType } from "@/models/Stock";
 import { Modal } from "../Modal";
 import ProductInfo from "./ProductInfo";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { SaleDocument } from "@/models/Sale";
 
 interface ProductCard {
@@ -166,7 +164,7 @@ function ProductCard({ product }: { product: ProductCard }) {
           identifiers: product.identifiers,
           slug: product.slug,
           quantity: product.quantity,
-          salePrice: product.salePrice ? product.salePrice : product.retailPrice,
+          salePrice: product.salePrice ? product.salePrice : null,
         });
       }
     } else {

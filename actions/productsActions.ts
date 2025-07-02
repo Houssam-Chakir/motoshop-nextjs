@@ -127,6 +127,7 @@ interface filtersType {
   maxPrice?: number;
   page: number;
   limit: number;
+  searchQuery?: string; // Add searchQuery for text search
 }
 
 interface filterInfo {
@@ -146,13 +147,19 @@ export const getProducts = next_cache(
     await connectDB();
     try {
       console.log("filters form server action", filters);
-      const brandIds = brands.filter((brand) => filters.brand.includes(brand.name)).map((brand) => brand._id);
-      const sizeFilters = filters.size;
-      const { page, limit, style } = filters;
+      const brandIds = brands.filter((brand) => filters.brand?.includes(brand.name)).map((brand) => brand._id);
+      const sizeFilters = filters.size || [];
+      const { page, limit, style, searchQuery } = filters;
 
       // Build the MongoDB query
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query: Record<string, any> = {};
+
+      // Handle text search query
+      if (searchQuery) {
+        const regex = new RegExp(searchQuery, "i");
+        query.$or = [{ title: regex }, { slug: regex }, { description: regex }];
+      }
 
       if (brandIds.length > 0) {
         query.brand = { $in: brandIds };
@@ -164,7 +171,7 @@ export const getProducts = next_cache(
       if (typeId) {
         query.type = { $in: typeId };
       }
-      if (style.length > 0) {
+      if (style && style.length > 0) {
         query.style = { $in: style };
       }
 

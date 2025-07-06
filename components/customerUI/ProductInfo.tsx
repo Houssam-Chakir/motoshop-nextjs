@@ -153,10 +153,10 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
           />
           {images.length > 1 && (
             <>
-              <Button variant='ghost' size='icon' className='absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={prevImage}>
+              <Button variant='ghost' size='icon' className='rounded-full absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={prevImage}>
                 <ChevronLeft className='w-5 h-5' />
               </Button>
-              <Button variant='ghost' size='icon' className='absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={nextImage}>
+              <Button variant='ghost' size='icon' className='rounded-full absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={nextImage}>
                 <ChevronRight className='w-5 h-5' />
               </Button>
             </>
@@ -201,9 +201,9 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
                   </>
                 )}
               </div>
-              <p className='italic text-[13px] text-success-green'>
-                <span className='line-through text-grey-darker'>{retailPrice?.toLocaleString("en-US")} MAD</span> saving {savedAmount?.toLocaleString("en-US")} MAD + Free shipping
-              </p>
+              {saleInfo && <p className='italic text-[13px] text-success-green'>
+                <span className='line-through text-grey-darker'>{finalPrice?.toLocaleString("en-US")} MAD</span> saving {savedAmount?.toLocaleString("en-US")} MAD + Free shipping
+              </p>}
             </div>
 
             {/* Size selection */}

@@ -138,9 +138,9 @@ export default function ProductInfoMobile({ product, isLoggedIn }: ProductInfoPr
   const currentImage = currentImageIndex >= 0 ? images[currentImageIndex]?.secure_url : "/placeholder-product.png";
 
   return (
-    <div className='grid grid-cols-1 gap- lg:grid-cols-2 h-[95vh] overflow-scroll'>
+    <div className='grid grid-cols-1 h-[95vh] overflow-scroll'>
       {/* Left side - Images */}
-      <div className='space-y-3 flex flex-col-reverse p-4'>
+      <div className='flex flex-col-reverse p-4'>
         {/* Main image */}
         <div className='overflow-hidden relative h-96 bg-grey-light'>
           <CldImage
@@ -152,10 +152,10 @@ export default function ProductInfoMobile({ product, isLoggedIn }: ProductInfoPr
           />
           {images.length > 1 && (
             <>
-              <Button variant='ghost' size='icon' className='absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={prevImage}>
+              <Button variant='ghost' size='icon' className='rounded-full absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={prevImage}>
                 <ChevronLeft className='w-5 h-5' />
               </Button>
-              <Button variant='ghost' size='icon' className='absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={nextImage}>
+              <Button variant='ghost' size='icon' className='rounded-full absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={nextImage}>
                 <ChevronRight className='w-5 h-5' />
               </Button>
             </>
@@ -190,7 +190,7 @@ export default function ProductInfoMobile({ product, isLoggedIn }: ProductInfoPr
             {/* Price and badges */}
             <div className='space-y-0'>
               <div className='flex gap-1 md:gap-2 lg:gap-3 items-center'>
-                <span className='md:text-2xl text-3xl font-black tracking-wider text-blue-900'>{finalPrice?.toLocaleString("en-US")} MAD</span>
+                <span className='text-[22px] xs:text-2xl md:text-3xl  font-black tracking-wider text-blue-900'>{finalPrice?.toLocaleString("en-US")} MAD</span>
                 {saleInfo && (
                   <>
                     <Badge className='text-white rounded-none bg-primary'>
@@ -200,9 +200,9 @@ export default function ProductInfoMobile({ product, isLoggedIn }: ProductInfoPr
                   </>
                 )}
               </div>
-              <p className='italic text-[13px] text-success-green'>
-                <span className='line-through text-grey-darker'>{retailPrice?.toLocaleString("en-US")} MAD</span> saving {savedAmount?.toLocaleString("en-US")} MAD + Free shipping
-              </p>
+              {saleInfo && <p className='italic text-[13px] text-success-green'>
+                <span className='line-through text-grey-darker'>{finalPrice?.toLocaleString("en-US")} MAD</span> saving {savedAmount?.toLocaleString("en-US")} MAD + Free shipping
+              </p>}
             </div>
 
             {/* Size selection */}

@@ -39,7 +39,7 @@ export default function WishlistSlider({ session }: { session: Session | null })
     <MobileSlider
       side='right'
       showDefaultCloseButton={false}
-      className='md:w-[450px] xs:w-[90%]  p-0'
+      className='md:w-[450px] w-[90%]  p-0'
       trigger={
         <div className='flex flex-col items-center group cursor-pointer'>
           <Heart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />

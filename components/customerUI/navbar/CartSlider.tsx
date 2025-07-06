@@ -241,7 +241,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
     <MobileSlider
       side='right'
       showDefaultCloseButton={false}
-      className='w-[450px] p-0'
+      className='md:w-[450px] w-[90%] p-0'
       trigger={
         <div className='relative flex flex-col items-center group cursor-pointer'>
           <ShoppingCart className='h-5 w-5 text-gray-700 group-hover:text-primary duration-100 group-hover:-translate-y-1' />

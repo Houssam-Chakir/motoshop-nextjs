@@ -16,7 +16,7 @@ export function MobileSlider({
   trigger,
   children,
   side = "left",
-  className = "w-[320px] p-0",
+  className = "w-[350px] p-0",
   showDefaultCloseButton, // Added prop here
 }: MobileSliderProps) {
   return (

@@ -6,10 +6,10 @@ import { Filter } from "lucide-react";
 import FiltersPage from "@/components/customerUI/productFilters/ProductFiltersContent";
 import { parseAsArrayOf, parseAsIndex, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import ProductsPagination from "../productsPagination";
-import { useEffect, useState } from "react";
 import FilterPill from "../productFilters/FilterPill";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { usePathname } from "next/navigation";
+import useMediaQuery from "@/hooks/useMediaQuery";
 
 interface Pagination {
   currentPage: number;
@@ -29,7 +29,7 @@ interface SectionTypes {
 
 export default function ProductsSection({ products, sizes, brands, pagination, refetchProducts }: SectionTypes) {
   // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
-  // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
+  const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   // const isDesktop = useMediaQuery("lg");
 
   const pathname = usePathname();
@@ -72,16 +72,18 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
 
   return (
     <main className='h-fit flex flex-col justify-between relative'>
-      <div className="py-4">
+      <div className='py-4'>
         <Breadcrumbs path={pathname} />
       </div>
-      <div className='flex justify-between items-center py-4'>
+      <div className='flex flex-wrap md:flex-nowrap justify-between items-center py-4'>
         <div className='text-[16px] grow'>
           Products <span className='rounded-full px-2 py-1 bg-grey-light text-gray-800'>{totalProducts}</span>
         </div>
-        <div className='flex gap-2 px-2'>
-          <FilterPill filters={{ sort, size, brand, style, maxPrice, minPrice }} handleRemoveFilter={handleRemoveFilter} />
-        </div>
+        {isTabletOrLarger && (
+          <div className='px-2'>
+            <FilterPill filters={{ sort, size, brand, style, maxPrice, minPrice }} handleRemoveFilter={handleRemoveFilter} />
+          </div>
+        )}
         <FiltersSidebar
           className='h-full border-none'
           trigger={
@@ -109,6 +111,11 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
             refetchProducts={refetchProducts}
           />
         </FiltersSidebar>
+        {!isTabletOrLarger && (
+          <div className='overflow-scroll w-full md:px-2'>
+            <FilterPill filters={{ sort, size, brand, style, maxPrice, minPrice }} handleRemoveFilter={handleRemoveFilter} />
+          </div>
+        )}
       </div>
       <div className='grid grow xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 gap-x-2 md:gap-y-16 sm:gap-y-8 gap-y-4'>
         {/* {products.map((product) => {

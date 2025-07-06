@@ -5,6 +5,7 @@
 
 @theme inline {
   --breakpoint-xs: 400px;
+  --breakpoint-xxs: 300px;
   /* Fonts */
   --font-sans: var(--font-inter); /* Makes Inter the default sans-serif font */
   --font-display: var(--font-oxanium); /* Creates a new utility for Oxanium */

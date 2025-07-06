@@ -6,10 +6,10 @@ export default function FilterPill({ filters, handleRemoveFilter }) {
 
 
   return (
-    <>
+    <div className="flex justify-end gap-2 overflow-scroll ">
       {isFilter && (
         <Pill>
-          <p>Clear all</p>
+          <p>Reset</p>
           <PillButton onClick={() => handleRemoveFilter('all')} />
         </Pill>
       )}
@@ -46,12 +46,12 @@ export default function FilterPill({ filters, handleRemoveFilter }) {
           <PillButton onClick={() => handleRemoveFilter('style')} />
         </Pill>
       )}
-    </>
+    </div>
   );
 }
 
 function Pill({ children }) {
-  return <div className='flex text-gray-600 gap-1 justify-between items-center pl-3 border rounded-full text-sm hover:border-slate-400 cursor-default'>{children}</div>;
+  return <div className='flex w-fit text-gray-600 gap-1 justify-between items-center pl-3 border rounded-full text-sm hover:border-slate-400 cursor-default'>{children}</div>;
 }
 
 function PillButton({onClick}) {

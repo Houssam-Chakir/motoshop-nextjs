@@ -8,6 +8,8 @@ import { parseAsArrayOf, parseAsIndex, parseAsInteger, parseAsString, useQuerySt
 import ProductsPagination from "../productsPagination";
 import { useEffect, useState } from "react";
 import FilterPill from "../productFilters/FilterPill";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { usePathname } from "next/navigation";
 
 interface Pagination {
   currentPage: number;
@@ -29,6 +31,8 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
   // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
   // const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   // const isDesktop = useMediaQuery("lg");
+
+  const pathname = usePathname();
 
   const { currentPage, totalPages, totalProducts, hasNextPage, hasPrevPage, limit } = pagination;
   console.log("Pagination info: ", pagination);
@@ -68,6 +72,9 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
 
   return (
     <main className='h-fit flex flex-col justify-between relative'>
+      <div className="py-4">
+        <Breadcrumbs path={pathname} />
+      </div>
       <div className='flex justify-between items-center py-4'>
         <div className='text-[16px] grow'>
           Products <span className='rounded-full px-2 py-1 bg-grey-light text-gray-800'>{totalProducts}</span>

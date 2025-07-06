@@ -17,11 +17,8 @@ const ProductsPage = async ({ params, searchParams }: PageProps) => {
     await connectDB();
 
     const { category } = params;
-    const categoryDoc = await Category.findOne({ slug: category });
-    const categoryId = categoryDoc._id.toString();
-
-    const [filters, brands] = await Promise.all([loadSearchParams(searchParams), getCachedBrands()]);
-    const { productsDoc, sizes, pagination } = await getProducts(filters, { brands, categoryId });
+    const [categoryDoc, filters, brands] = await Promise.all([Category.findOne({ slug: category }), loadSearchParams(searchParams), getCachedBrands()]);
+    const { productsDoc, sizes, pagination } = await getProducts(filters, { brands, categoryId: categoryDoc._id.toString() });
 
     async function refetchProducts() {
       "use server";

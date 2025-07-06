@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 //f// Layout ------------------------------------------------------------------------------------
 export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
+  
 
   return (
     <div className=''>

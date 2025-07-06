@@ -173,7 +173,7 @@ function UserButtonsSection({
 
 // -- User Menu -------------------------------------------
 function UserMenu({ providers, session }: { session: Session | null; providers: Record<string, { id: string; name: string }> }) {
-  // const { wishlist } = useUserContext(); // Get wishlist from context
+   // const { wishlist } = useUserContext(); // Get wishlist from context
   const { profile } = useUserContext();
 
   const userRole = profile?.role;

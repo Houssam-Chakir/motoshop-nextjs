@@ -15,17 +15,14 @@ const ProductsPage = async ({ params, searchParams }: PageProps) => {
   try {
     await connectDB();
 
-    const { type } = params;
-    const typeDoc = await Type.findOne({ slug: type });
+    const [typeDoc, filters, brands] = await Promise.all([Type.findOne({ slug: params.type }), loadSearchParams(searchParams), getCachedBrands()]);
     const typeId = typeDoc._id.toString();
 
-    const [filters, brands] = await Promise.all([loadSearchParams(searchParams), getCachedBrands()]);
     const { productsDoc, sizes, pagination } = await getProducts(filters, { brands, typeId });
 
-
     async function refetchProducts() {
-      'use server'
-      revalidateTag('products')
+      "use server";
+      revalidateTag("products");
     }
 
     const products = makeSerializable(productsDoc);

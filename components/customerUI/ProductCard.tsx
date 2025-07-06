@@ -13,6 +13,7 @@ import { getProductWithStock } from "@/actions/cartActions";
 import { ProductType } from "@/models/Product";
 import { StockType } from "@/models/Stock";
 import { Modal } from "../Modal";
+import ProductInfoSlider from "./ProductInfoSlider";
 import ProductInfo from "./ProductInfo";
 import { SaleDocument } from "@/models/Sale";
 
@@ -140,11 +141,7 @@ function ProductCard({ product }: { product: ProductCard }) {
     router.push(`/product/${product.slug}`);
   };
 
-  const handlePlusClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    //Plus logic here
-    console.log("Plus clicked", product.sku);
-  };
+
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
@@ -219,9 +216,11 @@ function ProductCard({ product }: { product: ProductCard }) {
       <div className='flex relative justify-center items-center p-2 w-full overflow-clip aspect-square bg-grey-light'>
         {/* hover buttons */}
         {!isDesktop && (
-          <Button onClick={handlePlusClick} className='absolute py-4 top-3 right-3 text-black hover:bg-white bg-white/80 rounded-full w-[35px] h-[35px] shadow-md'>
-            <Plus size={18} />
-          </Button>
+          <ProductInfoSlider product={product} isLoggedIn={isLoggedIn}>
+            <Button className='absolute py-4 top-3 right-3 text-black hover:bg-white bg-white/80 rounded-full w-[35px] h-[35px] shadow-md'>
+              <Plus size={18} />
+            </Button>
+          </ProductInfoSlider>
         )}
         {isDesktop && (
           <>
@@ -283,6 +282,7 @@ function ProductCard({ product }: { product: ProductCard }) {
   );
 }
 
+//* WISHLIST BUTTON /////////////////////////////////////////////////////////////////////////////
 interface WishlistButtonProps {
   handleWishlist: (e: React.MouseEvent) => void;
   isCurrentlyInWishlist: boolean;

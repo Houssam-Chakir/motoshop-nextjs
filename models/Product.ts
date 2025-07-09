@@ -229,6 +229,7 @@ export type ProductType = Omit<ProductDocument, keyof Document> & {
   _id: string;
   brand?: { _id: string; name: string };
   category?: { _id: string; name: string };
+  type?: { _id: string; name: string };
   stock?: {
     _id: string;
     sizes: SizeQuantityType[];

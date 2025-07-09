@@ -4,7 +4,6 @@ import Sale, { SaleDocument } from "@/models/Sale";
 import connectDB from "@/config/database";
 import { unstable_cache as next_cache } from "next/cache";
 
-
 // Re-export the SaleDocument type for use in other files
 export type { SaleDocument } from "@/models/Sale";
 
@@ -136,6 +135,7 @@ interface filterInfo {
   typeId?: string;
 }
 
+//f// GET PRODUCTS ///////////////////////////////////////////////////////////////////////////////
 /**
  * Fetches products with their active sale information.
  * @param {FilterQuery<ProductDocument>} [filters={}] - Optional Mongoose query filters to apply.
@@ -226,6 +226,10 @@ export const getProducts = next_cache(
           match: {},
           select: "sizes",
         })
+        .populate([
+          { path: "brand", select: "name" },
+          { path: "type", select: "name" },
+        ])
         .lean({ virtuals: true });
 
       // Apply size filtering to paginated results (if needed)
@@ -264,27 +268,35 @@ export const getProducts = next_cache(
   }
 );
 
-
+//f// GET PRODUCT DETAILS ///////////////////////////////////////////////////////////////////////////////
 /**
- * Fetches a single product by its ID, along with active sale information.
- * @param {string | Types.ObjectId} productId - The ID of the product to fetch.
+ * Fetches a single product by its slug, along with active sale information.
+ * @param {string | Types.ObjectId} slug - The ID of the product to fetch.
  * @returns {Promise<ProductWithSale | null>} A promise that resolves to the product with sale details, or null if not found.
  * @throws {Error} If there is an issue fetching the product.
  */
-export async function getProduct(productId: string | Types.ObjectId): Promise<ProductWithSale | null> {
+export async function getProduct(slug: string | Types.ObjectId) {
   await connectDB();
   try {
     const currentDate = new Date();
-    const product = await Product.findById(productId)
-      .select("name price images category slug stock description saleInfo")
+    const product = await Product.findOne({ slug: slug })
       .populate<{ saleInfo: SaleDocument | null }>({
         path: "saleInfo",
         match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
-        select: "name discountType discountValue color banner",
+        select: "name discountType discountValue startDate endDate isActive",
       })
-      .lean<LeanProductDocument>();
+      .populate({
+        path: "stock",
+        select: "sizes",
+      })
+      .populate([
+        { path: "brand", select: "name" },
+        { path: "type", select: "name" },
+        { path: "category", select: "name" },
+      ])
+      .lean({ virtuals: true });
 
-    return product ? transformProduct(product) : null;
+    return product;
   } catch (error) {
     console.error("Error fetching product with sales:", error);
     throw new Error("Failed to fetch product with sales");

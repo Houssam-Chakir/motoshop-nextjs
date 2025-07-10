@@ -28,6 +28,7 @@ interface SectionTypes {
 }
 
 export default function ProductsSection({ products, sizes, brands, pagination, refetchProducts }: SectionTypes) {
+  console.log('Products', products)
   // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
   const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   // const isDesktop = useMediaQuery("lg");

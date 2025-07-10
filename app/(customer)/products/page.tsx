@@ -24,7 +24,8 @@ const ProductsPage = async ({ searchParams }: PageProps) => {
     }
 
     const brandsName = brands.map((brand) => brand.name);
-    const products = makeSerializable(productsDoc);
+    const cleanProducts = JSON.parse(JSON.stringify(productsDoc));
+    const products = cleanProducts.map(product => makeSerializable(product));
 
     return <ProductsSection refetchProducts={refetchProducts} products={products} sizes={sizes} brands={brandsName} pagination={pagination} />;
   } catch (error) {

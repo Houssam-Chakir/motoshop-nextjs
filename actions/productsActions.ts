@@ -227,10 +227,18 @@ export const getProducts = next_cache(
           select: "sizes",
         })
         .populate([
-          { path: "brand", select: "name" },
-          { path: "type", select: "name" },
+          { path: "brand", select: "name -_id" },
+          { path: "type", select: "name -_id" },
         ])
-        .lean({ virtuals: true });
+        .lean({
+          virtuals: true,
+          transform: (doc: any) => {
+            // Remove MongoDB-specific properties
+            delete doc._id;
+            delete doc.__v;
+            return doc;
+          },
+        });
 
       // Apply size filtering to paginated results (if needed)
       const filteredProducts =

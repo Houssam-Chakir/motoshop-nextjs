@@ -1,6 +1,6 @@
 import mongoose, { Document, model, models, Schema } from "mongoose";
 import "./Sale"; // Import for model registration
-import './Stock'
+import "./Stock";
 import slug from "mongoose-slug-updater";
 import { nanoid } from "nanoid";
 import mongooseLeanVirtuals from "mongoose-lean-virtuals";
@@ -53,17 +53,42 @@ export interface ProductDocument extends Document {
   updatedAt?: Date;
 }
 
+// Define a separate schema for images without _id
+const ImageSchema = new Schema(
+  {
+    secure_url: { type: String, required: true },
+    public_id: { type: String, required: true },
+  },
+  { _id: false }
+); // This prevents _id generation
+
+// Define a separate schema for identifiers without _id
+const IdentifiersSchema = new Schema(
+  {
+    brand: { type: String, required: true },
+    categoryType: { type: String, required: true },
+    category: { type: String, required: true },
+  },
+  { _id: false }
+); // This prevents _id generation
+
+// Define a separate schema for specifications without _id
+const SpecificationSchema = new Schema(
+  {
+    name: { type: String, required: [true, "Please provide a name for the spec"] },
+    description: { type: String, required: [true, "Please provide information about the spec"] },
+  },
+  { _id: false }
+); // This prevents _id generation
+
 const ProductSchema: Schema = new Schema(
   {
     barcode: { type: String, required: true, unique: true, default: () => nanoid(12), index: true },
     sku: { type: String, trim: true, required: [true, "Please provide a sku"], index: true },
     title: { type: String, required: [true, "Please provide a title"], trim: true, index: true },
     identifiers: {
-      type: {
-        brand: String,
-        categoryType: String,
-        category: String,
-      },
+      type: IdentifiersSchema,
+      required: true,
     },
     slug: { type: String, slug: "title", unique: true, index: true },
     productModel: { type: String, required: [true, "Please provide a model"], trim: true, index: true },
@@ -75,25 +100,19 @@ const ProductSchema: Schema = new Schema(
     season: { type: String, enum: ["All seasons", "Summer", "Winter", "Spring/Fall"], default: "All seasons" },
     style: { type: String, enum: ["None", "Versitile", "Racing", "Adventure", "Enduro", "Urban", "Touring"], default: "None" },
     images: {
-      type: [{ secure_url: String, public_id: String }],
+      type: [ImageSchema],
       required: true,
     },
-
     category: { type: Schema.Types.ObjectId, ref: "Category", required: [true, "Please choose a category"], index: true },
     type: { type: Schema.Types.ObjectId, ref: "Type", required: [true, "Please choose a type"], index: true },
-
     stock: { type: mongoose.Types.ObjectId, ref: "Stock", unique: true },
-    specifications: [
-      {
-        name: { type: String, required: [true, "Please provide a name for the spec"] },
-        description: { type: String, required: [true, "Please provide information about the spec"] },
-      },
-    ],
-
+    specifications: {
+      type: [SpecificationSchema],
+      default: [],
+    },
     reviews: [{ type: mongoose.Types.ObjectId }],
     likes: { type: Number, default: 0, min: 0 },
   },
-
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 

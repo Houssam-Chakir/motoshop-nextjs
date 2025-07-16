@@ -17,10 +17,10 @@ export default function Breadcrumbs({ path }: { path: string }) {
   }
 
   return (
-    <Breadcrumb>
+    <Breadcrumb className=''>
       <BreadcrumbList>
         {/* Home Crumb */}
-        <BreadcrumbItem>
+        <BreadcrumbItem className='text-xs'>
           <BreadcrumbLink asChild>
             <Link href='/'>Home</Link>
           </BreadcrumbLink>
@@ -33,10 +33,10 @@ export default function Breadcrumbs({ path }: { path: string }) {
 
           return (
             <React.Fragment key={href}>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
+              <BreadcrumbSeparator className={`text-xs opacity-50 ${isLast ? 'opacity-0' : ''} md:opacity-100`} />
+              <BreadcrumbItem className='text-xs'>
                 {isLast ? (
-                  <BreadcrumbPage className='w-64 truncate cursor-default'>{capitalize(segment)}</BreadcrumbPage>
+                  <BreadcrumbPage className='max-w-0 sm:max-w-12 md:max-w-64 truncate cursor-default text-xs'>{capitalize(segment)}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
                     <Link href={href}>{capitalize(segment)}</Link>

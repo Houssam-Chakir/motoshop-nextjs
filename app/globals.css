@@ -102,7 +102,7 @@
   /* *secondary colors */
   --secondary: oklch(0.3049 0.0379 279.69);
   --secondary-light: oklch(0.6804 0.034 261.69);
-  --blue: oklch(0.2374 0.1595 267.26);
+  --blue: oklch(0.2674 0.1595 267.26);
   --blue-light: oklch(0.3374 0.1595 267.26);
   --blue-sky: oklch(0.8469 0.0753 264.05);
   --blue-sky-light: oklch(0.9656 0.0171 248.01);

@@ -13,6 +13,7 @@ import { addItemToGuestCart } from "@/lib/guestCartStore";
 import { addItemToCart } from "@/actions/cartActions";
 import { useUserContext } from "@/contexts/UserContext";
 import { SaleDocument } from "@/models/Sale";
+import ProductTitlePriceMobile from "./productDetailsPage/ProductInfoMobile";
 
 interface ProductInfoProps {
   product: Omit<ProductType, "saleInfo"> & {
@@ -25,7 +26,7 @@ interface ProductInfoProps {
 export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
   const { fetchCart } = useUserContext();
   console.log("Product in product info", product);
-  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, category, season, style, identifiers, quantity: stockQuantity, slug, stock } = product;
+  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, type,  category, season, style, identifiers, quantity: productQuantity, slug, stock } = product;
 
   const finalPrice = salePrice ? salePrice : retailPrice;
   const savedAmount = salePrice ? retailPrice - salePrice : 0;
@@ -181,30 +182,8 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
       <div className='flex flex-col justify-between space-y-6'>
         <div className='space-y-6'>
           {/* Product title and category */}
-          <div className='space-y-0'>
-            <h1 className='mb text-[24px]/8 font-black tracking-wide uppercase line-clamp-2 text-2'>{title}</h1>
-            <p className='text-grey-darker'>
-              {identifiers?.brand || brand?.name} {style} {identifiers?.category || category?.name} - {season}
-            </p>
-          </div>
+          <ProductTitlePriceMobile productInfo={{ brand, identifiers, type, season, style, title, saleInfo, finalPrice, savedAmount, retailPrice, productQuantity }} />
           <div className='space-y-6'>
-            {/* Price and badges */}
-            <div className='space-y-0'>
-              <div className='flex gap-1 md:gap-2 lg:gap-3 items-center'>
-                <span className='md:text-2xl text-3xl font-black tracking-wider text-blue-900'>{finalPrice?.toLocaleString("en-US")} MAD</span>
-                {saleInfo && (
-                  <>
-                    <Badge className='text-white rounded-none bg-primary'>
-                      {saleInfo.discountType === "percentage" ? `-${saleInfo.discountValue}%` : `${saleInfo.discountValue} MAD`}
-                    </Badge>
-                    <Badge className='text-white rounded-none bg-orange-600'>{saleInfo.name}</Badge>
-                  </>
-                )}
-              </div>
-              {saleInfo && <p className='italic text-[13px] text-success-green'>
-                <span className='line-through text-grey-darker'>{finalPrice?.toLocaleString("en-US")} MAD</span> saving {savedAmount?.toLocaleString("en-US")} MAD + Free shipping
-              </p>}
-            </div>
 
             {/* Size selection */}
             <div className='p-4 space-y-4 border border-gray-300 border-dashed'>

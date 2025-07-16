@@ -123,7 +123,7 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
           return <ProductCardTest product={product} key={product.sku} />;
         })} */}
         {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
+          return <ProductCard product={product} key={product.title} />;
         })}
       </div>
       <ProductsPagination {...pagination} currentPage={page} setPage={setPage} refetchProducts={refetchProducts} />

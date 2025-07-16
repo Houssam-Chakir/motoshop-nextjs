@@ -12,19 +12,21 @@ import { addItemToGuestCart } from "@/lib/guestCartStore";
 import { addItemToCart } from "@/actions/cartActions";
 import { useUserContext } from "@/contexts/UserContext";
 import { SaleDocument } from "@/models/Sale";
+import ProductTitlePriceMobile from "./productDetailsPage/ProductInfoMobile";
 
 interface ProductInfoProps {
   product: Omit<ProductType, "saleInfo"> & {
     saleInfo: SaleDocument | null;
     stock: StockType | null;
   };
+  displayAll: boolean
   isLoggedIn?: boolean;
 }
 
-export default function ProductInfoMobile({ product, isLoggedIn }: ProductInfoProps) {
+export default function ProductInfoMobile({ product, isLoggedIn, displayAll }: ProductInfoProps) {
   const { fetchCart } = useUserContext();
   console.log("Product in product info", product);
-  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, category, season, style, identifiers, quantity: stockQuantity, slug, stock } = product;
+  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, category, type,  season, style, identifiers, quantity: productQuantity, slug, stock } = product;
 
   const finalPrice = salePrice ? salePrice : retailPrice;
   const savedAmount = salePrice ? retailPrice - salePrice : 0;
@@ -140,7 +142,7 @@ export default function ProductInfoMobile({ product, isLoggedIn }: ProductInfoPr
   return (
     <div className='grid grid-cols-1 h-[95vh] overflow-scroll'>
       {/* Left side - Images */}
-      <div className='flex flex-col-reverse p-4'>
+      {displayAll && <div className='flex flex-col-reverse p-4'>
         {/* Main image */}
         <div className='overflow-hidden relative h-96 bg-grey-light'>
           <CldImage
@@ -174,36 +176,14 @@ export default function ProductInfoMobile({ product, isLoggedIn }: ProductInfoPr
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Right side - Product details */}
       <div className='flex flex-col justify-between space-y-6'>
-        <div className='space-y-4 px-4'>
+        <div className='space-y-1 p-4'>
           {/* Product title and category */}
-          <div className='space-y-0'>
-            <h1 className='text-[20px]/8 font-semibold tracking-wide line-clamp-2'>{title}</h1>
-            <p className='text-grey-darker'>
-              {identifiers?.brand || brand?.name} {style} {identifiers?.category || category?.name} - {season}
-            </p>
-          </div>
-          <div className='space-y-6'>
-            {/* Price and badges */}
-            <div className='space-y-0'>
-              <div className='flex gap-1 md:gap-2 lg:gap-3 items-center'>
-                <span className='text-[22px] xs:text-2xl md:text-3xl  font-black tracking-wider text-blue-900'>{finalPrice?.toLocaleString("en-US")} MAD</span>
-                {saleInfo && (
-                  <>
-                    <Badge className='text-white rounded-none bg-primary'>
-                      {saleInfo.discountType === "percentage" ? `-${saleInfo.discountValue}%` : `${saleInfo.discountValue} MAD`}
-                    </Badge>
-                    <Badge className='text-white rounded-none bg-orange-600'>{saleInfo.name}</Badge>
-                  </>
-                )}
-              </div>
-              {saleInfo && <p className='italic text-[13px] text-success-green'>
-                <span className='line-through text-grey-darker'>{finalPrice?.toLocaleString("en-US")} MAD</span> saving {savedAmount?.toLocaleString("en-US")} MAD + Free shipping
-              </p>}
-            </div>
+          <ProductTitlePriceMobile productInfo={{ brand, identifiers, type, season, style, title, saleInfo, finalPrice, savedAmount, retailPrice, productQuantity }} />
+          <div className='space-y-1'>
 
             {/* Size selection */}
             <div className='p-4 space-y-4 border border-gray-300 border-dashed mb-32'>

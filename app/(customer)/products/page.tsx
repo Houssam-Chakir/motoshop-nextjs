@@ -30,7 +30,6 @@ const ProductsPage = async ({ searchParams }: PageProps) => {
     return <ProductsSection refetchProducts={refetchProducts} products={products} sizes={sizes} brands={brandsName} pagination={pagination} />;
   } catch (error) {
     console.error("Failed to fetch products page data:", error);
-    // Return a user-friendly error UI instead of crashing the page
     throw new Error("Could not load products, please try again.");
   }
 };

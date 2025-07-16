@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 import { MobileSlider } from "@/components/customerUI/sideBar/MobileSidebar";
@@ -11,6 +11,7 @@ interface ProductInfoSliderProps {
   children: React.ReactNode;
   product: ProductType;
   isLoggedIn: boolean;
+  displayAll: boolean;
 }
 
 type SliderDataType = {
@@ -18,7 +19,7 @@ type SliderDataType = {
   stock: StockType | null;
 } | null;
 
-export default function ProductInfoSlider({ children, product, isLoggedIn }: ProductInfoSliderProps) {
+export default function ProductInfoSlider({ children, product, isLoggedIn, displayAll = true }: ProductInfoSliderProps) {
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isSliderLoading, setIsSliderLoading] = useState(false);
   const [sliderData, setSliderData] = useState<SliderDataType>(null);
@@ -49,10 +50,14 @@ export default function ProductInfoSlider({ children, product, isLoggedIn }: Pro
       side='bottom'
       isOpen={isSliderOpen}
       setIsOpen={setIsSliderOpen}
-      className="w-full h-[95vh]"
-      trigger={<div onClick={handleTriggerClick}>{children}</div>}
+      className={`w-full ${displayAll ? 'h-[95vh]' : 'h-[65vh]'}`}
+      trigger={
+        <div className='grow' onClick={handleTriggerClick}>
+          {children}
+        </div>
+      }
     >
-      <div className="w-full">
+      <div className='w-full'>
         {isSliderLoading && (
           <div className='flex justify-center items-center h-48'>
             <p>Loading product details...</p>
@@ -64,9 +69,7 @@ export default function ProductInfoSlider({ children, product, isLoggedIn }: Pro
             <p>{sliderError}</p>
           </div>
         )}
-        {!isSliderLoading && sliderData && (
-          <ProductInfoMobile isLoggedIn={isLoggedIn} product={sliderData.product} stock={sliderData.stock} />
-        )}
+        {!isSliderLoading && sliderData && <ProductInfoMobile isLoggedIn={isLoggedIn} product={sliderData.product} stock={sliderData.stock} displayAll={displayAll} />}
       </div>
     </MobileSlider>
   );

@@ -19,7 +19,7 @@ type SliderDataType = {
   stock: StockType | null;
 } | null;
 
-export default function ProductInfoSlider({ children, product, isLoggedIn, displayAll = true }: ProductInfoSliderProps) {
+export default function ProductInfoSlider({ children, product, isLoggedIn, displayAll = true, handleWishlist }: ProductInfoSliderProps) {
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isSliderLoading, setIsSliderLoading] = useState(false);
   const [sliderData, setSliderData] = useState<SliderDataType>(null);

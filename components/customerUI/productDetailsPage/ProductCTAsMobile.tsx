@@ -10,20 +10,22 @@ interface ProductCTAsProps {
   } | null;
   selectedSize: string | null;
   selectedSizeQuantity: number;
+  isLoggedIn: boolean;
+  finalIsCurrentlyInWishlist: boolean;
   handleAddToCart: () => void;
+  handleWishlist: () => void;
 }
 
-export default function ProductMobileCTAs({ product, stock, selectedSize, selectedSizeQuantity, handleAddToCart }: ProductCTAsProps) {
-  const {
-    profile, // To check if user is logged in
-    // isInWishlist,
-    // addItemToWishlist,
-    // removeItemFromWishlist,
-    // isLoadingWishlist,
-    // isLoadingProfile,
-  } = useUserContext();
-  const isLoggedIn = !!profile;
-
+export default function ProductMobileCTAs({
+  isLoggedIn,
+  product,
+  stock,
+  selectedSize,
+  selectedSizeQuantity,
+  handleAddToCart,
+  handleWishlist,
+  finalIsCurrentlyInWishlist,
+}: ProductCTAsProps) {
   return (
     <div className='fixed bottom-0 left-0 w-full bg-white/70 backdrop-blur-md z-50 px-4 pt-2 pb-4 border-t-1'>
       <div className='flex flex-col gap-1'>
@@ -38,10 +40,17 @@ export default function ProductMobileCTAs({ product, stock, selectedSize, select
 
         {/* Action buttons */}
         <div className='flex gap-3'>
-          <Button variant='outline' size='lg' className='flex-shrink-0 h-12 w-12 text-[16px] rounded-full border-grey-darker bg-transparent'>
-            <Heart className='size-6' />
+          <Button
+          onClick={handleWishlist}
+            variant='outline'
+            size='lg'
+            className={`flex-shrink-0 h-12 w-12 text-[16px] ${
+              finalIsCurrentlyInWishlist ? "text-primary/50" : "text-black"
+            } hover:text-primary rounded-full border-grey-darker bg-transparent`}
+          >
+            <Heart className='size-6' fill={finalIsCurrentlyInWishlist ? "#f72323" : "none"} />
           </Button>
-          <ProductInfoSlider product={product} displayAll={false} isLoggedIn={isLoggedIn}>
+          <ProductInfoSlider product={product} displayAll={false} isLoggedIn={isLoggedIn} handleWishlist={handleWishlist} finalIsCurrentlyInWishlist={finalIsCurrentlyInWishlist}>
             <Button variant='outline' size='lg' className='flex-1 w-full h-12 text-[16px] text-blue rounded-full border-blue bg-white'>
               <Plus className='size-6' />
               Select an option

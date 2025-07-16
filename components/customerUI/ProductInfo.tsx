@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Heart, ChevronLeft, ChevronRight, Minus, Plus, ShoppingCart } from "lucide-react";
 import { ProductType } from "@/models/Product";
-import { StockType, SizeQuantityType } from "@/models/Stock"; // Adjusted path, assuming @ is root
+import { StockType } from "@/models/Stock"; // Adjusted path, assuming @ is root
 import { CldImage } from "next-cloudinary";
 import { toast } from "react-toastify";
 import { addItemToGuestCart } from "@/lib/guestCartStore";

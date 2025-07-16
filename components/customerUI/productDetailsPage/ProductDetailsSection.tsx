@@ -17,6 +17,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import ProductMobileCTAs from "./ProductCTAsMobile";
 import ProductTitlePriceMobile from "./ProductInfoMobile";
+import { addItemToGuestWishlist, isItemInGuestWishlist, removeItemFromGuestWishlist } from "@/lib/guestWishlistStore";
 
 function toKebabCase(str: string) {
   return str
@@ -35,7 +36,21 @@ interface ProductInfoProps {
 
 export default function ProductDetailsSection({ product }: ProductInfoProps) {
   const isDesktop = useMediaQuery("lg");
-  const { fetchCart, profile } = useUserContext();
+  const {
+    profile, // To check if user is logged in
+    isInWishlist,
+    addItemToWishlist,
+    removeItemFromWishlist,
+    isLoadingWishlist,
+    isLoadingProfile,
+    fetchCart,
+  } = useUserContext();
+  const isLoggedIn = !!profile;
+  const [isGuestItemInWishlist, setIsGuestItemInWishlist] = useState(false);
+  const finalIsCurrentlyInWishlist = isLoggedIn ? isInWishlist(product._id) : isGuestItemInWishlist;
+
+
+
   const {
     _id,
     title,
@@ -68,6 +83,67 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedSizeQuantity, setSelectedSizeQuantity] = useState(0);
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    if (!product?._id) return;
+
+    if (isLoggedIn) {
+      if (isInWishlist(product._id)) {
+        console.log("[ProductCard] Logged in: removing Item From DB Wishlist", product._id);
+        removeItemFromWishlist(product._id);
+      } else {
+        console.log("[ProductCard] Logged in: adding Item to DB Wishlist", product._id);
+        addItemToWishlist({
+          id: product._id,
+          title: product.title,
+          imageUrl: product.images?.[0]?.secure_url,
+          retailPrice: product.retailPrice,
+          identifiers: product.identifiers,
+          slug: product.slug,
+          quantity: product.quantity,
+          salePrice: product.salePrice ? product.salePrice : null,
+        });
+      }
+    } else {
+      // Guest user: interact with localStorage
+      if (isGuestItemInWishlist) {
+        console.log("[ProductCard] Guest: removing Item From Local Wishlist", product._id);
+        removeItemFromGuestWishlist(product._id);
+      } else {
+        console.log("[ProductCard] Guest: adding Item to Local Wishlist", product._id);
+        addItemToGuestWishlist({
+          id: product._id,
+          title: product.title,
+          identifiers: product.identifiers,
+          retailPrice: product.retailPrice,
+          imageUrl: product.images[0].secure_url,
+          slug: product.slug,
+          quantity: product.quantity,
+          salePrice: product.salePrice ? product.salePrice : product.retailPrice,
+        });
+      }
+      // Update local state for guest after action
+      setIsGuestItemInWishlist(isItemInGuestWishlist(product._id));
+    }
+    console.log("Wishlist action for SKU:", product.sku);
+  };
+
+  useEffect(() => {
+    const updateGuestWishlistStatus = () => {
+      if (!isLoggedIn && product?._id) {
+        setIsGuestItemInWishlist(isItemInGuestWishlist(product._id));
+      }
+    };
+    // Initial status check
+    updateGuestWishlistStatus();
+    // Listen for global guest wishlist changes
+    window.addEventListener("guestWishlistChanged", updateGuestWishlistStatus);
+    // Cleanup listener on component unmount or when dependencies change
+    return () => {
+      window.removeEventListener("guestWishlistChanged", updateGuestWishlistStatus);
+    };
+  }, [isLoggedIn, product?._id]);
 
   useEffect(() => {
     if (selectedSize && stock?.sizes) {
@@ -396,8 +472,8 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
 
                   {/* Action buttons */}
                   <div className='flex gap-3'>
-                    <Button variant='outline' size='lg' className='flex-shrink-0 h-12 w-12 text-[16px] rounded-full border-grey-darker bg-transparent'>
-                      <Heart className='size-6' />
+                    <Button onClick={handleWishlist} variant='outline' size='lg' className={`flex-shrink-0 h-12 w-12 text-[16px] ${finalIsCurrentlyInWishlist ? "text-primary/50" : "text-black"} hover:text-primary rounded-full border-grey-darker bg-transparent`}>
+                      <Heart className='size-6' fill={finalIsCurrentlyInWishlist ? "#f72323" : "none"} />
                     </Button>
                     <Button
                       onClick={handleAddToCart}
@@ -435,7 +511,7 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
         )}
       </div>
       {/* //f/ Bottom section MOBILE */}
-      {!isDesktop && <ProductMobileCTAs product={product} stock={stock} selectedSize={selectedSize} selectedSizeQuantity={selectedSizeQuantity} handleAddToCart={handleAddToCart} />}
+      {!isDesktop && <ProductMobileCTAs product={product} stock={stock} selectedSize={selectedSize} selectedSizeQuantity={selectedSizeQuantity} handleAddToCart={handleAddToCart} handleWishlist={handleWishlist} finalIsCurrentlyInWishlist={finalIsCurrentlyInWishlist} />}
     </>
   );
 }

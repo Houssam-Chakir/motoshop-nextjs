@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getProductsWithSales } from "@/actions/productsActions";
+import { getProducts } from "@/actions/productsActions";
 
 // /api/products/search?q=term
 export async function GET(req: Request) {
@@ -12,12 +12,22 @@ export async function GET(req: Request) {
       return NextResponse.json([]);
     }
 
-    // Case-insensitive regex search on product name or slug. Extend as needed.
-    const regex = new RegExp(q, "i");
-
-    const products = await getProductsWithSales({
-      $or: [{ title: regex }, { slug: regex }, { description: regex }],
-    });
+    const products = await getProducts(
+      {
+        searchQuery: q, // Use the search query for the title, slug, and description
+        sort: "",
+        type: [],
+        brand: [],
+        size: [],
+        minPrice: 0,
+        maxPrice: 30000,
+        page: 0,
+        limit: 10, // Adjust the limit as needed
+      },
+      {
+        brands: [],
+      }
+    );
 
     return NextResponse.json(products);
   } catch (err) {

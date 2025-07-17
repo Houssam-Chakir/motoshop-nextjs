@@ -2,20 +2,19 @@
 
 import { ReviewType } from "@/models/Review";
 import { CldImage } from "next-cloudinary";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { Heart, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { useUserContext } from "@/contexts/UserContext";
 import React, { useState, useEffect } from "react";
 import { addItemToGuestWishlist, removeItemFromGuestWishlist, isItemInGuestWishlist } from "@/lib/guestWishlistStore";
-import { addItemToGuestCart } from "@/lib/guestCartStore";
 import { getProductWithStock } from "@/actions/cartActions";
 import { ProductType } from "@/models/Product";
 import { StockType } from "@/models/Stock";
-import { Modal } from "./Modal";
-import ProductInfo from "./customerUI/ProductInfo";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Modal } from "../Modal";
+import ProductInfoSlider from "./ProductInfoSlider";
+import ProductInfo from "./ProductInfo";
 import { SaleDocument } from "@/models/Sale";
 
 interface ProductCard {
@@ -49,7 +48,6 @@ interface ProductCard {
   wholesalePrice: number;
   saleInfo: SaleDocument;
   _id: string;
-  __v: number;
 }
 
 type ModalDataType = {
@@ -143,11 +141,7 @@ function ProductCard({ product }: { product: ProductCard }) {
     router.push(`/product/${product.slug}`);
   };
 
-  const handlePlusClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    //Plus logic here
-    console.log("Plus clicked", product.sku);
-  };
+
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
@@ -167,7 +161,7 @@ function ProductCard({ product }: { product: ProductCard }) {
           identifiers: product.identifiers,
           slug: product.slug,
           quantity: product.quantity,
-          salePrice: product.salePrice ? product.salePrice : product.retailPrice,
+          salePrice: product.salePrice ? product.salePrice : null,
         });
       }
     } else {
@@ -195,7 +189,7 @@ function ProductCard({ product }: { product: ProductCard }) {
   };
 
   return (
-    <div onClick={handleCardClick} className='bg-white w-full sm:max-w-[300px] md:max-w-[236px] group cursor-pointer'>
+    <div onClick={handleCardClick} className='bg-white min-w-[178px] w-full sm:max-w-[300px] md:max-w-[236px] group cursor-pointer'>
       {/* Modal -------------------------------------------------------------------------- */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={isModalLoading ? "Loading..." : "Overview"}>
         {/* Modal Content Logic */}
@@ -222,9 +216,11 @@ function ProductCard({ product }: { product: ProductCard }) {
       <div className='flex relative justify-center items-center p-2 w-full overflow-clip aspect-square bg-grey-light'>
         {/* hover buttons */}
         {!isDesktop && (
-          <Button onClick={handlePlusClick} className='absolute py-4 top-3 right-3 text-black hover:bg-white bg-white/80 rounded-full w-[35px] h-[35px] shadow-md'>
-            <Plus size={18} />
-          </Button>
+          <ProductInfoSlider product={product} isLoggedIn={isLoggedIn}>
+            <Button className='absolute py-4 top-3 right-3 text-black hover:bg-white bg-white/80 rounded-full w-[35px] h-[35px] shadow-md'>
+              <Plus size={18} />
+            </Button>
+          </ProductInfoSlider>
         )}
         {isDesktop && (
           <>
@@ -286,6 +282,7 @@ function ProductCard({ product }: { product: ProductCard }) {
   );
 }
 
+//* WISHLIST BUTTON /////////////////////////////////////////////////////////////////////////////
 interface WishlistButtonProps {
   handleWishlist: (e: React.MouseEvent) => void;
   isCurrentlyInWishlist: boolean;

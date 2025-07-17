@@ -112,7 +112,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     } else if (authStatus === "loading") {
       setIsLoadingProfile(true); // Auth is loading, so user data might be coming
     }
-  }, [authStatus, session?.user?.id, clearUserData]); // Assuming clearGuestWishlist is a stable import from a module
+  }, [authStatus, session?.user?.id, clearUserData, fetchCart]); // Assuming clearGuestWishlist is a stable import from a module
 
   useEffect(() => {
     fetchInitialUserData();

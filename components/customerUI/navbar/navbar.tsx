@@ -173,14 +173,14 @@ function UserButtonsSection({
 
 // -- User Menu -------------------------------------------
 function UserMenu({ providers, session }: { session: Session | null; providers: Record<string, { id: string; name: string }> }) {
-  // const { wishlist } = useUserContext(); // Get wishlist from context
+   // const { wishlist } = useUserContext(); // Get wishlist from context
   const { profile } = useUserContext();
 
   const userRole = profile?.role;
   return (
     <>
       {session && (
-        <div className='flex flex-col h-full min-h-0'>
+        <div className='flex flex-col h-full min-h-0 sticky'>
           {/* Profile Info & Counts Section */}
           <div className='p-4 border-b shrink-0'>
             <div className='flex items-center gap-3'>

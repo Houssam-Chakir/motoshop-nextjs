@@ -12,6 +12,8 @@ import { addItemToCart } from "@/actions/cartActions";
 import { useUserContext } from "@/contexts/UserContext";
 import { SaleDocument } from "@/models/Sale";
 import ProductTitlePriceMobile from "./productDetailsPage/ProductInfoMobile";
+import { handleWishlistProcess } from "@/utils/handleWishlist";
+import { isItemInGuestWishlist } from "@/lib/guestWishlistStore";
 
 interface ProductInfoProps {
   product: Omit<ProductType, "saleInfo"> & {
@@ -22,9 +24,18 @@ interface ProductInfoProps {
 }
 
 export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
-  const { fetchCart } = useUserContext();
+  const {
+    profile, // To check if user is logged in
+    isInWishlist,
+    addItemToWishlist,
+    removeItemFromWishlist,
+    fetchCart,
+  } = useUserContext();
+  const [isGuestItemInWishlist, setIsGuestItemInWishlist] = useState(false);
+  const finalIsCurrentlyInWishlist = isLoggedIn ? isInWishlist(product._id) : isGuestItemInWishlist;
+
   console.log("Product in product info", product);
-  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, type,  category, season, style, identifiers, quantity: productQuantity, slug, stock } = product;
+  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, type, category, season, style, identifiers, quantity: productQuantity, slug, stock } = product;
 
   const finalPrice = salePrice ? salePrice : retailPrice;
   const savedAmount = salePrice ? retailPrice - salePrice : 0;
@@ -69,6 +80,42 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
       }
     }
   }, [stock]);
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    const wishlistProduct = {
+      id: product._id,
+      title: product.title,
+      identifiers: product.identifiers,
+      retailPrice: product.retailPrice,
+      imageUrl: product.images[0].secure_url,
+      slug: product.slug!,
+      quantity: product.quantity!,
+      salePrice: product.salePrice ? product.salePrice : null,
+    };
+    const params = { wishlistProduct, isLoggedIn, isInWishlist, removeItemFromWishlist, addItemToWishlist, isGuestItemInWishlist, setIsGuestItemInWishlist };
+    e.stopPropagation(); // Prevent card click
+
+    if (!product?._id) return;
+    handleWishlistProcess(params);
+
+    console.log("Wishlist action for SKU:", product.sku);
+  };
+
+  useEffect(() => {
+    const updateGuestWishlistStatus = () => {
+      if (!isLoggedIn && product?._id) {
+        setIsGuestItemInWishlist(isItemInGuestWishlist(product._id));
+      }
+    };
+    // Initial status check
+    updateGuestWishlistStatus();
+    // Listen for global guest wishlist changes
+    window.addEventListener("guestWishlistChanged", updateGuestWishlistStatus);
+    // Cleanup listener on component unmount or when dependencies change
+    return () => {
+      window.removeEventListener("guestWishlistChanged", updateGuestWishlistStatus);
+    };
+  }, [isLoggedIn, product?._id]);
 
   const handleQuantityChange = (amount: number) => {
     setQuantity((prevQuantity) => {
@@ -115,7 +162,7 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
         ...product,
         inStock: product.stock?.sizes?.some((s) => s.quantity > 0) ?? false,
       };
-      console.log('Product added to guest cart', productWithStockStatus);
+      console.log("Product added to guest cart", productWithStockStatus);
       const result = addItemToGuestCart(productWithStockStatus, selectedSize, quantity);
       if (result.success) {
         toast.success(result.message);
@@ -182,7 +229,6 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
           {/* Product title and category */}
           <ProductTitlePriceMobile productInfo={{ brand, identifiers, type, season, style, title, saleInfo, finalPrice, savedAmount, retailPrice, productQuantity }} />
           <div className='space-y-6'>
-
             {/* Size selection */}
             <div className='p-4 space-y-4 border border-gray-300 border-dashed'>
               <div>
@@ -254,8 +300,15 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
 
             {/* Action buttons */}
             <div className='flex gap-3'>
-              <Button variant='outline' size='lg' className='flex-shrink-0 h-12 w-12 text-[16px] rounded-full border-grey-darker'>
-                <Heart className='size-6' />
+              <Button
+                onClick={handleWishlist}
+                variant='outline'
+                size='lg'
+                className={`flex-shrink-0 h-12 w-12 text-[16px] ${
+                  finalIsCurrentlyInWishlist ? "text-primary/50" : "text-black"
+                } hover:text-primary rounded-full border-grey-darker bg-transparent`}
+              >
+                <Heart className='size-6' fill={finalIsCurrentlyInWishlist ? "#f72323" : "none"} />
               </Button>
               <Button
                 onClick={handleAddToCart}

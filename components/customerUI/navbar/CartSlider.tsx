@@ -267,7 +267,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
         </div>
 
         {/* Cart Items */}
-        <div ref={parent} className='flex flex-col flex-grow overflow-y-auto p-2 gap-2'>
+        <div ref={parent} className='flex flex-col flex-grow overflow-y-auto p-2 gap-2 pb-80'>
           {displayCartItems.length > 0 ? (
             displayCartItems.map((item, idx) => (
               <React.Fragment key={item.productId + item.size}>

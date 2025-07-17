@@ -276,16 +276,56 @@ export const getProducts = next_cache(
   }
 );
 
-//f/ GET RECENT 10 PRODUCTS /////////////////////////////////////////////////////////////////////////////
+//f/ GET RECENT 5 PRODUCTS /////////////////////////////////////////////////////////////////////////////
 
 export async function getRecentProducts() {
   const currentDate = new Date();
   await connectDB();
-  
+
   try {
     const products = await Product.find()
       .sort({ createdAt: -1 })
-      .limit(10)
+      .limit(5)
+      .select("title retailPrice images identifiers slug inStock saleInfo")
+      .populate<{ saleInfo: SaleDocument | null }>({
+        path: "saleInfo",
+        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+        select: "name discountType discountValue startDate endDate isActive",
+      })
+      .populate({
+        path: "stock",
+        match: {},
+        select: "sizes",
+      })
+      .populate([
+        { path: "brand", select: "name -_id" },
+        { path: "type", select: "name -_id" },
+      ])
+      .lean({
+        virtuals: true,
+        transform: (doc: any) => {
+          // Remove MongoDB-specific properties
+          delete doc._id;
+          delete doc.__v;
+          return doc;
+        },
+      });
+    return products;
+  } catch (error) {
+    console.log("Error getting recent products: ", error);
+    throw new Error(" Error getting recent products for this page");
+  }
+}
+
+//f/ GET SIMILAR PRODUCTS /////////////////////////////////////////////////////////////////////////////
+
+export async function getSimilarProducts(categoryId) {
+  const currentDate = new Date();
+  await connectDB();
+
+  try {
+    const products = await Product.find({category: categoryId})
+      .limit(5)
       .select("title retailPrice images identifiers slug inStock saleInfo")
       .populate<{ saleInfo: SaleDocument | null }>({
         path: "saleInfo",

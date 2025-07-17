@@ -189,7 +189,7 @@ function ProductCard({ product }: { product: ProductCard }) {
   };
 
   return (
-    <div onClick={handleCardClick} className='bg-white w-full sm:max-w-[300px] md:max-w-[236px] group cursor-pointer'>
+    <div onClick={handleCardClick} className='bg-white min-w-[178px] w-full sm:max-w-[300px] md:max-w-[236px] group cursor-pointer'>
       {/* Modal -------------------------------------------------------------------------- */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={isModalLoading ? "Loading..." : "Overview"}>
         {/* Modal Content Logic */}

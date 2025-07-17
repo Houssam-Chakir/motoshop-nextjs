@@ -7,6 +7,7 @@ import Container from "@/components/layout/Container";
 import { SessionProvider } from "@/contexts/SessionContext";
 import { UserProvider } from "@/contexts/UserContext";
 import { SectionsProvider } from "@/contexts/SectionsContext";
+import Footer from "@/components/customerUI/layout/footer";
 
 export const metadata: Metadata = {
   title: "Motoshop",
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 
 //f// Layout ------------------------------------------------------------------------------------
 export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
-  
+
 
   return (
     <div className=''>
@@ -26,6 +27,7 @@ export default async function CustomerLayout({ children }: { children: React.Rea
               <TopBanner />
               <Navbar/>
               <Container>{children}</Container>
+              <Footer/>
             </SectionsProvider>
           </UserProvider>
         </SessionProvider>

@@ -288,7 +288,7 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
                   <tbody>
                     {specifications.map((spec, i) => {
                       return (
-                        <tr key={i} className='bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200'>
+                        <tr key={i} className='bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-100'>
                           <th scope='row' className='px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white'>
                             {spec.name}
                           </th>
@@ -301,7 +301,7 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
               </div>
             )}
             {!isDesktop && (
-              <div className='flex flex-col gap-2 pb-32'>
+              <div className='flex flex-col gap-2 pb-6'>
                 <p className='flex items-center gap-2 text-xs text-slate-900'>
                   <PackageCheck size={16} className='text-success-green' /> <span className='font-bold'>Free shipping</span> for orders total over 500DH
                 </p>

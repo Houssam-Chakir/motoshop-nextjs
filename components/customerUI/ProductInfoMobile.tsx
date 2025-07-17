@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Heart, ChevronLeft, ChevronRight, Minus, Plus, ShoppingCart } from "lucide-react";
 import { ProductType } from "@/models/Product";
 import { StockType } from "@/models/Stock"; // Adjusted path, assuming @ is root
@@ -12,30 +13,20 @@ import { addItemToCart } from "@/actions/cartActions";
 import { useUserContext } from "@/contexts/UserContext";
 import { SaleDocument } from "@/models/Sale";
 import ProductTitlePriceMobile from "./productDetailsPage/ProductInfoMobile";
-import { handleWishlistProcess } from "@/utils/handleWishlist";
-import { isItemInGuestWishlist } from "@/lib/guestWishlistStore";
 
 interface ProductInfoProps {
   product: Omit<ProductType, "saleInfo"> & {
     saleInfo: SaleDocument | null;
     stock: StockType | null;
   };
+  displayAll: boolean
   isLoggedIn?: boolean;
 }
 
-export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
-  const {
-    profile, // To check if user is logged in
-    isInWishlist,
-    addItemToWishlist,
-    removeItemFromWishlist,
-    fetchCart,
-  } = useUserContext();
-  const [isGuestItemInWishlist, setIsGuestItemInWishlist] = useState(false);
-  const finalIsCurrentlyInWishlist = isLoggedIn ? isInWishlist(product._id) : isGuestItemInWishlist;
-
+export default function ProductInfoMobile({ product, isLoggedIn, displayAll }: ProductInfoProps) {
+  const { fetchCart } = useUserContext();
   console.log("Product in product info", product);
-  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, type, category, season, style, identifiers, quantity: productQuantity, slug, stock } = product;
+  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, category, type,  season, style, identifiers, quantity: productQuantity, slug, stock } = product;
 
   const finalPrice = salePrice ? salePrice : retailPrice;
   const savedAmount = salePrice ? retailPrice - salePrice : 0;
@@ -80,42 +71,6 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
       }
     }
   }, [stock]);
-
-  const handleWishlist = (e: React.MouseEvent) => {
-    const wishlistProduct = {
-      id: product._id,
-      title: product.title,
-      identifiers: product.identifiers,
-      retailPrice: product.retailPrice,
-      imageUrl: product.images[0].secure_url,
-      slug: product.slug!,
-      quantity: product.quantity!,
-      salePrice: product.salePrice ? product.salePrice : null,
-    };
-    const params = { wishlistProduct, isLoggedIn, isInWishlist, removeItemFromWishlist, addItemToWishlist, isGuestItemInWishlist, setIsGuestItemInWishlist };
-    e.stopPropagation(); // Prevent card click
-
-    if (!product?._id) return;
-    handleWishlistProcess(params);
-
-    console.log("Wishlist action for SKU:", product.sku);
-  };
-
-  useEffect(() => {
-    const updateGuestWishlistStatus = () => {
-      if (!isLoggedIn && product?._id) {
-        setIsGuestItemInWishlist(isItemInGuestWishlist(product._id));
-      }
-    };
-    // Initial status check
-    updateGuestWishlistStatus();
-    // Listen for global guest wishlist changes
-    window.addEventListener("guestWishlistChanged", updateGuestWishlistStatus);
-    // Cleanup listener on component unmount or when dependencies change
-    return () => {
-      window.removeEventListener("guestWishlistChanged", updateGuestWishlistStatus);
-    };
-  }, [isLoggedIn, product?._id]);
 
   const handleQuantityChange = (amount: number) => {
     setQuantity((prevQuantity) => {
@@ -185,9 +140,9 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
   const currentImage = currentImageIndex >= 0 ? images[currentImageIndex]?.secure_url : "/placeholder-product.png";
 
   return (
-    <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>
+    <div className='grid grid-cols-1 h-[95vh] overflow-scroll'>
       {/* Left side - Images */}
-      <div className='space-y-4'>
+      {displayAll && <div className='flex flex-col-reverse p-4'>
         {/* Main image */}
         <div className='overflow-hidden relative h-96 bg-grey-light'>
           <CldImage
@@ -221,16 +176,17 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Right side - Product details */}
       <div className='flex flex-col justify-between space-y-6'>
-        <div className='space-y-6'>
+        <div className='space-y-1 p-4'>
           {/* Product title and category */}
           <ProductTitlePriceMobile productInfo={{ brand, identifiers, type, season, style, title, saleInfo, finalPrice, savedAmount, retailPrice, productQuantity }} />
-          <div className='space-y-6'>
+          <div className='space-y-1'>
+
             {/* Size selection */}
-            <div className='p-4 space-y-4 border border-gray-300 border-dashed'>
+            <div className='p-4 space-y-4 border border-gray-300 border-dashed mb-32'>
               <div>
                 <label className='block mb-3 text-sm font-medium text-gray-900'>
                   Size:<span className='text-red-500'>*</span>
@@ -259,6 +215,7 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
                   )}
                 </div>
               </div>
+
               {/* Quantity */}
               {(product.stock?.sizes?.length ?? 0) > 0 && (
                 <div>
@@ -285,7 +242,7 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
         </div>
 
         {/* Bottom section */}
-        <div>
+        <div className='absolute bg-white/70 backdrop-blur-sm bottom-0 border w-full p-4'>
           <div className='flex flex-col gap-1'>
             {/* Required options message or stock status */}
             {!selectedSize && stock && stock.sizes && stock.sizes.filter((s) => s.quantity > 0).length > 0 && (
@@ -300,15 +257,8 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
 
             {/* Action buttons */}
             <div className='flex gap-3'>
-              <Button
-                onClick={handleWishlist}
-                variant='outline'
-                size='lg'
-                className={`flex-shrink-0 h-12 w-12 text-[16px] ${
-                  finalIsCurrentlyInWishlist ? "text-primary/50" : "text-black"
-                } hover:text-primary rounded-full border-grey-darker bg-transparent`}
-              >
-                <Heart className='size-6' fill={finalIsCurrentlyInWishlist ? "#f72323" : "none"} />
+              <Button variant='outline' size='lg' className='flex-shrink-0 h-12 w-12 text-[16px] rounded-full border-grey-darker'>
+                <Heart className='size-6' />
               </Button>
               <Button
                 onClick={handleAddToCart}

@@ -1,35 +1,40 @@
-import ProductInfo from "@/components/customerUI/ProductInfo";
+import { getProduct, getRecentProducts, getSimilarProducts } from "@/actions/productsActions";
+import ProductCardsSlider from "@/components/customerUI/ProductCardsSlider";
+import ProductDetailsSection from "@/components/customerUI/productDetailsPage/ProductDetailsSection";
 import connectDB from "@/config/database";
-import Product, { ProductDocument, ProductType } from "@/models/Product";
-import Stock, { StockDocument, StockType } from "@/models/Stock";
-// If SizeQuantityType is a separate export from Stock.ts and needed directly here, ensure it's imported:
-// import Stock, { StockDocument, StockType, SizeQuantityType } from "@/models/Stock";
+import { ProductType } from "@/models/Product";
 import makeSerializable from "@/utils/convertToObj";
 import { notFound } from "next/navigation";
 
 const ProductDetailsPage = async ({ params }: { params: { slug: string } }) => {
-  await connectDB();
-  const { slug } = params;
+  try {
+    await connectDB();
+    const { slug } = await params;
 
-  const productDoc = await Product.findOne({ slug }).populate("brand", "name").populate("category", "name").populate("saleInfo").lean<ProductDocument>();
+    const productDoc = await getProduct(slug);
 
-  if (!productDoc) {
-    notFound();
+    if (!productDoc) notFound();
+    const product = makeSerializable(productDoc);
+
+    const categoryUrlParam = product.category.name.toLowerCase().split(" ").join("-");
+    const categoryId = product.category._id;
+
+    const [similarProducts, recentProductsDoc] = await Promise.all([getSimilarProducts(categoryId), getRecentProducts()]);
+
+    const cleanProducts = JSON.parse(JSON.stringify(recentProductsDoc));
+    const recentProducts = cleanProducts.map((product: ProductType) => makeSerializable(product));
+
+    return (
+      <>
+        <ProductDetailsSection product={product} />
+        <ProductCardsSlider products={similarProducts} title={"Similar products"} link={`/products/${categoryUrlParam}`} className={"pt-12"} />
+        <ProductCardsSlider products={recentProducts} title={"New arrivals"} link={"/products?sort=newest"} className={"pb-24"} />
+      </>
+    );
+  } catch (error) {
+    console.error("Failed to fetch products page data:", error);
+    throw new Error("Could not load product details, please try again.");
   }
-
-  const product: ProductType = makeSerializable(productDoc);
-
-  let stockData: StockType | null = null;
-  if (productDoc._id) {
-    const stockDoc = await Stock.findOne({ productId: productDoc._id }).lean<StockDocument>();
-
-    if (stockDoc) {
-      stockData = makeSerializable(stockDoc) as StockType; // Use StockType
-    }
-  }
-
-  // The 'stock' prop error will remain until ProductInfo.tsx is updated.
-  return <ProductInfo product={product} stock={stockData} />;
 };
 
 export default ProductDetailsPage;

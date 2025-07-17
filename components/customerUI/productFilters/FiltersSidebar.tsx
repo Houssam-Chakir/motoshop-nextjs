@@ -4,7 +4,7 @@ import type * as React from "react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"; // Adjust the import path if necessary
 
-interface MobileSliderProps {
+interface FiltersSidebarProps {
   trigger: React.ReactNode;
   children: React.ReactNode;
   side?: "left" | "right" | "top" | "bottom";
@@ -12,22 +12,24 @@ interface MobileSliderProps {
   showDefaultCloseButton?: boolean;
 }
 
-export function MobileSlider({
+function filtersSidebar({
   trigger,
   children,
-  side = "left",
-  className = "w-[350px] p-0",
-  showDefaultCloseButton, // Added prop here
-}: MobileSliderProps) {
+  side = "right",
+  className = "w-[360px] p-0",
+  showDefaultCloseButton = false, // Added prop here
+}: FiltersSidebarProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent side={side} className={className} showDefaultCloseButton={showDefaultCloseButton}>
         <VisuallyHidden asChild>
-          <SheetTitle>Main Navigation Menu</SheetTitle>
+          <SheetTitle>Filters sidebar</SheetTitle>
         </VisuallyHidden>
         {children}
       </SheetContent>
     </Sheet>
   );
 }
+
+export default filtersSidebar;

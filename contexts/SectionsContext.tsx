@@ -54,6 +54,7 @@ export function SectionsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refetch = useCallback(async () => {
+   console.log('Refetching Sections!')
     await fetchSections();
   }, [fetchSections]);
 

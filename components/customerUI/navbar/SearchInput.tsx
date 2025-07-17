@@ -63,19 +63,29 @@ export function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   // Debounced search effect
   React.useEffect(() => {
     if (searchQuery === undefined) return;
+
+    // Clear previous results immediately to show loading state
+    setSearchResult(null);
+
+    if (!searchQuery) {
+      // If query is empty, clear results and return
+      return;
+    }
+
     const delayDebounce = setTimeout(async () => {
-      if (!searchQuery) return;
       try {
         const res = await fetch(`/api/products/search?q=${encodeURIComponent(searchQuery)}`);
         if (res.ok) {
           const data = await res.json();
-          setSearchResult(data);
+          setSearchResult(data.productsDoc);
           console.log("Search results for", searchQuery, data);
         } else {
           console.log("Search request failed", res.status);
+          setSearchResult([]); // Set to empty array on failure
         }
       } catch (err) {
         console.error("Search error", err);
+        setSearchResult([]); // Set to empty array on error
       }
     }, 500); // 500ms debounce
 

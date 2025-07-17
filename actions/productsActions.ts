@@ -1,7 +1,8 @@
-import { Document, FilterQuery, Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import Product, { ProductDocument } from "@/models/Product";
 import Sale, { SaleDocument } from "@/models/Sale";
 import connectDB from "@/config/database";
+import { unstable_cache as next_cache } from "next/cache";
 
 // Re-export the SaleDocument type for use in other files
 export type { SaleDocument } from "@/models/Sale";
@@ -112,52 +113,279 @@ interface PaginationOptions {
   styles?: string[];
 }
 
+interface paramType {
+  _id: string;
+  name: string;
+}
+interface filtersType {
+  sort?: string;
+  type?: string[];
+  brand?: string[];
+  size?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  page: number;
+  limit: number;
+  searchQuery?: string; // Add searchQuery for text search
+}
+
+interface filterInfo {
+  brands: paramType[];
+  categoryId?: string;
+  typeId?: string;
+}
+
+//f// GET PRODUCTS ///////////////////////////////////////////////////////////////////////////////
 /**
  * Fetches products with their active sale information.
  * @param {FilterQuery<ProductDocument>} [filters={}] - Optional Mongoose query filters to apply.
  * @returns {Promise<ProductWithSale[]>} A promise that resolves to an array of products with sale details.
  * @throws {Error} If there is an issue fetching the products.
  */
-export async function getProductsWithSales(filters: FilterQuery<ProductDocument> = {}) {
+export const getProducts = next_cache(
+  async (filters: filtersType, { brands, categoryId = "", typeId = "" }: filterInfo) => {
+    await connectDB();
+    try {
+      console.log("filters form server action", filters);
+      const brandIds = brands.filter((brand) => filters.brand?.includes(brand.name)).map((brand) => brand._id);
+      const sizeFilters = filters.size || [];
+      const { page, limit, style, searchQuery } = filters;
+
+      // Build the MongoDB query
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const query: Record<string, any> = {};
+
+      // Handle text search query
+      if (searchQuery) {
+        const regex = new RegExp(searchQuery, "i");
+        query.$or = [{ title: regex }, { slug: regex }, { description: regex }];
+      }
+
+      if (brandIds.length > 0) {
+        query.brand = { $in: brandIds };
+      }
+
+      if (categoryId) {
+        query.category = { $in: categoryId };
+      }
+      if (typeId) {
+        query.type = { $in: typeId };
+      }
+      if (style && style.length > 0) {
+        query.style = { $in: style };
+      }
+
+      if (filters.minPrice > 0 || filters.maxPrice < 30000) {
+        query.retailPrice = { $gte: filters.minPrice, $lte: filters.maxPrice };
+      }
+
+      // Build the sort object
+      let sortOptions = {};
+      switch (filters.sort) {
+        case "newest":
+          sortOptions = { createdAt: -1 };
+          break;
+        case "price-asc":
+          sortOptions = { retailPrice: 1 };
+          break;
+        case "price-desc":
+          sortOptions = { retailPrice: -1 };
+          break;
+        default:
+          sortOptions = { createdAt: -1 };
+          break;
+      }
+
+      const currentDate = new Date();
+
+      // Light query ONLY for getting distinct sizes
+      const productsForSizes = await Product.find(query)
+        .select("_id") // Only select the minimum needed for populate to work
+        .populate({
+          path: "stock",
+          select: "sizes", // Only get sizes from stock
+        })
+        .lean();
+
+      // Extract unique sizes
+      const distinctSizes = [...new Set(productsForSizes.flatMap((product: any) => product?.stock?.sizes?.map((s: { size?: string }) => s?.size).filter(Boolean) || []))];
+
+      // Main paginated query for actual products
+      const products = await Product.find(query)
+        .sort(sortOptions)
+        .skip(page * limit)
+        .limit(limit)
+        .select("title retailPrice images identifiers slug inStock saleInfo")
+        .populate<{ saleInfo: SaleDocument | null }>({
+          path: "saleInfo",
+          match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+          select: "name discountType discountValue startDate endDate isActive",
+        })
+        .populate({
+          path: "stock",
+          match: {},
+          select: "sizes",
+        })
+        .populate([
+          { path: "brand", select: "name -_id" },
+          { path: "type", select: "name -_id" },
+        ])
+        .lean({
+          virtuals: true,
+          transform: (doc: any) => {
+            // Remove MongoDB-specific properties
+            delete doc._id;
+            delete doc.__v;
+            return doc;
+          },
+        });
+
+      // Apply size filtering to paginated results (if needed)
+      const filteredProducts =
+        sizeFilters.length > 0
+          ? products.filter(
+              (product: any) =>
+                Array.isArray(product?.stock?.sizes) && product.stock.sizes.some((s: { size?: string }) => s && typeof s.size === "string" && sizeFilters.includes(s.size))
+            )
+          : products;
+
+      // Get total count for pagination metadata (if needed)
+      const totalProducts = await Product.countDocuments(query);
+      const totalPages = Math.ceil(totalProducts / limit);
+
+      return {
+        productsDoc: filteredProducts,
+        sizes: distinctSizes,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalProducts,
+          hasNextPage: page + 1 < totalPages,
+          hasPrevPage: page > 0,
+          limit,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching products with sales:", error);
+      throw new Error("Failed to fetch products with sales");
+    }
+  },
+  ["products"],
+  {
+    tags: ["products"],
+  }
+);
+
+//f/ GET RECENT 5 PRODUCTS /////////////////////////////////////////////////////////////////////////////
+
+export async function getRecentProducts() {
+  const currentDate = new Date();
   await connectDB();
+
   try {
-    const currentDate = new Date();
-    const products = await Product.find(filters)
+    const products = await Product.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
       .select("title retailPrice images identifiers slug inStock saleInfo")
       .populate<{ saleInfo: SaleDocument | null }>({
         path: "saleInfo",
-        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } }, // Temporarily disabled for debugging
-        select: "name discountType discountValue startDate endDate isActive", // Explicitly select fields for matching
+        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+        select: "name discountType discountValue startDate endDate isActive",
       })
-      .lean({ virtuals: true });
-
+      .populate({
+        path: "stock",
+        match: {},
+        select: "sizes",
+      })
+      .populate([
+        { path: "brand", select: "name -_id" },
+        { path: "type", select: "name -_id" },
+      ])
+      .lean({
+        virtuals: true,
+        transform: (doc: any) => {
+          // Remove MongoDB-specific properties
+          delete doc._id;
+          delete doc.__v;
+          return doc;
+        },
+      });
     return products;
   } catch (error) {
-    console.error("Error fetching products with sales:", error);
-    throw new Error("Failed to fetch products with sales");
+    console.log("Error getting recent products: ", error);
+    throw new Error(" Error getting recent products for this page");
   }
 }
 
-/**
- * Fetches a single product by its ID, along with active sale information.
- * @param {string | Types.ObjectId} productId - The ID of the product to fetch.
- * @returns {Promise<ProductWithSale | null>} A promise that resolves to the product with sale details, or null if not found.
- * @throws {Error} If there is an issue fetching the product.
- */
-export async function getProductWithSales(productId: string | Types.ObjectId): Promise<ProductWithSale | null> {
+//f/ GET SIMILAR PRODUCTS /////////////////////////////////////////////////////////////////////////////
+
+export async function getSimilarProducts(categoryId) {
+  const currentDate = new Date();
   await connectDB();
+
   try {
-    const currentDate = new Date();
-    const product = await Product.findById(productId)
-      .select("name price images category slug stock description saleInfo")
+    const products = await Product.find({category: categoryId})
+      .limit(5)
+      .select("title retailPrice images identifiers slug inStock saleInfo")
       .populate<{ saleInfo: SaleDocument | null }>({
         path: "saleInfo",
         match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
-        select: "name discountType discountValue color banner",
+        select: "name discountType discountValue startDate endDate isActive",
       })
-      .lean<LeanProductDocument>();
+      .populate({
+        path: "stock",
+        match: {},
+        select: "sizes",
+      })
+      .populate([
+        { path: "brand", select: "name -_id" },
+        { path: "type", select: "name -_id" },
+      ])
+      .lean({
+        virtuals: true,
+        transform: (doc: any) => {
+          // Remove MongoDB-specific properties
+          delete doc._id;
+          delete doc.__v;
+          return doc;
+        },
+      });
+    return products;
+  } catch (error) {
+    console.log("Error getting recent products: ", error);
+    throw new Error(" Error getting recent products for this page");
+  }
+}
 
-    return product ? transformProduct(product) : null;
+//f// GET PRODUCT DETAILS ///////////////////////////////////////////////////////////////////////////////
+/**
+ * Fetches a single product by its slug, along with active sale information.
+ * @param {string | Types.ObjectId} slug - The ID of the product to fetch.
+ * @returns {Promise<ProductWithSale | null>} A promise that resolves to the product with sale details, or null if not found.
+ * @throws {Error} If there is an issue fetching the product.
+ */
+export async function getProduct(slug: string | Types.ObjectId) {
+  await connectDB();
+  try {
+    const currentDate = new Date();
+    const product = await Product.findOne({ slug: slug })
+      .populate<{ saleInfo: SaleDocument | null }>({
+        path: "saleInfo",
+        match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
+        select: "name discountType discountValue startDate endDate isActive",
+      })
+      .populate({
+        path: "stock",
+        select: "sizes",
+      })
+      .populate([
+        { path: "brand", select: "name" },
+        { path: "type", select: "name" },
+        { path: "category", select: "name" },
+      ])
+      .lean({ virtuals: true });
+
+    return product;
   } catch (error) {
     console.error("Error fetching product with sales:", error);
     throw new Error("Failed to fetch product with sales");
@@ -189,6 +417,7 @@ export async function getProductsByCategoryWithSales(
         match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
         select: "name discountType discountValue color banner startDate endDate",
       })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .sort(sort as any)
       .skip((page - 1) * limit)
       .limit(limit)

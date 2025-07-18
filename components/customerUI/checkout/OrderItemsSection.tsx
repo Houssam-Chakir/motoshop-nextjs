@@ -20,10 +20,8 @@ import { useMemo } from "react";
 import { useSessionContext } from "@/contexts/SessionContext";
 import OrderItemCard from "./OrderItemCard";
 
-
-
 export default function OrderItemsSection() {
-  const {session} = useSessionContext()
+  const { session } = useSessionContext();
 
   const [parent] = useAutoAnimate();
   const router = useRouter();
@@ -42,7 +40,7 @@ export default function OrderItemsSection() {
 
     if (!session) {
       const guestCart = getGuestCart();
-      console.log('guestCart: ', guestCart)
+      console.log("guestCart: ", guestCart);
       setGuestCartItems(guestCart.products);
       window.addEventListener("guestCartChanged", handleGuestCartChange as EventListener);
     }
@@ -151,9 +149,9 @@ export default function OrderItemsSection() {
   };
 
   return (
-    <div className='relative flex flex-col h-1/2'>
+    <div className='w-full flex flex-col h-1/2 md:px-6'>
       {/* Header */}
-      <div className='px-4 py-3 mb-2 w-full flex justify-between items-center border-b'>
+      <div className='px-4 py-3 mb-2 w-full flex justify-between items-center'>
         <div className='flex items-center gap-2'>
           <Box className='h-5 w-5 text-gray-700' />
           <span className='text-md font-semibold'>Order information </span> <span className='text-xs text-gray-500 pt-0.5'> ({totalCartItems} items)</span>
@@ -161,7 +159,7 @@ export default function OrderItemsSection() {
       </div>
 
       {/* Cart Items */}
-      <div ref={parent} className='flex flex-col flex-grow overflow-y-auto p-2 gap-2 pb-80'>
+      <div ref={parent} className='flex flex-col flex-grow overflow-y-auto p-2 gap-2 pb-8'>
         {displayCartItems.length > 0 ? (
           displayCartItems.map((item, idx) => (
             <React.Fragment key={item.productId + item.size}>
@@ -180,7 +178,7 @@ export default function OrderItemsSection() {
 
       {/* Footer - Summary & Checkout */}
       {displayCartItems.length > 0 && (
-        <div className='absolute bottom-0 w-full border-t p-4 space-y-4 shrink-0 bg-white/90 backdrop-blur-xs'>
+        <div className='p-4 space-y-4 shrink-0 bg-white/90 backdrop-blur-xs'>
           <div className='font-semibold'>Summary</div>
           <div className='bg-grey-dark/20 py-2 px-4 mb-4 border custom-dashed space-y-2'>
             {/* Subtotal */}
@@ -195,6 +193,11 @@ export default function OrderItemsSection() {
                 <span className='font-bold text-success-green'>- {totalDiscount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
               </div>
             )}
+            {/* Shipping */}
+            <div className='flex justify-between text-sm font-'>
+              <span>Shipping:</span>
+              <span className='font-bold text-success-green'>TBD</span>
+            </div>
             {/* Shipping - Placeholder */}
             <hr className='border-grey-medium' />
             {/* Total */}
@@ -203,12 +206,7 @@ export default function OrderItemsSection() {
               <span className='font-bold text-blue'>{finalTotal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
             </div>
           </div>
-          <div className='flex flex-col gap-2'>
-            <span className='text-xs text-grey-darker italic'>Shipping fee varies by address.</span>
-            <Button onClick={handleCheckout} className='w-full bg-blue hover:bg-blue/90 rounded-full py-5 cursor-pointer text-white'>
-              Proceed to Checkout
-            </Button>
-          </div>
+          
         </div>
       )}
     </div>

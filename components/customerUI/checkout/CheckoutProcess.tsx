@@ -6,12 +6,32 @@ import { usePathname } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StepperCheckout from "./StepperCheckout";
 import DeliveryInformationForm from "./DeliveryInformationForm";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface ICardInfo {
+  name: string | null;
+  cardNumber: string | null;
+  expiry: string | null;
+  cvc: string | null;
+}
+
+export interface CheckoutDataType {
+  number: string | null;
+  address: string | null;
+  city: string | null;
+  email: string | null;
+  fullName: string | null;
+  shippingFee?: number;
+  paymentMethod: "cmi" | "delivery" | "pickup" | null;
+  extraDirections?: string | null;
+  saveAddress?: boolean | null;
+  cardInfo: ICardInfo;
+}
 
 export default function CheckoutProcess() {
   // const pathname = usePathname();
   const [checkoutStep, setCheckoutStep] = useState(1);
-  const [checkoutData, setCheckoutData] = useState({
+  const [checkoutData, setCheckoutData] = useState<CheckoutDataType>({
     address: null,
     city: null,
     email: null,
@@ -20,6 +40,7 @@ export default function CheckoutProcess() {
     number: null,
     paymentMethod: null,
     saveAddress: false,
+    shippingFee: 10,
     cardInfo: {
       name: null,
       cardNumber: null,
@@ -27,6 +48,38 @@ export default function CheckoutProcess() {
       cvc: null,
     },
   });
+
+  function getShippingFeeByCity(city: string | null): number {
+    if (!city) return 0;
+    switch (city.trim().toLowerCase()) {
+      case "casablanca":
+        return 20;
+      case "rabat":
+        return 30;
+      case "marrakech":
+        return 40;
+      case "fes":
+        return 50;
+      case "tangier":
+        return 55;
+      case "agadir":
+        return 45;
+      default:
+        return 22;
+    }
+  }
+
+  // Efficiently update shippingFee when city changes
+  useEffect(() => {
+    setCheckoutData((prev) => ({
+      ...prev,
+      shippingFee: getShippingFeeByCity(prev.city),
+    }));
+  }, [checkoutData.city]);
+
+  const [finalCart, setFinalCart] = useState(null);
+  console.log("finalCart: ", finalCart);
+  console.log("checkoutData: ", checkoutData);
 
   return (
     <main className='py-2 flex flex-col md:flex-row justify-between'>
@@ -36,18 +89,9 @@ export default function CheckoutProcess() {
           <DeliveryInformationForm setCheckoutData={setCheckoutData}>
             <StepperCheckout checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep} />
           </DeliveryInformationForm>
-          <OrderItemsSection />
+          <OrderItemsSection shippingFee={checkoutData.shippingFee} setFinalCart={setFinalCart} />
         </>
       )}
     </main>
   );
-}
-
-{
-  /* <div className='flex flex-col gap-2'>
-  <span className='text-xs text-grey-darker italic'>Shipping fee varies by address.</span>
-  <Button onClick={handleCheckout} className='w-full bg-blue hover:bg-blue/90 rounded-full py-5 cursor-pointer text-white'>
-    Proceed to Checkout
-  </Button>
-</div>; */
 }

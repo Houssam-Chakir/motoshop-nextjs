@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ReactNode } from "react";
+import { CheckoutDataType } from "./CheckoutProcess";
 
 // Zod schema for form validation
 const deliveryFormSchema = z.object({
@@ -31,7 +32,7 @@ type DeliveryFormData = z.infer<typeof deliveryFormSchema>;
 
 interface DeliveryInformationType {
   children?: ReactNode;
-  setCheckoutData: (data: DeliveryFormData) => void;
+  setCheckoutData: (updater: (prev: CheckoutDataType) => CheckoutDataType) => void;
 }
 
 export default function DeliveryInformationForm({ children, setCheckoutData }: DeliveryInformationType) {
@@ -57,7 +58,8 @@ export default function DeliveryInformationForm({ children, setCheckoutData }: D
   const onSubmit = async (data: DeliveryFormData) => {
     setIsSubmitting(true);
     try {
-      setCheckoutData({
+      setCheckoutData((prev) => ({
+        ...prev,
         address: data.address,
         city: data.city,
         email: data.email,
@@ -66,7 +68,7 @@ export default function DeliveryInformationForm({ children, setCheckoutData }: D
         number: data.number,
         paymentMethod: data.paymentMethod,
         saveAddress: data.saveAddress,
-      });
+      }));
       // Handle successful submission
     } catch (error) {
       console.error("Submission error:", error);

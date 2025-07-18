@@ -11,7 +11,6 @@ import {
   GuestCartProductItem, // Import GuestCartProductItem type
 } from "@/lib/guestCartStore";
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { removeItemFromCart, updateCartItemQuantity } from "@/actions/cartActions";
 import { toast } from "react-toastify";
@@ -19,8 +18,9 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useMemo } from "react";
 import { useSessionContext } from "@/contexts/SessionContext";
 import OrderItemCard from "./OrderItemCard";
+import { CartItem } from "@/types/cart";
 
-export default function OrderItemsSection() {
+export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFinalCart: React.Dispatch<React.SetStateAction<CartItem[]>>; shippingFee?: number }) {
   const { session } = useSessionContext();
 
   const [parent] = useAutoAnimate();
@@ -78,6 +78,8 @@ export default function OrderItemsSection() {
     }
     return [];
   }, [session, cart, guestCartItems]);
+
+  setFinalCart(displayCartItems);
 
   const { subtotal, totalDiscount, finalTotal, totalCartItems } = useMemo(() => {
     const totals = displayCartItems.reduce(
@@ -196,7 +198,7 @@ export default function OrderItemsSection() {
             {/* Shipping */}
             <div className='flex justify-between text-sm font-'>
               <span>Shipping:</span>
-              <span className='font-bold text-success-green'>TBD</span>
+              <span className='font-bold text-success-green'>{shippingFee ? '+' + shippingFee : 'TBD'}</span>
             </div>
             {/* Shipping - Placeholder */}
             <hr className='border-grey-medium' />
@@ -206,7 +208,6 @@ export default function OrderItemsSection() {
               <span className='font-bold text-blue'>{finalTotal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
             </div>
           </div>
-          
         </div>
       )}
     </div>

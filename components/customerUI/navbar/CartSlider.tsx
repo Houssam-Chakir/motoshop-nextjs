@@ -5,9 +5,6 @@ import { useUserContext } from "@/contexts/UserContext";
 import { Session } from "next-auth";
 import { MobileSlider } from "../sideBar/MobileSidebar";
 import { ShoppingCart, X, Trash, Minus, Plus } from "lucide-react";
-import { ProductType } from "@/models/Product";
-import { CartType } from "@/types/cart";
-// import { CartItem as CartItemType } from "@/types/cart"; // Using GuestCartProductItem directly
 import {
   getGuestCart,
   removeItemFromGuestCart,
@@ -311,9 +308,11 @@ export default function CartSlider({ session }: { session: Session | null }) {
             </div>
             <div className='flex flex-col gap-2'>
               <span className='text-xs text-grey-darker italic'>Shipping fee varies by address.</span>
-              <Button onClick={handleCheckout} className='w-full bg-blue hover:bg-blue/90 rounded-full py-5 cursor-pointer text-white'>
-                Proceed to Checkout
-              </Button>
+              <SheetClose asChild>
+                <Button onClick={handleCheckout} className='w-full bg-blue hover:bg-blue/90 rounded-full py-5 cursor-pointer text-white'>
+                  Proceed to Checkout
+                </Button>
+              </SheetClose>
             </div>
           </div>
         )}

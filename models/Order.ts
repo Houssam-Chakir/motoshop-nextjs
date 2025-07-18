@@ -34,7 +34,6 @@ const OrderSchema: Schema = new Schema(
   {
     trackingNumber: { type: String, required: true, index: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    // product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     products: {
       type: [
         {

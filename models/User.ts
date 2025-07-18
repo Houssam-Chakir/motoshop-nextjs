@@ -15,7 +15,7 @@ export interface UserDocument extends Document {
   email: string;
   // password?: string;
   image?: string;
-  role: "customer" | "admin";
+  role: "customer" | "admin" | "guest";
   wishlist?: mongoose.Types.ObjectId[];
   cart?: mongoose.Types.ObjectId[];
   orders?: mongoose.Types.ObjectId[];
@@ -51,10 +51,10 @@ const UserSchema: Schema = new Schema(
     //   minlength: [6, "Password must be at least 6 characters long"],
     // },
     image: String,
-    role: { type: String, enum: ["customer", "admin"], default: "customer" },
+    role: { type: String, enum: ["customer", "admin", "guest"], default: "customer" },
     wishlist: {
       type: [{ type: Schema.Types.ObjectId, ref: "Product" }],
-      default: []
+      default: [],
     },
     cart: { type: Schema.Types.ObjectId, ref: "Cart" },
     orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],

@@ -30,12 +30,13 @@ export default function Breadcrumbs({ path }: { path: string }) {
         {pathSegments.map((segment, index) => {
           const href = "/" + pathSegments.slice(0, index + 1).join("/");
           const isLast = index === pathSegments.length - 1;
+          const isLong = pathSegments.length >= 4
 
           return (
             <React.Fragment key={href}>
-              <BreadcrumbSeparator className={`text-xs opacity-50 ${isLast ? 'opacity-0' : ''} md:opacity-100`} />
+              <BreadcrumbSeparator className={`text-xs opacity-50 ${(isLast && isLong) ? 'opacity-0' : ''} md:opacity-100`} />
               <BreadcrumbItem className='text-xs'>
-                {isLast ? (
+                {(isLast && isLong) ? (
                   <BreadcrumbPage className='max-w-0 sm:max-w-12 md:max-w-64 truncate cursor-default text-xs'>{capitalize(segment)}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>

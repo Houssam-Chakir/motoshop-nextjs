@@ -1,23 +1,23 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
-export function OrderItemsFinalList({finalCart, shippingFee}) {
-
-  const orderTotal = finalCart.totalPrice + shippingFee
+export function OrderItemsFinalList({ finalCart, shippingFee, checkoutData }) {
+  const orderTotal = finalCart.totalPrice + shippingFee;
 
   const customerInfo = [
-    { label: "Full name:", value: "Houssam Chakir" },
-    { label: "Number:", value: "0689752148" },
-    { label: "Email:", value: "houssamchakir@gmail.com" },
-    { label: "City:", value: "Casablanca" },
-    { label: "Address:", value: "Maarif, zerktouni, Res Fish, Imm17, App42" },
-    { label: "Extra:", value: "The red building" },
+    { label: "Full name:", value: checkoutData.fullName },
+    { label: "Number:", value: checkoutData.number },
+    { label: "Email:", value: checkoutData.email },
+    { label: "City:", value: checkoutData.city },
+    { label: "Address:", value: checkoutData.address },
+    { label: "Extra:", value: checkoutData.extraDirections },
   ];
 
   return (
     <div className='w-full p-6'>
-      <CardHeader className='pb-4'>
-        <CardTitle className='text-xl font-semibold mb-6 text-gray-900'>Order information</CardTitle>
-      </CardHeader>
+      <h2 className='pb-4'>
+        <CardTitle className='text-xl font-semibold text-gray-900'>Order information</CardTitle>
+      </h2>
       <CardContent className='custom-dashed p-4 pt-2 bg-grey space-y-4'>
         {/* Items Section */}
         <div>
@@ -46,7 +46,7 @@ export function OrderItemsFinalList({finalCart, shippingFee}) {
           </div>
           <div className='flex justify-between'>
             <span className='text-gray-700'>Shipping:</span>
-            <span className='font-bold text-green-600'>{shippingFee > 0 ? '+' + shippingFee + ' DH' : 'Free'}</span>
+            <span className='font-bold text-green-600'>{shippingFee > 0 ? "+" + shippingFee + " DH" : "Free"}</span>
           </div>
 
           <div className='border-t border-gray-200 pt-3'>
@@ -56,17 +56,18 @@ export function OrderItemsFinalList({finalCart, shippingFee}) {
             </div>
           </div>
         </div>
-
       </CardContent>
-        {/* Customer Information */}
-        <div className='space-y-4 pt-6 border-t border-gray-200'>
+      {/* Customer Information */}
+      <Table className='space-y-4 pt-6 border mt-6 border-gray-200'>
+        <TableBody>
           {customerInfo.map((info, index) => (
-            <div key={index} className='flex'>
-              <span className='text-gray-700 font-medium w-20 flex-shrink-0'>{info.label}</span>
-              <span className='text-gray-900 ml-4'>{info.value}</span>
-            </div>
+            <TableRow key={index} className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
+              <TableCell className="bg-grey/50 py-2 font-medium text-nowrap">{info.label}</TableCell>
+              <TableCell className='py-2 w-full'>{info.value}</TableCell>
+            </TableRow>
           ))}
-        </div>
+        </TableBody>
+      </Table>
     </div>
   );
 }

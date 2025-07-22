@@ -100,7 +100,7 @@ export default function CheckoutProcess() {
           <PaymentInformation>
             <StepperCheckout checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep} />
           </PaymentInformation>
-          <OrderItemsFinalList finalCart={finalCart} shippingFee={checkoutData.shippingFee} />
+          <OrderItemsFinalList finalCart={finalCart} shippingFee={checkoutData.shippingFee} checkoutData={checkoutData} />
         </>
       )}
     </main>

@@ -45,6 +45,7 @@ export default function StepperCheckout({ checkoutStep, setCheckoutStep }: Stepp
   };
 
   const handleStepClick = (stepId: number) => {
+    // if(checkoutStep < stepId) return
     setCheckoutStep(stepId);
   };
 

@@ -33,9 +33,11 @@ type DeliveryFormData = z.infer<typeof deliveryFormSchema>;
 interface DeliveryInformationType {
   children?: ReactNode;
   setCheckoutData: (updater: (prev: CheckoutDataType) => CheckoutDataType) => void;
+  setCheckoutStep: (step: number) => void;
+  checkoutData: CheckoutDataType;
 }
 
-export default function DeliveryInformationForm({ children, setCheckoutData, setCheckoutStep }: DeliveryInformationType) {
+export default function DeliveryInformationForm({ children, setCheckoutData, setCheckoutStep, checkoutData }: DeliveryInformationType) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -47,8 +49,14 @@ export default function DeliveryInformationForm({ children, setCheckoutData, set
   } = useForm<DeliveryFormData>({
     resolver: zodResolver(deliveryFormSchema),
     defaultValues: {
-      paymentMethod: "cmi",
-      saveAddress: false,
+      fullName: checkoutData.fullName ?? "",
+      number: checkoutData.number ?? "",
+      email: checkoutData.email ?? "",
+      city: checkoutData.city ?? undefined,
+      address: checkoutData.address ?? "",
+      extraDirections: checkoutData.extraDirections ?? "",
+      paymentMethod: checkoutData.paymentMethod ?? "cmi",
+      saveAddress: checkoutData.saveAddress ?? false,
     },
   });
 
@@ -69,7 +77,7 @@ export default function DeliveryInformationForm({ children, setCheckoutData, set
         paymentMethod: data.paymentMethod,
         saveAddress: data.saveAddress,
       }));
-      setCheckoutStep(2)
+      setCheckoutStep(2);
       // Handle successful submission
     } catch (error) {
       console.error("Submission error:", error);
@@ -103,7 +111,7 @@ export default function DeliveryInformationForm({ children, setCheckoutData, set
 
               <div>
                 <Label htmlFor='number' className='text-sm font-medium text-gray-900 mb-2 block'>
-                  number
+                  Number
                 </Label>
                 <Input
                   id='number'

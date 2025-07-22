@@ -182,7 +182,7 @@ export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFi
 
       {/* Footer - Summary & Checkout */}
       {displayCartItems.length > 0 && (
-        <div className='p-4 space-y-4 shrink-0 bg-white/90 backdrop-blur-xs'>
+        <div className='p-2 space-y-4 shrink-0 bg-white/90 backdrop-blur-xs'>
           <div className='font-semibold'>Summary</div>
           <div className='bg-grey-dark/20 py-2 px-4 mb-4 border custom-dashed space-y-2'>
             {/* Subtotal */}

@@ -71,6 +71,15 @@ export default function CheckoutProcess() {
     }
   }
 
+  function handleConfirmOrder(isPaymentCardValid) {
+    // Check if checkout data is present
+    // Check payment method
+      // Check if payment card is valid
+    // Create order
+    // Redirect to order status page with order status
+
+  }
+
   // Efficiently update shippingFee when city changes
   useEffect(() => {
     setCheckoutData((prev) => ({
@@ -89,7 +98,7 @@ export default function CheckoutProcess() {
       {checkoutStep === 1 && (
         // First step: Delivery Information and Cart adjustment
         <>
-          <DeliveryInformationForm setCheckoutStep={setCheckoutStep} setCheckoutData={setCheckoutData}>
+          <DeliveryInformationForm setCheckoutStep={setCheckoutStep} setCheckoutData={setCheckoutData} checkoutData={checkoutData}>
             <StepperCheckout checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep} />
           </DeliveryInformationForm>
           <OrderItemsSection shippingFee={checkoutData.shippingFee} setFinalCart={setFinalCart} />
@@ -97,7 +106,7 @@ export default function CheckoutProcess() {
       )}
       {checkoutStep === 2 && (
         <>
-          <PaymentInformation>
+          <PaymentInformation paymentMethod={checkoutData.paymentMethod}>
             <StepperCheckout checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep} />
           </PaymentInformation>
           <OrderItemsFinalList finalCart={finalCart} shippingFee={checkoutData.shippingFee} checkoutData={checkoutData} />

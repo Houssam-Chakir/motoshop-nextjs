@@ -23,7 +23,7 @@ export interface OrderDocument extends Document {
   paymentStatus: "pending" | "processing" | "paid" | "failed" | "refunded";
   orderedAt: Date;
   deliveryInformation: DeliveryInformation;
-  deliveryStatus: "processing" | "shipped" | "delivered" | "cancelled";
+  deliveryStatus: "processing"| "awaiting pickup"  | "packaged" | "shipped" | "in city"| "in delivery"  | "delivered" | "cancelled";
   estimatedDeliveryDate?: Date;
   notes?: string;
   createdAt?: Date;

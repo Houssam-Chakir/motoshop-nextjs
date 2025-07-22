@@ -79,8 +79,6 @@ export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFi
     return [];
   }, [session, cart, guestCartItems]);
 
-  setFinalCart(displayCartItems);
-
   const { subtotal, totalDiscount, finalTotal, totalCartItems } = useMemo(() => {
     const totals = displayCartItems.reduce(
       (acc, item) => {
@@ -100,6 +98,10 @@ export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFi
       totalDiscount: totals.subtotal - totals.finalTotal,
     };
   }, [displayCartItems]);
+
+  useEffect(() => {
+    setFinalCart({ cartItems: displayCartItems, totalPrice: finalTotal, totalDiscount });
+  }, [displayCartItems, setFinalCart, finalTotal, totalDiscount]);
 
   const handleRemoveItem = async (productId: string, size: string) => {
     if (isLoggedIn) {
@@ -198,7 +200,7 @@ export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFi
             {/* Shipping */}
             <div className='flex justify-between text-sm font-'>
               <span>Shipping:</span>
-              <span className='font-bold text-success-green'>{shippingFee ? '+' + shippingFee : 'TBD'}</span>
+              <span className='font-bold text-success-green'>{shippingFee ? "+" + shippingFee : "TBD"}</span>
             </div>
             {/* Shipping - Placeholder */}
             <hr className='border-grey-medium' />

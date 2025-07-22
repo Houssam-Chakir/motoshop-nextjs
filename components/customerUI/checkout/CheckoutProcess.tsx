@@ -7,6 +7,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import StepperCheckout from "./StepperCheckout";
 import DeliveryInformationForm from "./DeliveryInformationForm";
 import { useState, useEffect } from "react";
+import { PaymentInformation } from "./PaymentInformation";
+import { OrderItemsFinalList } from "./OrderItemsFinalList";
 
 interface ICardInfo {
   name: string | null;
@@ -85,11 +87,20 @@ export default function CheckoutProcess() {
     <main className='py-2 flex flex-col md:flex-row justify-between'>
       {/* <Breadcrumbs path={pathname} /> */}
       {checkoutStep === 1 && (
+        // First step: Delivery Information and Cart adjustment
         <>
-          <DeliveryInformationForm setCheckoutData={setCheckoutData}>
+          <DeliveryInformationForm setCheckoutStep={setCheckoutStep} setCheckoutData={setCheckoutData}>
             <StepperCheckout checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep} />
           </DeliveryInformationForm>
           <OrderItemsSection shippingFee={checkoutData.shippingFee} setFinalCart={setFinalCart} />
+        </>
+      )}
+      {checkoutStep === 2 && (
+        <>
+          <PaymentInformation>
+            <StepperCheckout checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep} />
+          </PaymentInformation>
+          <OrderItemsFinalList finalCart={finalCart} shippingFee={checkoutData.shippingFee} />
         </>
       )}
     </main>

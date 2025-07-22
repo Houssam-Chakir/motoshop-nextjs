@@ -35,7 +35,7 @@ interface DeliveryInformationType {
   setCheckoutData: (updater: (prev: CheckoutDataType) => CheckoutDataType) => void;
 }
 
-export default function DeliveryInformationForm({ children, setCheckoutData }: DeliveryInformationType) {
+export default function DeliveryInformationForm({ children, setCheckoutData, setCheckoutStep }: DeliveryInformationType) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -69,6 +69,7 @@ export default function DeliveryInformationForm({ children, setCheckoutData }: D
         paymentMethod: data.paymentMethod,
         saveAddress: data.saveAddress,
       }));
+      setCheckoutStep(2)
       // Handle successful submission
     } catch (error) {
       console.error("Submission error:", error);
@@ -80,7 +81,7 @@ export default function DeliveryInformationForm({ children, setCheckoutData }: D
   return (
     <div className='border-r w-full'>
       {children}
-      <div className='mx-auto bg-white px-6'>
+      <div className='mx-auto bg-white pr-6'>
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* Delivery Information Section */}
           <div className='mb-8'>

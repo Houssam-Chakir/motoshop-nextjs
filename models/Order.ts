@@ -19,11 +19,11 @@ export interface OrderDocument extends Document {
   quantity: number;
   deliveryFee: number;
   orderTotalPrice: number;
-  paymentMethod: "credit_card" | "cash_on_delivery";
+  paymentMethod: "cmi" | "delivery" | "pickup";
   paymentStatus: "pending" | "processing" | "paid" | "failed" | "refunded";
   orderedAt: Date;
   deliveryInformation: DeliveryInformation;
-  deliveryStatus: "processing"| "awaiting pickup"  | "packaged" | "shipped" | "in city"| "in delivery"  | "delivered" | "cancelled";
+  deliveryStatus: "processing" | "awaiting pickup" | "packaged" | "shipped" | "in city" | "in delivery" | "delivered" | "cancelled";
   estimatedDeliveryDate?: Date;
   notes?: string;
   createdAt?: Date;
@@ -49,7 +49,7 @@ const OrderSchema: Schema = new Schema(
     quantity: { type: Number, required: true, min: 0 },
     deliveryFee: { type: Number, required: true, min: 0 },
     orderTotalPrice: { type: Number, required: true, min: 0 },
-    paymentMethod: { type: String, required: true, enum: ["credit_card", "cash_on_delivery"] },
+    paymentMethod: { type: String, required: true, enum: ["cmi", "delivery", "pickup"] },
     paymentStatus: { type: String, required: true, enum: ["pending", "processing", "paid", "failed", "refunded"], default: "pending" },
     orderedAt: { type: Date, default: Date.now },
     deliveryInformation: DeliveryInfoSchema,

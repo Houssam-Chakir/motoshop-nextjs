@@ -50,6 +50,9 @@ export default function CheckoutProcess() {
       cvc: null,
     },
   });
+  const [finalCart, setFinalCart] = useState(null);
+  console.log("finalCart: ", finalCart);
+  console.log("checkoutData: ", checkoutData);
 
   function getShippingFeeByCity(city: string | null): number {
     if (!city) return 0;
@@ -71,13 +74,39 @@ export default function CheckoutProcess() {
     }
   }
 
-  function handleConfirmOrder(isPaymentCardValid) {
-    // Check if checkout data is present
-    // Check payment method
-      // Check if payment card is valid
-    // Create order
-    // Redirect to order status page with order status
+  function handleConfirmOrder(isPaymentCardValid: boolean) {
+    // 1. Check if checkout data is present
+    const { address, city, email, fullName, number, paymentMethod, cardInfo } = checkoutData;
+    if (!address || !city || !email || !fullName || !number) {
+      alert("Please fill in all required delivery information.");
+      return;
+    }
 
+    // 2. Check payment method
+    if (!paymentMethod) {
+      alert("Please select a payment method.");
+      return;
+    }
+
+    // 3. If payment method is card, check if payment card is valid
+    if (paymentMethod === "cmi") {
+      if (!isPaymentCardValid) {
+        alert("Please enter valid card information.");
+        return;
+      }
+      if (!cardInfo.name || !cardInfo.cardNumber || !cardInfo.expiry || !cardInfo.cvc) {
+        alert("Please fill in all card details.");
+        return;
+      }
+    }
+
+    // 4. Create order (stub - replace with actual order creation logic)
+    // Example: await createOrder({ ...checkoutData, cart: finalCart });
+    console.log("Order created!", { ...checkoutData, cart: finalCart });
+
+    // 5. Redirect to order status page (stub - replace with actual routing)
+    // Example: router.push(`/order-status?success=true`);
+    alert("Order placed successfully! Redirecting to order status page...");
   }
 
   // Efficiently update shippingFee when city changes
@@ -88,9 +117,7 @@ export default function CheckoutProcess() {
     }));
   }, [checkoutData.city]);
 
-  const [finalCart, setFinalCart] = useState(null);
-  console.log("finalCart: ", finalCart);
-  console.log("checkoutData: ", checkoutData);
+
 
   return (
     <main className='py-2 flex flex-col md:flex-row justify-between'>

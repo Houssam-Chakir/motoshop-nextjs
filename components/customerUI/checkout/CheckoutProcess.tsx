@@ -11,6 +11,7 @@ import { PaymentInformation } from "./PaymentInformation";
 import { OrderItemsFinalList } from "./OrderItemsFinalList";
 import { useUserContext } from "@/contexts/UserContext";
 import { clearCart } from "@/actions/cartActions";
+import { OrderStatusSection } from "./OrderStatusPage";
 
 interface CartItem {
   productId: string;
@@ -55,6 +56,7 @@ export default function CheckoutProcess() {
   console.log("session: ", session);
   const { profile } = useUserContext();
 
+  const [orderStatus, setOrderStatus] = useState({status: 'pending'})
   const [checkoutData, setCheckoutData] = useState<CheckoutDataType>({
     address: null,
     city: null,
@@ -163,6 +165,7 @@ export default function CheckoutProcess() {
         alert("Order placed successfully! Redirecting...");
         // Clear the cart from local storage or state management
         if (session) await clearCart();
+        setOrderStatus(result)
         setCheckoutStep(3)
       } else {
         alert(`Order creation failed: ${result.message}`);
@@ -198,6 +201,14 @@ export default function CheckoutProcess() {
           <PaymentInformation paymentMethod={checkoutData.paymentMethod} handleCreateOrder={handleCreateOrder} isSubmitting={isSubmitting} checkoutData={checkoutData}>
             <StepperCheckout checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep} />
           </PaymentInformation>
+          <OrderItemsFinalList finalCart={finalCart} shippingFee={checkoutData.shippingFee} checkoutData={checkoutData} />
+        </>
+      )}
+      {checkoutStep === 3 && (
+        <>
+          <OrderStatusSection checkoutData={checkoutData} orderStatus={orderStatus}>
+            <StepperCheckout checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep} />
+          </OrderStatusSection>
           <OrderItemsFinalList finalCart={finalCart} shippingFee={checkoutData.shippingFee} checkoutData={checkoutData} />
         </>
       )}

@@ -1,13 +1,26 @@
-'use server'
+"use server";
 
 import connectDB from "@/config/database";
 import Order, { OrderDocument } from "@/models/Order";
 import Product, { ProductDocument } from "@/models/Product";
 import Stock from "@/models/Stock";
-import { SaleDocument } from "@/models/Sale";
-import mongoose from "mongoose";
+import Sale, { SaleDocument } from "@/models/Sale";
+import User from "@/models/User"; // Import the User model
+import mongoose, { Types } from "mongoose";
 
-// For each product in the order
+// ... (interfaces remain the same for now, we handle optional userId in the function)
+
+// Main order input type
+export interface OrderInput {
+  userId?: string; // userId is now optional
+  products: Omit<OrderProductInput, "unitPrice" | "totalPrice">[];
+  quantity: number;
+  deliveryFee: number;
+  orderTotalPrice: number;
+  paymentMethod: "cmi" | "delivery" | "pickup";
+  deliveryInformation: DeliveryInformation;
+}
+
 interface OrderProductInput {
   productId: string;
   size: string;
@@ -17,7 +30,6 @@ interface OrderProductInput {
   addedAt?: Date;
 }
 
-// Delivery information type (from models/User.ts)
 interface DeliveryInformation {
   fullName: string;
   phoneNumber: string;
@@ -28,33 +40,12 @@ interface DeliveryInformation {
   extraDirections: string;
 }
 
-// Main order input type
-export interface OrderInput {
-  userId: string;
-  products: Omit<OrderProductInput, "unitPrice" | "totalPrice">[]; // Prices will be calculated on the server
-  quantity: number;
-  deliveryFee: number;
-  orderTotalPrice: number; // This will be validated against the server-calculated price
-  paymentMethod: "cmi" | "delivery" | "pickup";
-  deliveryInformation: DeliveryInformation;
-  notes?: string;
-}
-
-/**
- * The result type for createOrder: either success with the order, or failed with a message.
- */
 export type CreateOrderResult = { status: "success"; order: OrderDocument } | { status: "failed"; message: string };
 
-/**
- * Creates a new order with server-verified pricing and atomic stock updates.
- * @param {OrderInput} orderData - The data for the new order, client-side prices are ignored.
- * @returns {Promise<CreateOrderResult>} The result of the order creation.
- */
 export async function createOrder(orderData: OrderInput): Promise<CreateOrderResult> {
   await connectDB();
-  console.log('orderData: ', orderData)
+
   if (
-    !orderData.userId ||
     !orderData.products ||
     !Array.isArray(orderData.products) ||
     orderData.products.length === 0 ||
@@ -68,12 +59,46 @@ export async function createOrder(orderData: OrderInput): Promise<CreateOrderRes
   session.startTransaction();
 
   try {
-    // 1. Get all product data from DB to have an authoritative source for price and stock
+    let userIdForOrder: Types.ObjectId;
+
+    // --- User Handling Logic ---
+    if (orderData.userId) {
+      // Case 1: User is logged in.
+      userIdForOrder = new Types.ObjectId(orderData.userId);
+    } else {
+      // Case 2: Guest checkout.
+      const { email, fullName } = orderData.deliveryInformation;
+      if (!email) {
+        throw new Error("Email is required for guest checkout.");
+      }
+
+      let user = await User.findOne({ email }).session(session);
+
+      if (user) {
+        // User with this email already exists.
+        if (user.role === "customer") {
+          // If it's a full customer account, they must log in.
+          throw new Error("An account with this email already exists. Please log in to place your order.");
+        }
+        // If it's a guest account, we can reuse it.
+        userIdForOrder = user._id;
+      } else {
+        // No user found, create a new guest account.
+        const newGuest = new User({
+          name: fullName,
+          email: email,
+          role: "guest",
+        });
+        await newGuest.save({ session });
+        userIdForOrder = newGuest._id;
+      }
+    }
+
+    // --- Stock and Price Calculation ---
     const productIds = orderData.products.map((p) => p.productId);
     const currentDate = new Date();
-
     const products = await Product.find({ _id: { $in: productIds } })
-      .select("stock retailPrice saleInfo") // Select all fields needed
+      .select("stock retailPrice saleInfo")
       .populate<{ saleInfo: SaleDocument | null }>({
         path: "saleInfo",
         match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
@@ -88,17 +113,11 @@ export async function createOrder(orderData: OrderInput): Promise<CreateOrderRes
     let serverCalculatedSubtotal = 0;
     const serverCalculatedProducts: OrderProductInput[] = [];
 
-    // 2. Atomically update stock and calculate prices for each item
     for (const item of orderData.products) {
       const product = productMap.get(item.productId);
-      if (!product) {
-        throw new Error(`Product with ID ${item.productId} not found.`);
-      }
-      if (!product.stock) {
-        throw new Error(`Stock information not found for product ID ${item.productId}.`);
-      }
+      if (!product) throw new Error(`Product with ID ${item.productId} not found.`);
+      if (!product.stock) throw new Error(`Stock information for product ID ${item.productId} not found.`);
 
-      // --- Atomic Stock Update ---
       const updateResult = await Stock.updateOne(
         { _id: product.stock, "sizes.size": item.size, "sizes.quantity": { $gte: item.quantity } },
         { $inc: { "sizes.$.quantity": -item.quantity } },
@@ -109,9 +128,7 @@ export async function createOrder(orderData: OrderInput): Promise<CreateOrderRes
         throw new Error(`Insufficient stock for product ${item.productId} (size: ${item.size}).`);
       }
 
-      // --- Server-Side Price Calculation using Virtual Property ---
       const unitPrice = product.salePrice ?? product.retailPrice;
-
       const totalPrice = unitPrice * item.quantity;
       serverCalculatedSubtotal += totalPrice;
 
@@ -122,18 +139,14 @@ export async function createOrder(orderData: OrderInput): Promise<CreateOrderRes
       });
     }
 
-    // 3. Create the order document with server-verified data
+    // --- Order Creation ---
     const finalOrderTotal = serverCalculatedSubtotal + orderData.deliveryFee;
-
-    // Security Check: Validate client price against server price. Allow for minor floating point discrepancies.
-    if (Math.abs(finalOrderTotal - orderData.orderTotalPrice) > 0.01) {
-      console.warn(`Potential price tampering detected. Discarding client price. Client Total: ${orderData.orderTotalPrice}, Server Total: ${finalOrderTotal}`);
-    }
 
     const order = new Order({
       ...orderData,
-      products: serverCalculatedProducts, // USE SERVER-CALCULATED PRODUCTS
-      orderTotalPrice: finalOrderTotal, // USE SERVER-CALCULATED TOTAL
+      userId: userIdForOrder, // Use the determined userId
+      products: serverCalculatedProducts,
+      orderTotalPrice: finalOrderTotal,
       trackingNumber: `TRK-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       paymentStatus: orderData.paymentMethod === "cmi" ? "paid" : "pending",
       deliveryStatus: "processing",
@@ -142,18 +155,16 @@ export async function createOrder(orderData: OrderInput): Promise<CreateOrderRes
 
     await order.save({ session });
 
-    // 4. Commit the transaction
     await session.commitTransaction();
     session.endSession();
 
-    // Convert to a plain object to avoid serialization issues
     const plainOrder = JSON.parse(JSON.stringify(order));
-
     return { status: "success", order: plainOrder };
+
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    const message = error instanceof Error ? error.message : "An unexpected error occurred during order creation.";
+    const message = error instanceof Error ? error.message : "An unexpected error occurred.";
     console.error("Order creation failed:", message);
     return { status: "failed", message };
   }

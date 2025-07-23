@@ -52,8 +52,8 @@ export default function CheckoutProcess() {
   const [finalCart, setFinalCart] = useState<FinalCart>({ cartItems: [], totalDiscount: 0, totalPrice: 0 });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: session } = useSession();
-  const {profile} = useUserContext()
-  const router = useRouter();
+  console.log("session: ", session);
+  const { profile } = useUserContext();
 
   const [checkoutData, setCheckoutData] = useState<CheckoutDataType>({
     address: null,
@@ -96,12 +96,7 @@ export default function CheckoutProcess() {
   async function handleCreateOrder(cardInfo) {
     if (isSubmitting) return;
 
-    // 1. Validate user and cart
-    if (!profile?.id) {
-      alert("You must be logged in to place an order.");
-      return;
-    }
-    // Correctly check the cartItems array inside the finalCart object
+    // 1. Validate cart
     if (finalCart.cartItems.length === 0) {
       alert("Your cart is empty.");
       return;
@@ -143,11 +138,11 @@ export default function CheckoutProcess() {
       const finalTotalPrice = orderSubtotal + (shippingFee || 0);
 
       const orderData = {
-        userId: profile.id,
+        ...(session?.user?._id && { userId: session.user._id }), // Conditionally add userId
         products: productsForOrder,
         quantity: totalQuantity,
         deliveryFee: shippingFee || 0,
-        orderTotalPrice: finalTotalPrice, // This is the value the server will validate against
+        orderTotalPrice: finalTotalPrice,
         paymentMethod: paymentMethod,
         deliveryInformation: {
           fullName: fullName,
@@ -166,9 +161,9 @@ export default function CheckoutProcess() {
       // 5. Handle the result
       if (result.status === "success") {
         alert("Order placed successfully! Redirecting...");
-        // TODO: Clear the cart from local storage or state management
-        await clearCart()
-        router.push(`/order-status/${result.order.trackingNumber}`);
+        // Clear the cart from local storage or state management
+        if (session) await clearCart();
+        setCheckoutStep(3)
       } else {
         alert(`Order creation failed: ${result.message}`);
       }

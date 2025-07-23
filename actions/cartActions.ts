@@ -288,7 +288,7 @@ export async function clearCart(): Promise<AddToCartActionState> {
     await mongooseSession.commitTransaction();
     mongooseSession.endSession();
 
-    revalidatePath("/cart");
+    revalidatePath("/");
 
     return { success: true, message: "Cart cleared successfully." };
   } catch (error) {

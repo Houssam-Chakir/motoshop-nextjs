@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const paymentSchema = z.object({
-  fullName: z.string().min(2, "Full name must be at least 2 characters").max(50, "Full name must be less than 50 characters"),
+  name: z.string().min(2, "Full name must be at least 2 characters").max(50, "Full name must be less than 50 characters"),
   cardNumber: z
     .string()
     .min(13, "Card number must be at least 13 digits")
@@ -115,16 +115,16 @@ export function PaymentForm({ onSubmit, onCancel }: PaymentFormProps) {
 
         {/* Full Name */}
         <div className='space-y-1'>
-          <Label htmlFor='fullName' className='text-sm font-semibold text-gray-900'>
+          <Label htmlFor='name' className='text-sm font-semibold text-gray-900'>
             Full name
           </Label>
           <Input
-            id='fullName'
+            id='name'
             placeholder='Name on card'
-            className={`h-9 bg-white text-gray-900 placeholder:text-gray-400 ${errors.fullName ? "border-red-500 focus:border-red-500" : ""}`}
-            {...register("fullName")}
+            className={`h-9 bg-white text-gray-900 placeholder:text-gray-400 ${errors.name ? "border-red-500 focus:border-red-500" : ""}`}
+            {...register("name")}
           />
-          {errors.fullName && <p className='text-sm text-red-600'>{errors.fullName.message}</p>}
+          {errors.name && <p className='text-sm text-red-600'>{errors.name.message}</p>}
         </div>
 
         {/* Card Number */}

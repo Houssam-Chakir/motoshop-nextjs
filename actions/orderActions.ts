@@ -52,7 +52,7 @@ export type CreateOrderResult = { status: "success"; order: OrderDocument } | { 
  */
 export async function createOrder(orderData: OrderInput): Promise<CreateOrderResult> {
   await connectDB();
-
+  console.log('orderData: ', orderData)
   if (
     !orderData.userId ||
     !orderData.products ||
@@ -146,7 +146,10 @@ export async function createOrder(orderData: OrderInput): Promise<CreateOrderRes
     await session.commitTransaction();
     session.endSession();
 
-    return { status: "success", order };
+    // Convert to a plain object to avoid serialization issues
+    const plainOrder = JSON.parse(JSON.stringify(order));
+
+    return { status: "success", order: plainOrder };
   } catch (error) {
     await session.abortTransaction();
     session.endSession();

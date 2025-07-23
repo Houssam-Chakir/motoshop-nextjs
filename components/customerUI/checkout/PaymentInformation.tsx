@@ -5,14 +5,16 @@ import { PaymentForm } from "./PaymentForm";
 import { BadgeAlert, CreditCard, MapPin, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function PaymentInformation({ children, paymentMethod }) {
+export function PaymentInformation({ children, paymentMethod, handleCreateOrder, checkoutData }) {
   console.log("paymentMethod: ", paymentMethod);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handlePaymentSubmit = async (data: any) => {
     console.log("Processing payment:", data);
+    console.log('checkout data: ', checkoutData)
     // Add your payment processing logic here
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    alert("Payment processed successfully!");
+    await handleCreateOrder(data)
+
   };
 
   const handlePaymentCancel = () => {

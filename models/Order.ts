@@ -25,7 +25,6 @@ export interface OrderDocument extends Document {
   deliveryInformation: DeliveryInformation;
   deliveryStatus: "processing" | "awaiting pickup" | "packaged" | "shipped" | "in city" | "in delivery" | "delivered" | "cancelled";
   estimatedDeliveryDate?: Date;
-  notes?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -55,7 +54,6 @@ const OrderSchema: Schema = new Schema(
     deliveryInformation: DeliveryInfoSchema,
     deliveryStatus: { type: String, required: true, enum: ["processing", "shipped", "delivered", "cancelled"], default: "processing" },
     estimatedDeliveryDate: { type: Date },
-    notes: { type: String },
   },
   { timestamps: true }
 );

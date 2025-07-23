@@ -74,7 +74,7 @@ export default function CheckoutProcess() {
     }
   }
 
-  function handleConfirmOrder(isPaymentCardValid: boolean) {
+  function handleCreateOrder(isPaymentCardValid: boolean) {
     // 1. Check if checkout data is present
     const { address, city, email, fullName, number, paymentMethod, cardInfo } = checkoutData;
     if (!address || !city || !email || !fullName || !number) {

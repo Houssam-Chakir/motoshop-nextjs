@@ -1,3 +1,5 @@
+'use server'
+
 import connectDB from "@/config/database";
 import Order, { OrderDocument } from "@/models/Order";
 import Product, { ProductDocument } from "@/models/Product";

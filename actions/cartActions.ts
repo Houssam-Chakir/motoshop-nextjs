@@ -7,6 +7,7 @@ import makeSerializable from "@/utils/convertToObj";
 import { getServerSession } from "next-auth/next";
 import authOptions from "@/utils/authOptions";
 import Cart, { CartDocument, CartProductItem } from "@/models/Cart";
+import User from "@/models/User"; // Import the User model
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 import { SaleDocument } from "./productsActions";
@@ -253,6 +254,49 @@ export async function removeItemFromCart({ productId, size }: { productId: strin
     return { success: true, message: "Item removed from cart successfully." };
   } catch (error) {
     console.error("Error removing item from cart:", error);
+    const message = error instanceof Error ? error.message : "An unexpected server error occurred.";
+    return { success: false, message: `Server Error: ${message}` };
+  }
+}
+
+export async function clearCart(): Promise<AddToCartActionState> {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user || !session.user.id) {
+    return { success: false, message: "Unauthorized: Please log in." };
+  }
+
+  const mongooseSession = await mongoose.startSession();
+  mongooseSession.startTransaction();
+
+  try {
+    await connectDB();
+
+    // Step 1: Delete the cart document
+    const cartDeletionResult = await Cart.findOneAndDelete({ userId: session.user.id }).session(mongooseSession);
+
+    if (!cartDeletionResult) {
+      // If no cart exists, there's nothing to do. The state is already what we want.
+      await mongooseSession.commitTransaction();
+      mongooseSession.endSession();
+      return { success: true, message: "Cart is already empty." };
+    }
+
+    // Step 2: Unset the cart field from the User document
+    await User.updateOne({ _id: session.user.id }, { $unset: { cart: "" } }).session(mongooseSession);
+
+    // If both operations succeed, commit the transaction
+    await mongooseSession.commitTransaction();
+    mongooseSession.endSession();
+
+    revalidatePath("/cart");
+
+    return { success: true, message: "Cart cleared successfully." };
+  } catch (error) {
+    // If any error occurs, abort the transaction
+    await mongooseSession.abortTransaction();
+    mongooseSession.endSession();
+
+    console.error("Error clearing cart:", error);
     const message = error instanceof Error ? error.message : "An unexpected server error occurred.";
     return { success: false, message: `Server Error: ${message}` };
   }

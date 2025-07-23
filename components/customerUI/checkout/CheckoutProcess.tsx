@@ -10,6 +10,7 @@ import DeliveryInformationForm from "./DeliveryInformationForm";
 import { PaymentInformation } from "./PaymentInformation";
 import { OrderItemsFinalList } from "./OrderItemsFinalList";
 import { useUserContext } from "@/contexts/UserContext";
+import { clearCart } from "@/actions/cartActions";
 
 interface CartItem {
   productId: string;
@@ -166,6 +167,7 @@ export default function CheckoutProcess() {
       if (result.status === "success") {
         alert("Order placed successfully! Redirecting...");
         // TODO: Clear the cart from local storage or state management
+        await clearCart()
         router.push(`/order-status/${result.order.trackingNumber}`);
       } else {
         alert(`Order creation failed: ${result.message}`);

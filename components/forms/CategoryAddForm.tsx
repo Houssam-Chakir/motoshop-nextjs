@@ -192,7 +192,7 @@ export default function CategoryForm() {
     try {
       const updatedType = newTypes.find((t) => t.tempId === tempId);
       if (updatedType) {
-        const { tempId: _, ...typeForValidation } = updatedType;
+        const { tempId, ...typeForValidation } = updatedType;
         TypeSchema.parse(typeForValidation);
         // Clear type-specific errors
         setErrors((prev) => {
@@ -430,7 +430,7 @@ export default function CategoryForm() {
               {formData.types.length === 0 ? (
                 <div className='text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg'>
                   <p>No types added yet</p>
-                  <p className='text-sm'>Click "Add Type" to get started</p>
+                  <p className='text-sm'>Click &quot;Add Type&quot; to get started</p>
                 </div>
               ) : (
                 <div className='space-y-3'>

@@ -17,7 +17,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import ProductMobileCTAs from "./ProductCTAsMobile";
 import ProductTitlePriceMobile from "./ProductInfoMobile";
-import { addItemToGuestWishlist, isItemInGuestWishlist, removeItemFromGuestWishlist } from "@/lib/guestWishlistStore";
+import { isItemInGuestWishlist } from "@/lib/guestWishlistStore";
 import { handleWishlistProcess } from "@/utils/handleWishlist";
 
 function toKebabCase(str: string) {
@@ -48,24 +48,7 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
   const [isGuestItemInWishlist, setIsGuestItemInWishlist] = useState(false);
   const finalIsCurrentlyInWishlist = isLoggedIn ? isInWishlist(product._id) : isGuestItemInWishlist;
 
-  const {
-    _id,
-    title,
-    retailPrice,
-    salePrice,
-    saleInfo,
-    images,
-    brand,
-    type,
-    category,
-    season,
-    style,
-    identifiers,
-    slug,
-    stock,
-    quantity: productQuantity,
-    specifications,
-  } = product;
+  const { title, retailPrice, salePrice, saleInfo, images, brand, type, category, season, style, identifiers, slug, stock, quantity: productQuantity, specifications } = product;
   console.log("product: ", product);
 
   const categoryPathname = category?.name ? toKebabCase(category.name) : "unknown-category";

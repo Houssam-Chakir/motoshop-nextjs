@@ -113,7 +113,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
   const [parent] = useAutoAnimate();
   const router = useRouter();
 
-  const { profile, cart, isLoadingCart, fetchCart } = useUserContext();
+  const { profile, cart, fetchCart } = useUserContext();
   const isLoggedIn = !!profile;
 
   // Initialize with an empty cart to prevent hydration mismatch. Server will render 0 items.
@@ -276,7 +276,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
             <div className='p-8 pt-12 text-center text-gray-500'>
               <ShoppingCart size={48} className='mx-auto mb-4 opacity-50' />
               <p className='font-semibold'>Your cart is empty</p>
-              <p className='text-sm mt-1'>Looks like you haven't added anything to your cart yet.</p>
+              <p className='text-sm mt-1'>Looks like you haven&apos;t added anything to your cart yet.</p>
             </div>
           )}
         </div>

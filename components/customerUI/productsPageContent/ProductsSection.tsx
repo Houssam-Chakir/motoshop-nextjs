@@ -28,14 +28,14 @@ interface SectionTypes {
 }
 
 export default function ProductsSection({ products, sizes, brands, pagination, refetchProducts }: SectionTypes) {
-  console.log('Products', products)
+  console.log("Products", products);
   // const isPhoneOrLarger = useMediaQuery("sm"); // 'md' is type-checked
   const isTabletOrLarger = useMediaQuery("md"); // 'md' is type-checked
   // const isDesktop = useMediaQuery("lg");
 
   const pathname = usePathname();
 
-  const { currentPage, totalPages, totalProducts, hasNextPage, hasPrevPage, limit } = pagination;
+  const { currentPage, totalProducts } = pagination;
   console.log("Pagination info: ", pagination);
 
   const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
@@ -45,7 +45,6 @@ export default function ProductsSection({ products, sizes, brands, pagination, r
   const [maxPrice, setMaxPrice] = useQueryState("maxPrice", parseAsInteger.withDefault(30000));
   const [minPrice, setMinPrice] = useQueryState("minPrice", parseAsInteger.withDefault(0));
   const [page, setPage] = useQueryState("page", parseAsIndex.withDefault(currentPage));
-  const [pagesLimit, setPagesLimit] = useQueryState("limit", parseAsInteger.withDefault(limit));
 
   const handleRemoveFilter = async (filter: string) => {
     switch (filter) {

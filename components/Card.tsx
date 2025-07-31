@@ -1,6 +1,5 @@
 "use client";
 
-import { ProductDocument } from "@/models/Product";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import deleteProduct from "@/actions/deleteProduct";

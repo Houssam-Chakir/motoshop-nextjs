@@ -1,8 +1,6 @@
 "use client";
 
-import { redirect } from "next/navigation";
-import { CheckCircle, CreditCard, MailCheck, Receipt, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckCircle, MailCheck, Receipt, XCircle } from "lucide-react";
 
 export function OrderStatusSection({ children, checkoutData, orderStatus }) {
   console.log("checkoutData: ", checkoutData);
@@ -22,10 +20,12 @@ export function OrderStatusSection({ children, checkoutData, orderStatus }) {
     <div className='space-y-6 w-full md:border-r'>
       {children}
       <div className='md:pr-6'>
-        <div className="mb-6">
+        <div className='mb-6'>
           <section className={`p-6 mb-2 ${isSuccess ? "bg-green-600" : "bg-red-600"}`}>
             <div className={`items-center justify-center gap-2 text-center text-white `}>
-              <h2 className='flex gap-2 w-fit mx-auto font-bold text-2xl mb-1.5'><span className='mt-1'>{isSuccess ? <CheckCircle size={24} /> : <XCircle size={24} />}</span> {defaultTitle}</h2>
+              <h2 className='flex gap-2 w-fit mx-auto font-bold text-2xl mb-1.5'>
+                <span className='mt-1'>{isSuccess ? <CheckCircle size={24} /> : <XCircle size={24} />}</span> {defaultTitle}
+              </h2>
               {orderStatus.status === "success" && (
                 <p className='text-sm font-light opacity-90'>
                   Tracking Number: <span className='font-medium'>{orderStatus.order.trackingNumber}</span>
@@ -61,23 +61,4 @@ export function OrderStatusSection({ children, checkoutData, orderStatus }) {
 
 function DashedContainer({ children }) {
   return <div className='custom-dashed p-4 bg-grey space-y-4'>{children}</div>;
-}
-
-function CheckoutButtons({ isSubmitting, handleOrderSubmit, handleCancel }) {
-  return (
-    <>
-      {/* Action Buttons */}
-      <div className='space-y-4 pt-6'>
-        <Button disabled={isSubmitting} onClick={handleOrderSubmit} className='w-full bg-blue hover:bg-blue/90 rounded-full py-5 cursor-pointer text-white disabled:opacity-50'>
-          <CreditCard className='w-5 h-5 mr-2' />
-          {isSubmitting ? "Processing..." : "Buy now"}
-        </Button>
-        <div className='text-center'>
-          <Button type='button' variant='link' className='text-gray-600 hover:text-gray-900 p-0 h-auto' onClick={handleCancel}>
-            Cancel
-          </Button>
-        </div>
-      </div>
-    </>
-  );
 }

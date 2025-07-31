@@ -19,7 +19,7 @@ type SliderDataType = {
   stock: StockType | null;
 } | null;
 
-export default function ProductInfoSlider({ children, product, isLoggedIn, displayAll = true, handleWishlist }: ProductInfoSliderProps) {
+export default function ProductInfoSlider({ children, product, isLoggedIn, displayAll = true }: ProductInfoSliderProps) {
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [isSliderLoading, setIsSliderLoading] = useState(false);
   const [sliderData, setSliderData] = useState<SliderDataType>(null);
@@ -50,7 +50,7 @@ export default function ProductInfoSlider({ children, product, isLoggedIn, displ
       side='bottom'
       isOpen={isSliderOpen}
       setIsOpen={setIsSliderOpen}
-      className={`w-full ${displayAll ? 'h-[95vh]' : 'h-[65vh]'}`}
+      className={`w-full ${displayAll ? "h-[95vh]" : "h-[65vh]"}`}
       trigger={
         <div className='grow' onClick={handleTriggerClick}>
           {children}

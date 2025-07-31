@@ -1,4 +1,4 @@
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 export function OrderItemsFinalList({ finalCart, shippingFee, checkoutData }) {
@@ -61,8 +61,8 @@ export function OrderItemsFinalList({ finalCart, shippingFee, checkoutData }) {
       <Table className='space-y-4 pt-6 border mt-6 border-gray-200'>
         <TableBody>
           {customerInfo.map((info, index) => (
-            <TableRow key={index} className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
-              <TableCell className="bg-grey/50 py-2 font-medium text-nowrap">{info.label}</TableCell>
+            <TableRow key={index} className='*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r'>
+              <TableCell className='bg-grey/50 py-2 font-medium text-nowrap'>{info.label}</TableCell>
               <TableCell className='py-2 w-full'>{info.value}</TableCell>
             </TableRow>
           ))}

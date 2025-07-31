@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Package, CreditCard, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +27,7 @@ interface StepperCheckoutProps {
 }
 
 export default function StepperCheckout({ checkoutStep, setCheckoutStep }: StepperCheckoutProps) {
-  console.log('checkoutStep: ', checkoutStep)
+  console.log("checkoutStep: ", checkoutStep);
   const getStepState = (stepId: number) => {
     if (stepId < checkoutStep) return "completed";
     if (stepId === checkoutStep) return "active";

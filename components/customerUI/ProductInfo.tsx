@@ -24,18 +24,12 @@ interface ProductInfoProps {
 }
 
 export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
-  const {
-    profile, // To check if user is logged in
-    isInWishlist,
-    addItemToWishlist,
-    removeItemFromWishlist,
-    fetchCart,
-  } = useUserContext();
+  const { isInWishlist, addItemToWishlist, removeItemFromWishlist, fetchCart } = useUserContext();
   const [isGuestItemInWishlist, setIsGuestItemInWishlist] = useState(false);
   const finalIsCurrentlyInWishlist = isLoggedIn ? isInWishlist(product._id) : isGuestItemInWishlist;
 
   console.log("Product in product info", product);
-  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, type, category, season, style, identifiers, quantity: productQuantity, slug, stock } = product;
+  const { title, retailPrice, salePrice, saleInfo, images, brand, type, season, style, identifiers, quantity: productQuantity, stock } = product;
 
   const finalPrice = salePrice ? salePrice : retailPrice;
   const savedAmount = salePrice ? retailPrice - salePrice : 0;

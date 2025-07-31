@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Heart, ChevronLeft, ChevronRight, Minus, Plus, ShoppingCart } from "lucide-react";
 import { ProductType } from "@/models/Product";
 import { StockType } from "@/models/Stock"; // Adjusted path, assuming @ is root
@@ -19,14 +18,14 @@ interface ProductInfoProps {
     saleInfo: SaleDocument | null;
     stock: StockType | null;
   };
-  displayAll: boolean
+  displayAll: boolean;
   isLoggedIn?: boolean;
 }
 
 export default function ProductInfoMobile({ product, isLoggedIn, displayAll }: ProductInfoProps) {
   const { fetchCart } = useUserContext();
   console.log("Product in product info", product);
-  const { _id, title, retailPrice, salePrice, saleInfo, images, brand, category, type,  season, style, identifiers, quantity: productQuantity, slug, stock } = product;
+  const { title, retailPrice, salePrice, saleInfo, images, brand, type, season, style, identifiers, quantity: productQuantity, stock } = product;
 
   const finalPrice = salePrice ? salePrice : retailPrice;
   const savedAmount = salePrice ? retailPrice - salePrice : 0;
@@ -142,41 +141,43 @@ export default function ProductInfoMobile({ product, isLoggedIn, displayAll }: P
   return (
     <div className='grid grid-cols-1 h-[95vh] overflow-scroll'>
       {/* Left side - Images */}
-      {displayAll && <div className='flex flex-col-reverse p-4'>
-        {/* Main image */}
-        <div className='overflow-hidden relative h-96 bg-grey-light'>
-          <CldImage
-            src={currentImage}
-            alt={product.title}
-            fill
-            sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
-            className='object-contain transition-transform duration-500 ease-in-out group-hover:scale-105'
-          />
-          {images.length > 1 && (
-            <>
-              <Button variant='ghost' size='icon' className='rounded-full absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={prevImage}>
-                <ChevronLeft className='w-5 h-5' />
-              </Button>
-              <Button variant='ghost' size='icon' className='rounded-full absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={nextImage}>
-                <ChevronRight className='w-5 h-5' />
-              </Button>
-            </>
-          )}
-        </div>
+      {displayAll && (
+        <div className='flex flex-col-reverse p-4'>
+          {/* Main image */}
+          <div className='overflow-hidden relative h-96 bg-grey-light'>
+            <CldImage
+              src={currentImage}
+              alt={product.title}
+              fill
+              sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+              className='object-contain transition-transform duration-500 ease-in-out group-hover:scale-105'
+            />
+            {images.length > 1 && (
+              <>
+                <Button variant='ghost' size='icon' className='rounded-full absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={prevImage}>
+                  <ChevronLeft className='w-5 h-5' />
+                </Button>
+                <Button variant='ghost' size='icon' className='rounded-full absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white' onClick={nextImage}>
+                  <ChevronRight className='w-5 h-5' />
+                </Button>
+              </>
+            )}
+          </div>
 
-        {/* Thumbnail images */}
-        <div className='flex overflow-x-auto gap-2'>
-          {images.map((img, index) => (
-            <button
-              key={index}
-              className={`flex-shrink-0 w-16 h-16 bg-gray-50 rounded-xs overflow-hidden border-2 ${currentImageIndex === index ? "border-blue-500" : "border-transparent"}`}
-              onClick={() => setCurrentImageIndex(index)}
-            >
-              <CldImage src={img.secure_url || "/placeholder-product.png"} alt={`${title} - view ${index + 1}`} width={64} height={64} className='object-contain w-full h-full' />
-            </button>
-          ))}
+          {/* Thumbnail images */}
+          <div className='flex overflow-x-auto gap-2'>
+            {images.map((img, index) => (
+              <button
+                key={index}
+                className={`flex-shrink-0 w-16 h-16 bg-gray-50 rounded-xs overflow-hidden border-2 ${currentImageIndex === index ? "border-blue-500" : "border-transparent"}`}
+                onClick={() => setCurrentImageIndex(index)}
+              >
+                <CldImage src={img.secure_url || "/placeholder-product.png"} alt={`${title} - view ${index + 1}`} width={64} height={64} className='object-contain w-full h-full' />
+              </button>
+            ))}
+          </div>
         </div>
-      </div>}
+      )}
 
       {/* Right side - Product details */}
       <div className='flex flex-col justify-between space-y-6'>
@@ -184,7 +185,6 @@ export default function ProductInfoMobile({ product, isLoggedIn, displayAll }: P
           {/* Product title and category */}
           <ProductTitlePriceMobile productInfo={{ brand, identifiers, type, season, style, title, saleInfo, finalPrice, savedAmount, retailPrice, productQuantity }} />
           <div className='space-y-1'>
-
             {/* Size selection */}
             <div className='p-4 space-y-4 border border-gray-300 border-dashed mb-32'>
               <div>

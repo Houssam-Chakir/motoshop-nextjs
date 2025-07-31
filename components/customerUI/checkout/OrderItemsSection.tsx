@@ -11,7 +11,6 @@ import {
   GuestCartProductItem, // Import GuestCartProductItem type
 } from "@/lib/guestCartStore";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { removeItemFromCart, updateCartItemQuantity } from "@/actions/cartActions";
 import { toast } from "react-toastify";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -24,9 +23,8 @@ export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFi
   const { session } = useSessionContext();
 
   const [parent] = useAutoAnimate();
-  const router = useRouter();
 
-  const { profile, cart, isLoadingCart, fetchCart } = useUserContext();
+  const { profile, cart, fetchCart } = useUserContext();
   const isLoggedIn = !!profile;
 
   // Initialize with an empty cart to prevent hydration mismatch. Server will render 0 items.
@@ -145,11 +143,6 @@ export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFi
         updateItemQuantityInGuestCart(productId, size || "Standard", newQuantity); // Use productId, size, and newQuantity
       }
     }
-  };
-
-  const handleCheckout = () => {
-    router.push("/checkout"); // Navigate to your checkout page
-    // Potentially close the slider here if it doesn't close automatically
   };
 
   return (

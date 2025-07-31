@@ -1,5 +1,4 @@
 import { ArrowRight } from "lucide-react";
-import { Button } from "../ui/button";
 import ProductCard from "./ProductCard";
 import Link from "next/link";
 

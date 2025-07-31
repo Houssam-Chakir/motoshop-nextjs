@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Plus } from "lucide-react";
 import ProductInfoSlider from "../ProductInfoSlider";
-import { useUserContext } from "@/contexts/UserContext";
 
 interface ProductCTAsProps {
   stock: {
@@ -12,20 +11,10 @@ interface ProductCTAsProps {
   selectedSizeQuantity: number;
   isLoggedIn: boolean;
   finalIsCurrentlyInWishlist: boolean;
-  handleAddToCart: () => void;
   handleWishlist: () => void;
 }
 
-export default function ProductMobileCTAs({
-  isLoggedIn,
-  product,
-  stock,
-  selectedSize,
-  selectedSizeQuantity,
-  handleAddToCart,
-  handleWishlist,
-  finalIsCurrentlyInWishlist,
-}: ProductCTAsProps) {
+export default function ProductMobileCTAs({ isLoggedIn, product, stock, selectedSize, selectedSizeQuantity, handleWishlist, finalIsCurrentlyInWishlist }: ProductCTAsProps) {
   return (
     <div className='fixed bottom-0 left-0 w-full bg-white/70 backdrop-blur-md z-50 px-4 pt-2 pb-4 border-t-1'>
       <div className='flex flex-col gap-1'>
@@ -41,7 +30,7 @@ export default function ProductMobileCTAs({
         {/* Action buttons */}
         <div className='flex gap-3'>
           <Button
-          onClick={handleWishlist}
+            onClick={handleWishlist}
             variant='outline'
             size='lg'
             className={`flex-shrink-0 h-12 w-12 text-[16px] ${

@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Plus, X, FileImage, CheckCircle } from "lucide-react";
+import { Plus, FileImage, CheckCircle } from "lucide-react";
 import UpdateCategory from "@/actions/updateCategory";
 
 // Section options
@@ -241,7 +241,7 @@ export default function CategoryEditForm({ category }: CategoryEditFormProps) {
     try {
       const updatedType = newTypes.find((t) => t.tempId === tempId);
       if (updatedType) {
-        const { tempId: _, ...typeForValidation } = updatedType;
+        const { tempId, ...typeForValidation } = updatedType;
         TypeSchema.parse(typeForValidation);
         // Clear type-specific errors
         setErrors((prev) => {
@@ -329,7 +329,8 @@ export default function CategoryEditForm({ category }: CategoryEditFormProps) {
             public_id: category.icon.public_id!,
           }
         : undefined,
-      types: formData.types.map(({ tempId, __v, category, ...type }) => type), // Remove unnecessary fields
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      types: formData.types.map(({ tempId, __v, category, ...type }) => type),
     };
 
     // console.log("formData: ", formData);
@@ -504,7 +505,7 @@ export default function CategoryEditForm({ category }: CategoryEditFormProps) {
               {formData.types.length === 0 ? (
                 <div className='text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg'>
                   <p>No types added yet</p>
-                  <p className='text-sm'>Click "Add Type" to get started</p>
+                  <p className='text-sm'>Click &quot;Add Type&quot; to get started</p>
                 </div>
               ) : (
                 <div className='space-y-3'>

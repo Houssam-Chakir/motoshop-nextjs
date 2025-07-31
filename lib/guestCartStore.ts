@@ -91,7 +91,7 @@ export const addItemToGuestCart = (
   }
 
   const cart = getGuestCart();
-  const productIdStr = (product._id as any).toString();
+  const productIdStr = product._id.toString();
   const existingItemIndex = cart.products.findIndex((item) => item.productId === productIdStr && item.size === size);
 
   if (existingItemIndex > -1) {

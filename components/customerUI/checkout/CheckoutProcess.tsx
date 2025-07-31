@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { createOrder } from "@/actions/orderActions";
 import OrderItemsSection from "./OrderItemsSection";
 import StepperCheckout from "./StepperCheckout";
 import DeliveryInformationForm from "./DeliveryInformationForm";
 import { PaymentInformation } from "./PaymentInformation";
 import { OrderItemsFinalList } from "./OrderItemsFinalList";
-import { useUserContext } from "@/contexts/UserContext";
 import { clearCart } from "@/actions/cartActions";
 import { OrderStatusSection } from "./OrderStatusPage";
 
@@ -54,9 +52,8 @@ export default function CheckoutProcess() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: session } = useSession();
   console.log("session: ", session);
-  const { profile } = useUserContext();
 
-  const [orderStatus, setOrderStatus] = useState({status: 'pending'})
+  const [orderStatus, setOrderStatus] = useState({ status: "pending" });
   const [checkoutData, setCheckoutData] = useState<CheckoutDataType>({
     address: null,
     city: null,
@@ -165,8 +162,8 @@ export default function CheckoutProcess() {
         alert("Order placed successfully! Redirecting...");
         // Clear the cart from local storage or state management
         if (session) await clearCart();
-        setOrderStatus(result)
-        setCheckoutStep(3)
+        setOrderStatus(result);
+        setCheckoutStep(3);
       } else {
         alert(`Order creation failed: ${result.message}`);
       }

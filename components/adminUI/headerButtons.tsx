@@ -3,7 +3,6 @@
 import { getProviders, signIn, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Session } from "next-auth";
 import GoogleSignupButton from "@/components/authentication/GoogleSignUpButton";
 import { useSessionContext } from "@/contexts/SessionContext";
 

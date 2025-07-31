@@ -19,7 +19,6 @@ import { toast } from "react-toastify";
 import type { ProductType } from "@/models/Product";
 import updateProduct from "@/actions/updateProduct";
 import { redirect } from "next/navigation";
-import mongoose from "mongoose";
 
 // Define the stock item schema
 const stockItemSchema = z.object({

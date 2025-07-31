@@ -22,6 +22,7 @@ export interface CartProductItemType {
     title: string;
     images: { secure_url: string; public_id?: string }[];
     retailPrice: number;
+    salePrice: number;
     slug: string;
     // Populated fields from getCart action
     saleInfo?: {

@@ -7,7 +7,7 @@ import ProductEditForm from "@/components/forms/ProductEditForm";
 import { getCachedBrands, getCachedCategories, getCachedSizes, getCachedTypes } from "@/utils/getCachedLists";
 import Stock, { StockDocument } from "@/models/Stock";
 
-const ProductEditPage = async ({ params }: { params: { id: string } }) => {
+const ProductEditPage = async ({ params }: { params: Promise<{ id: string }> }) => {
   // Connect to DB and get user session
   await connectDB();
   await getSessionUser();
@@ -16,18 +16,14 @@ const ProductEditPage = async ({ params }: { params: { id: string } }) => {
   const productDoc = await Product.findById(id).lean();
   const product = makeSerializable(productDoc) as ProductType & { _id: string };
   // Get stock document using product id
-  const stockDoc = await Stock.findOne({ productId: id }).lean() as StockDocument | null;
-  const stock = makeSerializable(stockDoc)
-  console.log('stock: ', stock);
+  const stockDoc = (await Stock.findOne({ productId: id }).lean()) as StockDocument | null;
+  const stock = makeSerializable(stockDoc);
+  console.log("stock: ", stock);
 
-
-
-
-  const brands = (await getCachedBrands()) as [{ _id: string; name: string }];
-  const types = (await getCachedTypes()) as [{ _id: string; name: string }];
-  const categories = (await getCachedCategories()) as [{ _id: string; name: string }];
-  const sizes = await getCachedSizes()
-
+  const brands = (await getCachedBrands()) as { _id: string; name: string }[];
+  const types = (await getCachedTypes()) as { _id: string; name: string }[];
+  const categories = (await getCachedCategories()) as { _id: string; name: string }[];
+  const sizes = await getCachedSizes();
 
   console.log("product: ", product);
   return (

@@ -9,13 +9,14 @@ import { SearchParams } from "nuqs";
 import { revalidateTag } from "next/cache";
 type PageProps = {
   searchParams: Promise<SearchParams>;
-  params: { type: string };
+  params: Promise<{ type: string }>;
 };
 const ProductsPage = async ({ params, searchParams }: PageProps) => {
   try {
     await connectDB();
 
-    const [typeDoc, filters, brands] = await Promise.all([Type.findOne({ slug: params.type }), loadSearchParams(searchParams), getCachedBrands()]);
+    const { type } = await params;
+    const [typeDoc, filters, brands] = await Promise.all([Type.findOne({ slug: type }), loadSearchParams(searchParams), getCachedBrands()]);
     const typeId = typeDoc._id.toString();
 
     const { productsDoc, sizes, pagination } = await getProducts(filters, { brands, typeId });

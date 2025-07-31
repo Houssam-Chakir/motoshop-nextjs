@@ -10,13 +10,13 @@ import { revalidateTag } from "next/cache";
 
 type PageProps = {
   searchParams: Promise<SearchParams>;
-  params: { category: string };
+  params: Promise<{ category: string }>;
 };
 const ProductsPage = async ({ params, searchParams }: PageProps) => {
   try {
     await connectDB();
 
-    const { category } = params;
+    const { category } = await params;
     const [categoryDoc, filters, brands] = await Promise.all([Category.findOne({ slug: category }), loadSearchParams(searchParams), getCachedBrands()]);
     const { productsDoc, sizes, pagination } = await getProducts(filters, { brands, categoryId: categoryDoc._id.toString() });
 

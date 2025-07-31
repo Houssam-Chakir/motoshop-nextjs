@@ -6,7 +6,7 @@ import { ProductType } from "@/models/Product";
 import makeSerializable from "@/utils/convertToObj";
 import { notFound } from "next/navigation";
 
-const ProductDetailsPage = async ({ params }: { params: { slug: string } }) => {
+const ProductDetailsPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   try {
     await connectDB();
     const { slug } = await params;

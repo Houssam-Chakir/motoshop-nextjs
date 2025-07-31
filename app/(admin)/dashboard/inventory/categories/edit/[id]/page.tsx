@@ -4,19 +4,19 @@ import makeSerializable from "@/utils/convertToObj";
 import { getSessionUser } from "@/utils/getSessionUser";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const EditCategoryPage = async ({ params }: PageProps) => {
   await getSessionUser();
-  const { id } = params;
-  console.log('id: ', id);
-  const categoryDoc = await Category.findById(id).lean().populate('applicableTypes')
-  const category = makeSerializable(categoryDoc)
+  const { id } = await params;
+  console.log("id: ", id);
+  const categoryDoc = await Category.findById(id).lean().populate("applicableTypes");
+  const category = makeSerializable(categoryDoc);
 
-  console.log('category: ', category);
+  console.log("category: ", category);
 
   return (
     <section className='flex justify-center'>

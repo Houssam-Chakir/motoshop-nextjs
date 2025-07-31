@@ -122,6 +122,7 @@ interface filtersType {
   type?: string[];
   brand?: string[];
   size?: string[];
+  style?: string[];
   minPrice?: number;
   maxPrice?: number;
   page: number;
@@ -175,8 +176,11 @@ export const getProducts = next_cache(
         query.style = { $in: style };
       }
 
-      if (filters.minPrice > 0 || filters.maxPrice < 30000) {
-        query.retailPrice = { $gte: filters.minPrice, $lte: filters.maxPrice };
+      if ((filters.minPrice && filters.minPrice > 0) || (filters.maxPrice && filters.maxPrice < 30000)) {
+        query.retailPrice = {
+          $gte: filters.minPrice || 0,
+          $lte: filters.maxPrice || 30000,
+        };
       }
 
       // Build the sort object
@@ -319,12 +323,12 @@ export async function getRecentProducts() {
 
 //f/ GET SIMILAR PRODUCTS /////////////////////////////////////////////////////////////////////////////
 
-export async function getSimilarProducts(categoryId) {
+export async function getSimilarProducts(categoryId: string) {
   const currentDate = new Date();
   await connectDB();
 
   try {
-    const products = await Product.find({category: categoryId})
+    const products = await Product.find({ category: categoryId })
       .limit(5)
       .select("title retailPrice images identifiers slug inStock saleInfo")
       .populate<{ saleInfo: SaleDocument | null }>({

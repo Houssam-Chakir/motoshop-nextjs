@@ -2,9 +2,9 @@
 
 import connectDB from "@/config/database";
 import Order, { OrderDocument } from "@/models/Order";
-import Product, { ProductDocument } from "@/models/Product";
+import Product from "@/models/Product";
 import Stock from "@/models/Stock";
-import Sale, { SaleDocument } from "@/models/Sale";
+import { SaleDocument } from "@/models/Sale";
 import User from "@/models/User"; // Import the User model
 import mongoose, { Types } from "mongoose";
 
@@ -45,13 +45,7 @@ export type CreateOrderResult = { status: "success"; order: OrderDocument } | { 
 export async function createOrder(orderData: OrderInput): Promise<CreateOrderResult> {
   await connectDB();
 
-  if (
-    !orderData.products ||
-    !Array.isArray(orderData.products) ||
-    orderData.products.length === 0 ||
-    !orderData.paymentMethod ||
-    !orderData.deliveryInformation
-  ) {
+  if (!orderData.products || !Array.isArray(orderData.products) || orderData.products.length === 0 || !orderData.paymentMethod || !orderData.deliveryInformation) {
     throw new Error("Missing required order fields.");
   }
 
@@ -72,7 +66,7 @@ export async function createOrder(orderData: OrderInput): Promise<CreateOrderRes
         throw new Error("Email is required for guest checkout.");
       }
 
-      let user = await User.findOne({ email }).session(session);
+      const user = await User.findOne({ email }).session(session);
 
       if (user) {
         // User with this email already exists.
@@ -105,7 +99,7 @@ export async function createOrder(orderData: OrderInput): Promise<CreateOrderRes
       })
       .session(session);
 
-    const productMap = new Map<string, ProductDocument>();
+    const productMap = new Map<string, any>();
     for (const p of products) {
       productMap.set(p._id.toString(), p);
     }
@@ -160,7 +154,6 @@ export async function createOrder(orderData: OrderInput): Promise<CreateOrderRes
 
     const plainOrder = JSON.parse(JSON.stringify(order));
     return { status: "success", order: plainOrder };
-
   } catch (error) {
     await session.abortTransaction();
     session.endSession();

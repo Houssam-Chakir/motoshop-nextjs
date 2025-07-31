@@ -11,7 +11,7 @@ const AddProduct = async () => {
     <section className='flex justify-center bg-slate-100'>
       <div className='px-12 py-6 border my-6 rounded-xs bg-white'>
         <h1 className='font-display text-3xl pb-4 mb-8 text-center border-b'>Create new product</h1>
-        <ProductAddForm brands={brands as [{ _id: string; name: string }]} types={types as [{ _id: string; name: string }]} categories={categories} sizes={sizes} />
+        <ProductAddForm brands={brands as [{ _id: string; name: string }]} types={types as [{ _id: string; name: string }]} categories={categories as { _id: string; name: string }[]} sizes={sizes} />
       </div>
     </section>
   );

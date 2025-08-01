@@ -3,6 +3,7 @@ import makeSerializable from "@/utils/convertToObj";
 import ProductsSection from "@/components/customerUI/productsPageContent/ProductsSection";
 import { getCachedBrands } from "@/utils/getCachedLists";
 import { getProducts } from "@/actions/productsActions";
+import { ProductType } from "@/models/Product";
 import { SearchParams } from "nuqs/server";
 import { loadSearchParams } from "@/lib/searchParams";
 import { revalidateTag } from "next/cache";
@@ -25,7 +26,7 @@ const ProductsPage = async ({ searchParams }: PageProps) => {
 
     const brandsName = brands.map((brand) => brand.name);
     const cleanProducts = JSON.parse(JSON.stringify(productsDoc));
-    const products = cleanProducts.map(product => makeSerializable(product));
+    const products = cleanProducts.map((product: ProductType) => makeSerializable(product));
 
     return <ProductsSection refetchProducts={refetchProducts} products={products} sizes={sizes} brands={brandsName} pagination={pagination} />;
   } catch (error) {

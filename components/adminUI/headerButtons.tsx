@@ -26,7 +26,7 @@ export default function HeaderButtons() {
           {providers &&
             Object.values(providers).map((provider, i) => {
               if (provider.id === "google") {
-                return <GoogleSignupButton onSignup={() => signIn(provider.id)} key={i} className='' />;
+                return <GoogleSignupButton onSignup={() => { signIn(provider.id); }} key={i} className='' />;
               }
             })}
         </div>

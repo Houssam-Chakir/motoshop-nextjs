@@ -19,8 +19,11 @@ const ProductDetailsPage = async ({ params }: { params: Promise<{ slug: string }
     const categoryUrlParam = product.category.name.toLowerCase().split(" ").join("-");
     const categoryId = product.category._id;
 
-    const [similarProducts, recentProductsDoc] = await Promise.all([getSimilarProducts(categoryId), getRecentProducts()]);
+    const [similarProductsDocs, recentProductsDoc] = await Promise.all([getSimilarProducts(categoryId), getRecentProducts()]);
 
+    const cleanSimilarProducts = JSON.parse(JSON.stringify(similarProductsDocs));
+    const similarProducts = cleanSimilarProducts.map((product: ProductType) => makeSerializable(product));
+    
     const cleanProducts = JSON.parse(JSON.stringify(recentProductsDoc));
     const recentProducts = cleanProducts.map((product: ProductType) => makeSerializable(product));
 

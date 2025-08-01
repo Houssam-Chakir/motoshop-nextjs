@@ -19,7 +19,13 @@ import { useSessionContext } from "@/contexts/SessionContext";
 import OrderItemCard from "./OrderItemCard";
 import { CartItem } from "@/types/cart";
 
-export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFinalCart: React.Dispatch<React.SetStateAction<CartItem[]>>; shippingFee?: number }) {
+interface FinalCart {
+  cartItems: CartItem[];
+  totalDiscount: number;
+  totalPrice: number;
+}
+
+export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFinalCart: React.Dispatch<React.SetStateAction<FinalCart>>; shippingFee?: number }) {
   const { session } = useSessionContext();
 
   const [parent] = useAutoAnimate();

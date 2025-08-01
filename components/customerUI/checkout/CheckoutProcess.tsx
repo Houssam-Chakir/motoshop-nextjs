@@ -92,7 +92,7 @@ export default function CheckoutProcess() {
     }
   }
 
-  async function handleCreateOrder(cardInfo) {
+  async function handleCreateOrder(cardInfo: { name: string; cardNumber: any; expiry: any; cvc: any; }) {
     if (isSubmitting) return;
 
     // 1. Validate cart
@@ -137,7 +137,7 @@ export default function CheckoutProcess() {
       const finalTotalPrice = orderSubtotal + (shippingFee || 0);
 
       const orderData = {
-        ...(session?.user?._id && { userId: session.user._id }), // Conditionally add userId
+        ...(session?.user?.id && { userId: session.user.id }), // Conditionally add userId
         products: productsForOrder,
         quantity: totalQuantity,
         deliveryFee: shippingFee || 0,

@@ -4,9 +4,10 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import deleteProduct from "@/actions/deleteProduct";
 import { toast } from "react-toastify";
+import { ProductType } from "@/models/Product";
 // import Image from "next/image";
 
-const ProductCardTest = ({ product }) => {
+const ProductCardTest = ({ product }: { product: ProductType }) => {
   const handleDeleteProduct = async () => {
     const isConfirmed = confirm("Are you sure you want to delete this product");
     if (isConfirmed) {

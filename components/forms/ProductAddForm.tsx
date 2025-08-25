@@ -55,7 +55,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 // Custom searchable select component
-function SearchableSelect({
+function SearchableSelect<T extends Record<string, unknown>>({
   options,
   placeholder,
   value,
@@ -63,8 +63,7 @@ function SearchableSelect({
   displayKey = "name",
   valueKey = "_id",
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options: any[];
+  options: T[];
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
@@ -76,10 +75,12 @@ function SearchableSelect({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const filteredOptions = options.filter((option) => option[displayKey].toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredOptions = options.filter((option) =>
+    String(option[displayKey as keyof T]).toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Find the selected option
-  const selectedOption = options.find((option) => option[valueKey] === value);
+  const selectedOption = options.find((option) => String(option[valueKey as keyof T]) === value);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -127,7 +128,7 @@ function SearchableSelect({
         onClick={handleTriggerClick}
         className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
       >
-        <span className='flex-1 text-left truncate'>{selectedOption ? selectedOption[displayKey] : placeholder}</span>
+        <span className='flex-1 text-left truncate'>{selectedOption ? String(selectedOption[displayKey as keyof T]) : placeholder}</span>
         <span className='ml-2'>
           {isOpen ? (
             <svg
@@ -183,14 +184,14 @@ function SearchableSelect({
             ) : (
               filteredOptions.map((option) => (
                 <div
-                  key={option[valueKey]}
+                  key={String(option[valueKey as keyof T])}
                   className={cn(
                     "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
-                    option[valueKey] === value && "bg-accent text-accent-foreground"
+                    option[valueKey as keyof T] === value && "bg-accent text-accent-foreground"
                   )}
-                  onClick={() => handleOptionSelect(option[valueKey])}
+                  onClick={() => handleOptionSelect(String(option[valueKey as keyof T]))}
                 >
-                  {option[valueKey] === value && (
+                  {option[valueKey as keyof T] === value && (
                     <span className='absolute left-2 flex h-3.5 w-3.5 items-center justify-center'>
                       <svg
                         xmlns='http://www.w3.org/2000/svg'
@@ -208,7 +209,7 @@ function SearchableSelect({
                       </svg>
                     </span>
                   )}
-                  {option[displayKey]}
+                  {String(option[displayKey as keyof T])}
                 </div>
               ))
             )}

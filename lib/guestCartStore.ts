@@ -1,5 +1,3 @@
-import { ProductDocument } from "@/models/Product"; // Assuming ProductDocument is exported from your models
-
 const GUEST_CART_KEY = "guestCart";
 
 // Interface for a single product item within the guest cart
@@ -100,7 +98,7 @@ export const addItemToGuestCart = (
   }
 
   const cart = getGuestCart();
-  const productIdStr = typeof product._id === 'string' ? product._id : product._id.toString();
+  const productIdStr = typeof product._id === "string" ? product._id : product._id.toString();
   const existingItemIndex = cart.products.findIndex((item) => item.productId === productIdStr && item.size === size);
 
   if (existingItemIndex > -1) {

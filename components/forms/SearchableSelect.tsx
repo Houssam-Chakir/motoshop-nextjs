@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search } from "lucide-react";
 
 // Custom searchable select component
-export default function SearchableSelect({
+export default function SearchableSelect<T extends Record<string, unknown>>({
   options,
   placeholder,
   value,
@@ -12,8 +12,7 @@ export default function SearchableSelect({
   displayKey = "name",
   valueKey = "_id",
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options: any[];
+  options: T[];
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
@@ -22,7 +21,9 @@ export default function SearchableSelect({
 }) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredOptions = options.filter((option) => option[displayKey].toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredOptions = options.filter((option) =>
+    String(option[displayKey as keyof T]).toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <Select value={value} onValueChange={onChange}>
@@ -45,8 +46,8 @@ export default function SearchableSelect({
             <p className='text-muted-foreground'>No results found</p>
           ) : (
             filteredOptions.map((option) => (
-              <SelectItem key={option[valueKey]} value={option[valueKey]}>
-                {option[displayKey]}
+              <SelectItem key={String(option[valueKey as keyof T])} value={String(option[valueKey as keyof T])}>
+                {String(option[displayKey as keyof T])}
               </SelectItem>
             ))
           )}

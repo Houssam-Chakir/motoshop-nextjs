@@ -1,9 +1,12 @@
+import { Suspense } from "react";
 import CheckoutProcess from "@/components/customerUI/checkout/CheckoutProcess";
 
 function CheckoutPage() {
   return (
     <section>
-      <CheckoutProcess />
+      <Suspense fallback={<div>Loading checkout...</div>}>
+        <CheckoutProcess />
+      </Suspense>
     </section>
   );
 }

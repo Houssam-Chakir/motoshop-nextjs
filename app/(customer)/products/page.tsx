@@ -8,6 +8,8 @@ import { SearchParams } from "nuqs/server";
 import { loadSearchParams } from "@/lib/searchParams";
 import { revalidateTag } from "next/cache";
 
+export const dynamic = 'force-dynamic';
+
 type PageProps = {
   searchParams: Promise<SearchParams>;
 };

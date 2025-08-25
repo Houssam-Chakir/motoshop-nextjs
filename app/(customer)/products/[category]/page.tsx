@@ -8,6 +8,8 @@ import { loadSearchParams } from "@/lib/searchParams";
 import Category from "@/models/Category";
 import { revalidateTag } from "next/cache";
 
+export const dynamic = 'force-dynamic';
+
 type PageProps = {
   searchParams: Promise<SearchParams>;
   params: Promise<{ category: string }>;

@@ -19,7 +19,7 @@ export interface GuestWishlistItem {
   imageUrl?: string;
   slug: string;
   quantity: number
-  salePrice?: number
+  salePrice?: number | null
 }
 
 /**

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Suspense } from "react";
 import Navbar from "@/components/customerUI/navbar/navbar";
 import TopBanner from "@/components/customerUI/layout/TopBanner";
 import Container from "@/components/layout/Container";
@@ -20,18 +21,20 @@ export default async function CustomerLayout({ children }: { children: React.Rea
 
   return (
     <div className=''>
-      <NuqsAdapter>
-        <SessionProvider>
-          <UserProvider>
-            <SectionsProvider>
-              <TopBanner />
-              <Navbar/>
-              <Container>{children}</Container>
-              <Footer/>
-            </SectionsProvider>
-          </UserProvider>
-        </SessionProvider>
-      </NuqsAdapter>
+      <Suspense fallback={<div>Loading...</div>}> 
+        <NuqsAdapter>
+          <SessionProvider>
+            <UserProvider>
+              <SectionsProvider>
+                <TopBanner />
+                <Navbar/>
+                <Container>{children}</Container>
+                <Footer/>
+              </SectionsProvider>
+            </UserProvider>
+          </SessionProvider>
+        </NuqsAdapter>
+      </Suspense>
     </div>
   );
 }

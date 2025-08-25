@@ -481,7 +481,7 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
           stock={stock}
           selectedSize={selectedSize}
           selectedSizeQuantity={selectedSizeQuantity}
-          handleAddToCart={handleAddToCart}
+          isLoggedIn={isLoggedIn}
           handleWishlist={handleWishlist}
           finalIsCurrentlyInWishlist={finalIsCurrentlyInWishlist}
         />

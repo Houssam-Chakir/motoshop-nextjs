@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, ChevronLeft, ChevronRight, Minus, Plus, ShoppingCart } from "lucide-react";
 import { ProductType } from "@/models/Product";
-import { StockType } from "@/models/Stock"; // Adjusted path, assuming @ is root
 import { CldImage } from "next-cloudinary";
 import { toast } from "react-toastify";
 import { addItemToGuestCart } from "@/lib/guestCartStore";
@@ -16,7 +15,7 @@ import ProductTitlePriceMobile from "./productDetailsPage/ProductInfoMobile";
 interface ProductInfoProps {
   product: Omit<ProductType, "saleInfo"> & {
     saleInfo: SaleDocument | null;
-    stock: StockType | null;
+    stock: ProductType["stock"] | null;
   };
   displayAll: boolean;
   isLoggedIn?: boolean;

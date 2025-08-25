@@ -1,17 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Plus } from "lucide-react";
 import ProductInfoSlider from "../ProductInfoSlider";
+import type { ProductType } from "@/models/Product";
+import type { StockType } from "@/models/Stock";
+import type React from "react";
+import type { SaleDocument } from "@/models/Sale";
 
 interface ProductCTAsProps {
-  stock: {
-    sizes?: { size: string; quantity: number }[];
-    // Add other stock properties if needed
-  } | null;
-  selectedSize: string | null;
+  product: Omit<ProductType, "saleInfo"> & { saleInfo: SaleDocument | null; stock: ProductType["stock"] | null };
+  stock: StockType | null;
+  selectedSize: string;
   selectedSizeQuantity: number;
   isLoggedIn: boolean;
   finalIsCurrentlyInWishlist: boolean;
-  handleWishlist: () => void;
+  handleWishlist: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export default function ProductMobileCTAs({ isLoggedIn, product, stock, selectedSize, selectedSizeQuantity, handleWishlist, finalIsCurrentlyInWishlist }: ProductCTAsProps) {
@@ -39,7 +41,7 @@ export default function ProductMobileCTAs({ isLoggedIn, product, stock, selected
           >
             <Heart className='size-6' fill={finalIsCurrentlyInWishlist ? "#f72323" : "none"} />
           </Button>
-          <ProductInfoSlider product={product} displayAll={false} isLoggedIn={isLoggedIn} handleWishlist={handleWishlist} finalIsCurrentlyInWishlist={finalIsCurrentlyInWishlist}>
+          <ProductInfoSlider product={product} displayAll={false} isLoggedIn={isLoggedIn}>
             <Button variant='outline' size='lg' className='flex-1 w-full h-12 text-[16px] text-blue rounded-full border-blue bg-white'>
               <Plus className='size-6' />
               Select an option

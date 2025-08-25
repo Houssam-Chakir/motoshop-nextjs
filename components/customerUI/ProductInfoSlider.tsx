@@ -4,19 +4,18 @@ import React, { useState } from "react";
 import { MobileSlider } from "@/components/customerUI/sideBar/MobileSidebar";
 import { getProductWithStock } from "@/actions/cartActions";
 import { ProductType } from "@/models/Product";
-import { StockType } from "@/models/Stock";
+import type { SaleDocument } from "@/models/Sale";
 import ProductInfoMobile from "./ProductInfoMobile";
 
 interface ProductInfoSliderProps {
   children: React.ReactNode;
-  product: ProductType;
+  product: { _id: string };
   isLoggedIn: boolean;
   displayAll: boolean;
 }
 
 type SliderDataType = {
   product: ProductType;
-  stock: StockType | null;
 } | null;
 
 export default function ProductInfoSlider({ children, product, isLoggedIn, displayAll = true }: ProductInfoSliderProps) {
@@ -69,7 +68,20 @@ export default function ProductInfoSlider({ children, product, isLoggedIn, displ
             <p>{sliderError}</p>
           </div>
         )}
-        {!isSliderLoading && sliderData && <ProductInfoMobile isLoggedIn={isLoggedIn} product={sliderData.product} stock={sliderData.stock} displayAll={displayAll} />}
+        {!isSliderLoading && sliderData && (() => {
+          const prod = sliderData.product as ProductType;
+          const productForMobile: Omit<ProductType, "saleInfo"> & {
+            saleInfo: SaleDocument | null;
+            stock: ProductType["stock"] | null;
+          } = {
+            ...prod,
+            saleInfo: (prod as any).saleInfo ?? null,
+            stock: (prod as any).stock ?? null,
+          };
+          return (
+            <ProductInfoMobile isLoggedIn={isLoggedIn} product={productForMobile} displayAll={displayAll} />
+          );
+        })()}
       </div>
     </MobileSlider>
   );

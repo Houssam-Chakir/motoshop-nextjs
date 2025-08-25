@@ -19,13 +19,12 @@ type SliderDataType = {
 } | null;
 
 export default function ProductInfoSlider({ children, product, isLoggedIn, displayAll = true }: ProductInfoSliderProps) {
-  const [isSliderOpen, setIsSliderOpen] = useState(false);
+  // Using uncontrolled MobileSlider; manage only data/loading state here
   const [isSliderLoading, setIsSliderLoading] = useState(false);
   const [sliderData, setSliderData] = useState<SliderDataType>(null);
   const [sliderError, setSliderError] = useState<string | null>(null);
 
   const handleTriggerClick = async () => {
-    setIsSliderOpen(true);
     setIsSliderLoading(true);
     setSliderError(null);
 
@@ -47,8 +46,6 @@ export default function ProductInfoSlider({ children, product, isLoggedIn, displ
   return (
     <MobileSlider
       side='bottom'
-      isOpen={isSliderOpen}
-      setIsOpen={setIsSliderOpen}
       className={`w-full ${displayAll ? "h-[95vh]" : "h-[65vh]"}`}
       trigger={
         <div className='grow' onClick={handleTriggerClick}>

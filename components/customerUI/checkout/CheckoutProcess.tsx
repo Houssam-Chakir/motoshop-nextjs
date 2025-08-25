@@ -10,28 +10,8 @@ import { PaymentInformation } from "./PaymentInformation";
 import { OrderItemsFinalList } from "./OrderItemsFinalList";
 import { clearCart } from "@/actions/cartActions";
 import { OrderStatusSection } from "./OrderStatusPage";
-import { FinalCart } from "@/types/checkout";
-
-
-interface ICardInfo {
-  name: string | null;
-  cardNumber: string | null;
-  expiry: string | null;
-  cvc: string | null;
-}
-
-export interface CheckoutDataType {
-  number: string | null;
-  address: string | null;
-  city: string | null;
-  email: string | null;
-  fullName: string | null;
-  shippingFee?: number;
-  paymentMethod: "cmi" | "delivery" | "pickup" | null;
-  extraDirections?: string | null;
-  saveAddress?: boolean | null;
-  cardInfo: ICardInfo;
-}
+import { FinalCart, CheckoutDataType } from "@/types/checkout";
+import type { PaymentFormData } from "./PaymentForm";
 
 export default function CheckoutProcess() {
   const [checkoutStep, setCheckoutStep] = useState(1);
@@ -80,7 +60,7 @@ export default function CheckoutProcess() {
     }
   }
 
-  async function handleCreateOrder(cardInfo: { name: string; cardNumber: any; expiry: any; cvc: any }) {
+  async function handleCreateOrder(cardInfo?: PaymentFormData) {
     if (isSubmitting) return;
 
     // 1. Validate cart
@@ -100,7 +80,7 @@ export default function CheckoutProcess() {
       return;
     }
     if (paymentMethod === "cmi") {
-      if (!cardInfo.name || !cardInfo.cardNumber || !cardInfo.expiry || !cardInfo.cvc) {
+      if (!cardInfo || !cardInfo.name || !cardInfo.cardNumber || !cardInfo.expiry || !cardInfo.cvc) {
         alert("Please fill in all valid card details.");
         return;
       }

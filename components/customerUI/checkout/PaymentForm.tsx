@@ -37,7 +37,7 @@ const paymentSchema = z.object({
     .regex(/^[0-9]+$/, "CVC must contain only numbers"),
 });
 
-type PaymentFormData = z.infer<typeof paymentSchema>;
+export type PaymentFormData = z.infer<typeof paymentSchema>;
 
 interface PaymentFormProps {
   onSubmit?: (data: PaymentFormData) => Promise<void>;

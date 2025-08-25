@@ -2,14 +2,18 @@
 
 import { CheckCircle, MailCheck, Receipt, XCircle } from "lucide-react";
 
-export function OrderStatusSection({ children, checkoutData, orderStatus }) {
+const paymentMethodMap = {
+  cmi: "CMI",
+  delivery: "Pay on delivery",
+  pickup: "Pickup from store",
+} as const;
+type PaymentMethod = keyof typeof paymentMethodMap;
+type CheckoutData = { paymentMethod: "cmi" | "delivery" | "pickup" | null };
+type OrderStatus = { status: string; order?: { trackingNumber?: string } };
+
+export function OrderStatusSection({ children, checkoutData, orderStatus }: { children: React.ReactNode; checkoutData: CheckoutData; orderStatus: OrderStatus }) {
   console.log("checkoutData: ", checkoutData);
-  const paymentMethodMap = {
-    cmi: "CMI",
-    delivery: "Pay on delivery",
-    pickup: "Pickup from store",
-  };
-  const deliveryMethod = paymentMethodMap[checkoutData.paymentMethod] || "";
+  const deliveryMethod = paymentMethodMap[checkoutData.paymentMethod as PaymentMethod] || "";
 
   const isSuccess = orderStatus.status === "success";
 
@@ -28,7 +32,7 @@ export function OrderStatusSection({ children, checkoutData, orderStatus }) {
               </h2>
               {orderStatus.status === "success" && (
                 <p className='text-sm font-light opacity-90'>
-                  Tracking Number: <span className='font-medium'>{orderStatus.order.trackingNumber}</span>
+                  Tracking Number: <span className='font-medium'>{orderStatus.order?.trackingNumber}</span>
                 </p>
               )}
             </div>
@@ -59,6 +63,6 @@ export function OrderStatusSection({ children, checkoutData, orderStatus }) {
   );
 }
 
-function DashedContainer({ children }) {
+function DashedContainer({ children }: { children: React.ReactNode }) {
   return <div className='custom-dashed p-4 bg-grey space-y-4'>{children}</div>;
 }

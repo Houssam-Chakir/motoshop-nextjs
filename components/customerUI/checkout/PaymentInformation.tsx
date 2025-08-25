@@ -4,8 +4,17 @@ import { redirect } from "next/navigation";
 import { PaymentForm } from "./PaymentForm";
 import { BadgeAlert, CreditCard, MapPin, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { ReactNode } from "react";
 
-export function PaymentInformation({ children, paymentMethod, handleCreateOrder, checkoutData, isSubmitting }) {
+export function PaymentInformation(
+  { children, paymentMethod, handleCreateOrder, checkoutData, isSubmitting }: {
+    children?: ReactNode;
+    paymentMethod: "cmi" | "delivery" | "pickup" | null;
+    handleCreateOrder: (data?: any) => Promise<void>;
+    checkoutData: any;
+    isSubmitting: boolean;
+  }
+) {
   console.log("paymentMethod: ", paymentMethod);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,11 +82,11 @@ export function PaymentInformation({ children, paymentMethod, handleCreateOrder,
   );
 }
 
-function DashedContainer({ children }) {
+function DashedContainer({ children }: { children: ReactNode }) {
   return <div className='custom-dashed p-4 bg-grey space-y-4'>{children}</div>;
 }
 
-function CheckoutButtons({ isSubmitting, handleOrderSubmit, handleCancel }) {
+function CheckoutButtons({ isSubmitting, handleOrderSubmit, handleCancel }: { isSubmitting: boolean; handleOrderSubmit: () => Promise<void>; handleCancel: () => void }) {
   return (
     <>
       {/* Action Buttons */}

@@ -1,7 +1,7 @@
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import type { FinalCart } from "@/types/checkout";
-import type { CheckoutDataType } from "./CheckoutProcess";
+import type { CheckoutDataType } from "@/types/checkout";
 
 export function OrderItemsFinalList({ finalCart, shippingFee, checkoutData }: { finalCart: FinalCart; shippingFee?: number; checkoutData: CheckoutDataType }) {
   const shipping = typeof shippingFee === "number" ? shippingFee : 0;

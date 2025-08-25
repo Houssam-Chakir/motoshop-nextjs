@@ -1,8 +1,11 @@
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import type { FinalCart } from "@/types/checkout";
+import type { CheckoutDataType } from "./CheckoutProcess";
 
-export function OrderItemsFinalList({ finalCart, shippingFee, checkoutData }) {
-  const orderTotal = finalCart.totalPrice + shippingFee;
+export function OrderItemsFinalList({ finalCart, shippingFee, checkoutData }: { finalCart: FinalCart; shippingFee?: number; checkoutData: CheckoutDataType }) {
+  const shipping = typeof shippingFee === "number" ? shippingFee : 0;
+  const orderTotal = finalCart.totalPrice + shipping;
 
   const customerInfo = [
     { label: "Full name:", value: checkoutData.fullName },
@@ -46,7 +49,7 @@ export function OrderItemsFinalList({ finalCart, shippingFee, checkoutData }) {
           </div>
           <div className='flex justify-between'>
             <span className='text-gray-700'>Shipping:</span>
-            <span className='font-bold text-green-600'>{shippingFee > 0 ? "+" + shippingFee + " DH" : "Free"}</span>
+            <span className='font-bold text-green-600'>{shipping > 0 ? "+" + shipping + " DH" : "Free"}</span>
           </div>
 
           <div className='border-t border-gray-200 pt-3'>

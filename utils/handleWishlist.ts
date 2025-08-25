@@ -1,8 +1,10 @@
 import { addItemToGuestWishlist, isItemInGuestWishlist, removeItemFromGuestWishlist } from "@/lib/guestWishlistStore";
+import { GuestWishlistItem } from "@/lib/guestWishlistStore";
 import { WishlistItem } from "@/types/wishlist";
 
 interface HandleWishlistParams {
-  wishlistProduct: WishlistItem;
+  // Use the stricter guest type so it's valid for both guest and logged-in flows
+  wishlistProduct: GuestWishlistItem;
   isLoggedIn: boolean;
   isInWishlist: (id: string) => boolean;
   removeItemFromWishlist: (id: string) => void;

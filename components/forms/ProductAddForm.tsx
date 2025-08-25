@@ -322,8 +322,8 @@ function SizeInput({
   );
 }
 
-async function handleAddProduct(formData) {
-  const res = await addNewProduct(formData);
+async function handleAddProduct(formData: unknown) {
+  const res = await addNewProduct(formData as any);
   console.log("status: ", res.status);
   if (res.status) {
     toast.success("Product created successfully!");

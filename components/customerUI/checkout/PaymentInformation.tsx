@@ -17,7 +17,6 @@ export function PaymentInformation(
 ) {
   console.log("paymentMethod: ", paymentMethod);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handlePaymentSubmit = async (data: any) => {
     console.log("Processing payment:", data);
     console.log("checkout data: ", checkoutData);

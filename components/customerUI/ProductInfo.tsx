@@ -84,9 +84,9 @@ export default function ProductInfo({ product, isLoggedIn }: ProductInfoProps) {
       imageUrl: product.images[0].secure_url,
       slug: product.slug!,
       quantity: product.quantity!,
-      salePrice: product.salePrice ? product.salePrice : null,
+      salePrice: product.salePrice ?? undefined,
     };
-    const params = { wishlistProduct, isLoggedIn, isInWishlist, removeItemFromWishlist, addItemToWishlist, isGuestItemInWishlist, setIsGuestItemInWishlist };
+    const params = { wishlistProduct, isLoggedIn: !!isLoggedIn, isInWishlist, removeItemFromWishlist, addItemToWishlist, isGuestItemInWishlist, setIsGuestItemInWishlist };
     e.stopPropagation(); // Prevent card click
 
     if (!product?._id) return;

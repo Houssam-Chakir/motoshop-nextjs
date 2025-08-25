@@ -94,7 +94,11 @@ function ProductCard({ product }: { product: ProductCard }) {
       const result = await getProductWithStock(product._id);
 
       if (result.success && result.data) {
-        setModalData(result.data); // Set the fetched data
+        const fetchedProduct = result.data.product as ProductType;
+        setModalData({
+          product: fetchedProduct,
+          stock: ((fetchedProduct as any).stock ?? null) as StockType | null,
+        });
       } else {
         throw new Error(result.message || "Failed to fetch product details.");
       }
@@ -205,11 +209,22 @@ function ProductCard({ product }: { product: ProductCard }) {
             <p>{modalError}</p>
           </div>
         )}
-        {!isModalLoading && modalData && (
-          <div>
-            <ProductInfo isLoggedIn={isLoggedIn} product={modalData.product} stock={modalData.stock} />
-          </div>
-        )}
+        {!isModalLoading && modalData && (() => {
+          const prod = modalData.product as ProductType;
+          const productForInfo: Omit<ProductType, "saleInfo"> & {
+            saleInfo: SaleDocument | null;
+            stock: StockType | null;
+          } = {
+            ...prod,
+            saleInfo: (prod as any).saleInfo ?? null,
+            stock: (prod as any).stock ?? null,
+          };
+          return (
+            <div>
+              <ProductInfo isLoggedIn={isLoggedIn} product={productForInfo} />
+            </div>
+          );
+        })()}
       </Modal>
       {/* /Modal -------------------------------------------------------------------------- */}
       {/* Product Image */}

@@ -66,7 +66,9 @@ const authOptions: NextAuthOptions = {
      * @throws Will throw an error if the database connection or user creation fails.
      */
     async signIn({ profile }) {
-      const { email, name, picture } = profile || {};
+      const email = (profile as any)?.email as string | undefined;
+      const name = (profile as any)?.name as string | undefined;
+      const picture = (profile as any)?.picture as string | undefined;
       if (!email || !name) throw new Error("Something went wrong signing in");
 
       try {

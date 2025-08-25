@@ -1,8 +1,25 @@
 import { X } from "lucide-react";
+import type { ReactNode } from "react";
 
-export default function FilterPill({ filters, handleRemoveFilter }) {
+type Filters = {
+  sort?: string;
+  size: string[];
+  brand: string[];
+  style: string[];
+  maxPrice: number;
+  minPrice: number;
+};
+
+type RemoveKey = "all" | "sort" | "price" | "size" | "brand" | "style";
+
+interface FilterPillProps {
+  filters: Filters;
+  handleRemoveFilter: (key: RemoveKey) => void;
+}
+
+export default function FilterPill({ filters, handleRemoveFilter }: FilterPillProps) {
   const { sort, size, brand, style, maxPrice, minPrice } = filters;
-  const isFilter = (sort || size.length > 0 || brand.length > 0 || style.length > 0 || maxPrice < 30000 || minPrice > 0)
+  const isFilter = sort || size.length > 0 || brand.length > 0 || style.length > 0 || maxPrice < 30000 || minPrice > 0;
 
 
   return (
@@ -35,7 +52,7 @@ export default function FilterPill({ filters, handleRemoveFilter }) {
       {brand.length > 0 && (
         <Pill>
           <p>brand</p>
-          <p className='text-gray-600 font-light'>({size.length})</p>
+          <p className='text-gray-600 font-light'>({brand.length})</p>
           <PillButton onClick={() => handleRemoveFilter('brand')} />
         </Pill>
       )}
@@ -50,14 +67,15 @@ export default function FilterPill({ filters, handleRemoveFilter }) {
   );
 }
 
-function Pill({ children }) {
+function Pill({ children }: { children: ReactNode }) {
   return <div className='flex w-fit text-gray-600 gap-1 justify-between items-center pl-3 border rounded-full text-sm hover:border-slate-400 cursor-default'>{children}</div>;
 }
 
-function PillButton({onClick}) {
+function PillButton({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick} className="py-1.5 pr-2 cursor-pointer group">
       <X size={16} className='text-gray-600 group-hover:text-primary-dark' />
     </button>
   );
 }
+

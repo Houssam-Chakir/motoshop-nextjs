@@ -323,8 +323,8 @@ function SizeInput({
   );
 }
 
-async function handleUpdateProduct(formData) {
-  const res = await updateProduct(formData);
+async function handleUpdateProduct(formData: unknown) {
+  const res = await updateProduct(formData as any);
   console.log("res: ", res);
   if (res.status) {
     toast.success("Product edited successfully!");

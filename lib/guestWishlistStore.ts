@@ -12,7 +12,7 @@ export interface GuestWishlistItem {
     brand: string;
     categoryType: string;
     category: string;
-    _id: string; // This is the identifier's own ID from the ProductCard interface
+    _id?: string; // Optional: some sources may not provide this
   };
   retailPrice: number;
   // Consider adding imageUrl if it's small or essential for a quick view, e.g.:

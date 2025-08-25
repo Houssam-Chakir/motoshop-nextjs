@@ -11,7 +11,7 @@ interface ProductInfoSliderProps {
   children: React.ReactNode;
   product: { _id: string };
   isLoggedIn: boolean;
-  displayAll: boolean;
+  displayAll?: boolean;
 }
 
 type SliderDataType = {

@@ -79,7 +79,16 @@ const saveGuestCart = (cart: GuestCart): void => {
 type GuestCartActionResult = { success: boolean; message: string };
 
 export const addItemToGuestCart = (
-  product: Pick<ProductDocument, "_id" | "title" | "slug" | "images" | "retailPrice" | "salePrice" | "identifiers"> & { inStock: boolean },
+  product: {
+    _id: string | { toString(): string };
+    title: string;
+    slug?: string;
+    images: { secure_url: string }[];
+    retailPrice: number;
+    salePrice?: number;
+    identifiers?: { brand: string };
+    inStock: boolean;
+  },
   size: string,
   selectedSizeQuantity: number
 ): GuestCartActionResult => {
@@ -91,7 +100,7 @@ export const addItemToGuestCart = (
   }
 
   const cart = getGuestCart();
-  const productIdStr = product._id.toString();
+  const productIdStr = typeof product._id === 'string' ? product._id : product._id.toString();
   const existingItemIndex = cart.products.findIndex((item) => item.productId === productIdStr && item.size === size);
 
   if (existingItemIndex > -1) {

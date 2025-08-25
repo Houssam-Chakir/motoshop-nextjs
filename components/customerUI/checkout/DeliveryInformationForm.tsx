@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ReactNode } from "react";
-import { CheckoutDataType } from "./CheckoutProcess";
+import { CheckoutDataType } from "@/types/checkout";
 
 // Zod schema for form validation
 const deliveryFormSchema = z.object({

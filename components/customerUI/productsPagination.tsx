@@ -2,7 +2,9 @@
 
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
-const generatePagination = (currentPage: number, totalPages: number) => {
+type PageItem = number | '...';
+
+const generatePagination = (currentPage: number, totalPages: number): PageItem[] => {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
@@ -18,7 +20,16 @@ const generatePagination = (currentPage: number, totalPages: number) => {
   return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
 };
 
-export default function ProductsPagination({ currentPage, totalPages, hasNextPage, hasPrevPage, setPage, refetchProducts }) {
+interface ProductsPaginationProps {
+  currentPage: number; // zero-based index
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  setPage: (page: number) => Promise<unknown> | void;
+  refetchProducts: () => Promise<void> | void;
+}
+
+export default function ProductsPagination({ currentPage, totalPages, hasNextPage, hasPrevPage, setPage, refetchProducts }: ProductsPaginationProps) {
   const handlePageChange = async (newPage: number) => {
     if (newPage < 0 || newPage >= totalPages) return;
     await setPage(newPage);
@@ -43,8 +54,13 @@ export default function ProductsPagination({ currentPage, totalPages, hasNextPag
             {pageNumber === '...' ? (
               <PaginationEllipsis className='rounded-none' />
             ) : (
-              <PaginationLink onClick={() => handlePageChange(pageNumber - 1)} isActive={currentPage + 1 === pageNumber} className='rounded-none'>
-                {pageNumber}
+              // pageNumber is a number in this branch
+              <PaginationLink
+                onClick={() => handlePageChange((pageNumber as number) - 1)}
+                isActive={currentPage + 1 === (pageNumber as number)}
+                className='rounded-none'
+              >
+                {pageNumber as number}
               </PaginationLink>
             )}
           </PaginationItem>
@@ -61,3 +77,4 @@ export default function ProductsPagination({ currentPage, totalPages, hasNextPag
     </Pagination>
   );
 }
+

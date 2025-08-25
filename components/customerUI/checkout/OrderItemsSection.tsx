@@ -17,13 +17,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useMemo } from "react";
 import { useSessionContext } from "@/contexts/SessionContext";
 import OrderItemCard from "./OrderItemCard";
-import { CartItem } from "@/types/cart";
-
-interface FinalCart {
-  cartItems: CartItem[];
-  totalDiscount: number;
-  totalPrice: number;
-}
+import { FinalCart, CheckoutCartItem } from "@/types/checkout";
 
 export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFinalCart: React.Dispatch<React.SetStateAction<FinalCart>>; shippingFee?: number }) {
   const { session } = useSessionContext();
@@ -54,7 +48,7 @@ export default function OrderItemsSection({ setFinalCart, shippingFee }: { setFi
     };
   }, [session]);
 
-  const displayCartItems = useMemo(() => {
+  const displayCartItems: CheckoutCartItem[] = useMemo(() => {
     if (session && cart?.products) {
       console.log("cart in cartSLider", cart);
       return cart.products.map((item) => {

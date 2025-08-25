@@ -338,12 +338,12 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
                         {savedAmount?.toLocaleString("en-US")} MAD
                       </p>
                     )}
-                    {productQuantity && productQuantity > 5 && (
+                    {(productQuantity != null && productQuantity > 5) && (
                       <p className='flex items-center gap-1 italic text-[13px] text-success-green'>
                         <PackagePlus size={14} /> Product in stock! ( {productQuantity} )
                       </p>
                     )}
-                    {productQuantity && productQuantity < 5 && (
+                    {(productQuantity != null && productQuantity < 5 && productQuantity > 0) && (
                       <p className='flex items-center gap-1 italic text-[13px] text-orange-600'>
                         <PackagePlus size={14} /> Only {productQuantity} piece{productQuantity > 1 ? "s" : ""} left in stock!
                       </p>

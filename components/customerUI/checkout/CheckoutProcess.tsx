@@ -10,20 +10,8 @@ import { PaymentInformation } from "./PaymentInformation";
 import { OrderItemsFinalList } from "./OrderItemsFinalList";
 import { clearCart } from "@/actions/cartActions";
 import { OrderStatusSection } from "./OrderStatusPage";
+import { FinalCart } from "@/types/checkout";
 
-interface CartItem {
-  productId: string;
-  size: string;
-  quantity: number;
-  price: number;
-}
-
-// Correctly define the structure of the finalCart object
-interface FinalCart {
-  cartItems: CartItem[];
-  totalDiscount: number;
-  totalPrice: number;
-}
 
 interface ICardInfo {
   name: string | null;
@@ -92,7 +80,7 @@ export default function CheckoutProcess() {
     }
   }
 
-  async function handleCreateOrder(cardInfo: { name: string; cardNumber: any; expiry: any; cvc: any; }) {
+  async function handleCreateOrder(cardInfo: { name: string; cardNumber: any; expiry: any; cvc: any }) {
     if (isSubmitting) return;
 
     // 1. Validate cart

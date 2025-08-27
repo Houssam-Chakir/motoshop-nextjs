@@ -4,7 +4,7 @@ import { AdminProductFilters } from "@/types/admin";
 import { getAdminProducts, getAdminFilterOptions } from "@/actions/adminActions";
 
 interface InventoryPageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<Record<string, string | string[]>>;
 }
 
 // Loading component
@@ -39,17 +39,18 @@ function InventoryLoading() {
 }
 
 const InventoryPage = async ({ searchParams }: InventoryPageProps) => {
+  const sp = await searchParams;
   // Parse filters from search params
   const filters: AdminProductFilters = {
-    search: typeof searchParams.search === "string" && searchParams.search ? searchParams.search : undefined,
-    brand: typeof searchParams.brand === "string" && searchParams.brand ? searchParams.brand : undefined,
-    category: typeof searchParams.category === "string" && searchParams.category ? searchParams.category : undefined,
-    type: typeof searchParams.type === "string" && searchParams.type ? searchParams.type : undefined,
-    stockStatus: (typeof searchParams.stockStatus === "string" ? searchParams.stockStatus : "all") as AdminProductFilters["stockStatus"],
-    sort: (typeof searchParams.sort === "string" ? searchParams.sort : "title") as AdminProductFilters["sort"],
-    sortOrder: (typeof searchParams.sortOrder === "string" ? searchParams.sortOrder : "asc") as AdminProductFilters["sortOrder"],
-    page: typeof searchParams.page === "string" ? parseInt(searchParams.page) : 0,
-    limit: typeof searchParams.limit === "string" ? parseInt(searchParams.limit) : 25,
+    search: typeof sp.search === "string" && sp.search ? sp.search : undefined,
+    brand: typeof sp.brand === "string" && sp.brand ? sp.brand : undefined,
+    category: typeof sp.category === "string" && sp.category ? sp.category : undefined,
+    type: typeof sp.type === "string" && sp.type ? sp.type : undefined,
+    stockStatus: (typeof sp.stockStatus === "string" ? sp.stockStatus : "all") as AdminProductFilters["stockStatus"],
+    sort: (typeof sp.sort === "string" ? sp.sort : "title") as AdminProductFilters["sort"],
+    sortOrder: (typeof sp.sortOrder === "string" ? sp.sortOrder : "asc") as AdminProductFilters["sortOrder"],
+    page: typeof sp.page === "string" ? parseInt(sp.page) : 0,
+    limit: typeof sp.limit === "string" ? parseInt(sp.limit) : 25,
   };
 
   // Fetch data

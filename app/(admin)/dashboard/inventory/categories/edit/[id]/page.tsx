@@ -1,5 +1,6 @@
 import CategoryEditForm from "@/components/forms/CategoryEditForm";
 import Category from "@/models/Category";
+import "@/models/Type"; // Import for Mongoose schema registration
 import makeSerializable from "@/utils/convertToObj";
 import { getSessionUser } from "@/utils/getSessionUser";
 

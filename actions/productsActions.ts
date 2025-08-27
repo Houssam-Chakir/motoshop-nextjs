@@ -1,6 +1,10 @@
 import { FilterQuery, Types } from "mongoose";
 import Product, { ProductDocument } from "@/models/Product";
 import Sale, { SaleDocument } from "@/models/Sale";
+import "@/models/Brand"; // Import for Mongoose schema registration
+import "@/models/Category"; // Import for Mongoose schema registration
+import "@/models/Type"; // Import for Mongoose schema registration
+import "@/models/Stock"; // Import for Mongoose schema registration
 import connectDB from "@/config/database";
 import { unstable_cache as next_cache } from "next/cache";
 
@@ -153,7 +157,6 @@ export const getProducts = next_cache(
       const { page, limit, style, searchQuery } = filters;
 
       // Build the MongoDB query
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query: Record<string, any> = {};
 
       // Handle text search query
@@ -421,7 +424,6 @@ export async function getProductsByCategoryWithSales(
         match: { isActive: true, startDate: { $lte: currentDate }, endDate: { $gte: currentDate } },
         select: "name discountType discountValue color banner startDate endDate",
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .sort(sort as any)
       .skip((page - 1) * limit)
       .limit(limit)

@@ -1,58 +1,64 @@
-import Link from "next/link";
-import ProductCard from "@/components/Card";
-import connectDB from "@/config/database";
-import Product, { ProductType } from "@/models/Product";
-import makeSerializable from "@/utils/convertToObj";
-import Category from "@/models/Category";
-import { Button } from "@/components/ui/button";
-import { Pen } from "lucide-react";
+import { Suspense } from "react";
+import InventoryPageClient from "@/components/adminUI/InventoryPageClient";
+import { AdminProductFilters } from "@/types/admin";
+import { getAdminProducts, getAdminFilterOptions } from "@/actions/adminActions";
 
-interface CategoryType {
-  _id: string;
-  name: string;
-  slug: string;
-  section: string;
-  icon: {
-    secure_url: string;
-    public_id: string;
-  };
+interface InventoryPageProps {
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-const InventoryPage = async () => {
-  await connectDB();
-  const productsDoc = await Product.find({}).lean();
-  const products = makeSerializable(productsDoc) as ProductType[];
-  const categoriesDoc = await Category.find({}).lean();
-  const categories = makeSerializable(categoriesDoc) as CategoryType[];
-  console.log("products: ", products);
+// Loading component
+function InventoryLoading() {
   return (
-    <div>
-      <h1>Inventory</h1>
-      <div className='flex flex-col'>
-        <Link href={"inventory/product/add"}>Add product</Link>
-        <Link href={"inventory/categories/add"}>Add Category</Link>
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <div>
+          <div className='h-8 w-64 bg-gray-200 rounded animate-pulse' />
+          <div className='h-4 w-96 bg-gray-100 rounded animate-pulse mt-2' />
+        </div>
+        <div className='flex gap-3'>
+          <div className='h-10 w-32 bg-gray-200 rounded animate-pulse' />
+          <div className='h-10 w-32 bg-gray-200 rounded animate-pulse' />
+        </div>
       </div>
 
-      <div className='text-2xl'>Products</div>
-      <div className='flex flex-wrap gap-4'>
-        {products.map((product) => {
-          return <ProductCard product={product} key={product.sku} />;
-        })}
+      <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className='bg-white p-4 border rounded-lg'>
+            <div className='h-4 w-24 bg-gray-200 rounded animate-pulse' />
+            <div className='h-8 w-16 bg-gray-200 rounded animate-pulse mt-2' />
+          </div>
+        ))}
       </div>
-      <div>Categories</div>
-      <div className='flex gap-4 flex-wrap'>
-        {categories.map((category: CategoryType, i: number) => {
-          return (
-            <div key={i} className='p-4 border bg-white w-fit flex gap-2 items-center'>
-              <h3>{category.name}</h3>
-              <Link href={`/dashboard/inventory/categories/edit/${category._id}`}>
-                <Button variant='ghost'><Pen/></Button>
-              </Link>
-            </div>
-          );
-        })}
+
+      <div className='bg-white border rounded-lg p-4'>
+        <div className='h-64 w-full bg-gray-100 rounded animate-pulse' />
       </div>
     </div>
+  );
+}
+
+const InventoryPage = async ({ searchParams }: InventoryPageProps) => {
+  // Parse filters from search params
+  const filters: AdminProductFilters = {
+    search: typeof searchParams.search === "string" && searchParams.search ? searchParams.search : undefined,
+    brand: typeof searchParams.brand === "string" && searchParams.brand ? searchParams.brand : undefined,
+    category: typeof searchParams.category === "string" && searchParams.category ? searchParams.category : undefined,
+    type: typeof searchParams.type === "string" && searchParams.type ? searchParams.type : undefined,
+    stockStatus: (typeof searchParams.stockStatus === "string" ? searchParams.stockStatus : "all") as AdminProductFilters["stockStatus"],
+    sort: (typeof searchParams.sort === "string" ? searchParams.sort : "title") as AdminProductFilters["sort"],
+    sortOrder: (typeof searchParams.sortOrder === "string" ? searchParams.sortOrder : "asc") as AdminProductFilters["sortOrder"],
+    page: typeof searchParams.page === "string" ? parseInt(searchParams.page) : 0,
+    limit: typeof searchParams.limit === "string" ? parseInt(searchParams.limit) : 25,
+  };
+
+  // Fetch data
+  const [productsData, filterOptions] = await Promise.all([getAdminProducts(filters), getAdminFilterOptions()]);
+
+  return (
+    <Suspense fallback={<InventoryLoading />}>
+      <InventoryPageClient initialData={productsData} filterOptions={filterOptions} initialFilters={filters} />
+    </Suspense>
   );
 };
 

@@ -17,10 +17,11 @@ export interface AdminProduct {
   slug: string;
   sku: string;
   barcode: string;
+  identifiers: { brand: string; categoryType: string; category: string } | null;
   images: { secure_url: string; public_id: string }[];
-  brand: { _id: string; name: string };
-  category: { _id: string; name: string; section: string };
-  type: { _id: string; name: string };
+  brand: { _id: string; name: string } | null;
+  category: { _id: string; name: string; section: string } | null;
+  type: { _id: string; name: string } | null;
   retailPrice: number;
   salePrice?: number;
   wholesalePrice: number;

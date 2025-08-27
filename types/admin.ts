@@ -14,6 +14,7 @@ export interface AdminProductFilters {
 export interface AdminProduct {
   _id: string;
   title: string;
+  slug: string;
   sku: string;
   barcode: string;
   images: { secure_url: string; public_id: string }[];

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Edit, Trash2, Eye, AlertTriangle, CheckCircle, XCircle, MoreHorizontal, Package, DollarSign } from "lucide-react";
+import { Edit, Trash2, Eye, AlertTriangle, CheckCircle, XCircle, MoreHorizontal, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -30,19 +30,19 @@ const stockStatusConfig: Record<string, StockStatusConfig> = {
   in_stock: {
     icon: CheckCircle,
     color: "text-green-600",
-    bgColor: "bg-green-50",
+    bgColor: "bg-green-100",
     label: "In Stock",
   },
   low_stock: {
     icon: AlertTriangle,
-    color: "text-yellow-600",
-    bgColor: "bg-yellow-50",
+    color: "text-amber-600",
+    bgColor: "bg-amber-100",
     label: "Low Stock",
   },
   out_of_stock: {
     icon: XCircle,
     color: "text-red-600",
-    bgColor: "bg-red-50",
+    bgColor: "bg-red-100",
     label: "Out of Stock",
   },
 };
@@ -73,10 +73,7 @@ export default function InventoryTable({ products, onEdit, onDelete, onBulkDelet
   const someSelected = selectedCount > 0 && selectedCount < products.length;
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
+    return `${amount.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MAD`;
   };
 
   const formatDate = (dateString: string) => {
@@ -201,23 +198,31 @@ export default function InventoryTable({ products, onEdit, onDelete, onBulkDelet
                     </TableCell>
 
                     <TableCell>
-                      <div className='space-y-1'>
-                        <div className='flex items-center gap-2'>
+                      <div className='flex items-center gap-2'>
+                        {product.salePrice ? (
+                          <>
+                            <span className='text-sm font-bold text-blue-600'>{formatCurrency(product.salePrice)}</span>
+                            <span className='text-xs text-gray-500 line-through'>{formatCurrency(product.retailPrice)}</span>
+                          </>
+                        ) : (
                           <span className='text-sm font-medium text-gray-900'>{formatCurrency(product.retailPrice)}</span>
-                          {product.salePrice && (
-                            <Badge variant='destructive' className='text-xs'>
-                              Sale: {formatCurrency(product.salePrice)}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className='text-xs text-gray-500'>Cost: {formatCurrency(product.wholesalePrice)}</p>
+                        )}
                       </div>
                     </TableCell>
 
                     <TableCell>{getStockDisplay(product)}</TableCell>
 
                     <TableCell>
-                      <Badge variant={product.stockStatus === "in_stock" ? "default" : product.stockStatus === "low_stock" ? "secondary" : "destructive"} className='text-xs'>
+                      <Badge
+                        variant={product.stockStatus === "in_stock" ? "default" : "destructive"}
+                        className={`text-xs ${
+                          product.stockStatus === "in_stock"
+                            ? "bg-green-100 text-green-800"
+                            : product.stockStatus === "low_stock"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
                         {config.label}
                       </Badge>
                     </TableCell>
@@ -235,7 +240,7 @@ export default function InventoryTable({ products, onEdit, onDelete, onBulkDelet
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
                           <DropdownMenuItem asChild>
-                            <Link href={`/product/${product.sku}`} className='flex items-center gap-2'>
+                            <Link href={`/product/${product.slug}`} className='flex items-center gap-2'>
                               <Eye className='h-4 w-4' />
                               View Product
                             </Link>

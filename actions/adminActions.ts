@@ -100,11 +100,15 @@ export const getAdminProducts = nextCache(
         return {
           _id: product._id.toString(),
           title: product.title || "",
+          slug: product.slug || "",
           sku: product.sku || "",
           barcode: product.barcode || "",
           productModel: product.productModel || "",
           description: product.description || "",
-          images: product.images || [],
+          images: (product.images || []).map((img: any) => ({
+            secure_url: img.secure_url || "",
+            public_id: img.public_id || "",
+          })),
           brand: product.brand
             ? {
                 _id: product.brand._id.toString(),
@@ -131,7 +135,10 @@ export const getAdminProducts = nextCache(
           style: product.style || "",
           stock: product.stock
             ? {
-                sizes: product.stock.sizes || [],
+                sizes: (product.stock.sizes || []).map((size: any) => ({
+                  size: size.size || "",
+                  quantity: size.quantity || 0,
+                })),
               }
             : null,
           totalStock,

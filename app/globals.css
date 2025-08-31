@@ -87,8 +87,9 @@
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.33 0.1859 279.56);
+  --card: #f9fafb;
+  /* Card text color (light mode) - slate-900 */
+  --card-foreground: #0f172a;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
   /* *primary colors */
@@ -123,7 +124,8 @@
 
   /* other */
   --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
+  /* Muted/secondary text color (light mode) - slate-600 */
+  --muted-foreground: #475569;
   --accent: oklch(0.968 0.007 247.896);
   --accent-foreground: oklch(0.208 0.042 265.755);
   --destructive: oklch(0.577 0.245 27.325);
@@ -196,5 +198,11 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans); /* Apply Inter as the default body font */
+  }
+  /* Override text-base to use slate text color by default.
+     This lives in the base layer so any explicit color utilities
+     (e.g., text-blue) in the utilities layer will override it. */
+  .text-base {
+    @apply text-slate-900 dark:text-slate-100;
   }
 }

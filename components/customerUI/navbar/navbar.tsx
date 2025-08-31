@@ -210,9 +210,11 @@ function UserMenu({ providers, session }: { session: Session | null; providers: 
               <UserSearch size={22} className='text-gray-600 shrink-0' />
               <span className='text-sm text-gray-700'>Profile</span>
             </li>
-            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
-              <BoxIcon size={22} className='text-gray-600 shrink-0' />
-              <span className='text-sm text-gray-700'>Orders</span>
+            <li className='hover:bg-grey-light cursor-pointer'>
+              <Link className='flex items-center gap-3 px-4 py-2.5 rounded-xs' href='/orders'>
+                <BoxIcon size={22} className='text-gray-600 shrink-0' />
+                <span className='text-sm text-gray-700'>Orders</span>
+              </Link>
             </li>
 
             <hr className='my-1.5 border-gray-200' />
@@ -278,9 +280,11 @@ function UserMenu({ providers, session }: { session: Session | null; providers: 
           {/* Main Action Buttons List */}
           <ul className='flex-grow w-full flex flex-col gap-1.5 px-2 py-3 text-md overflow-y-auto'>
             {/* Section 1: Profile, Orders */}
-            <li className='flex items-center gap-3 px-4 py-2.5 rounded-xs hover:bg-grey-light cursor-pointer'>
-              <BoxIcon size={22} className='text-gray-600 shrink-0' />
-              <span className='text-sm text-gray-700'>Orders</span>
+            <li className='hover:bg-grey-light cursor-pointer'>
+              <Link className='flex items-center gap-3 px-4 py-2.5 rounded-xs' href='/orders'>
+                <BoxIcon size={22} className='text-gray-600 shrink-0' />
+                <span className='text-sm text-gray-700'>Orders</span>
+              </Link>
             </li>
 
             {/* Section 2: Wishlist, Cart */}

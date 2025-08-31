@@ -5,6 +5,8 @@ import mongoose, { ConnectionStates } from 'mongoose';
  * It checks the connection state to avoid multiple connection attempts.
  */
 const connectDB = async (): Promise<void> => {
+    // Set higher maxListeners to prevent warnings
+    mongoose.connection.setMaxListeners(20);
     // 1. Check if MongoDB URI is provided
     const MONGODB_URI = process.env.MONGODB_URI;
     if (!MONGODB_URI) {

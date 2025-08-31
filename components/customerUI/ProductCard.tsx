@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { useUserContext } from "@/contexts/UserContext";
 import React, { useState, useEffect } from "react";
+import { price } from "@/lib/price";
 import { addItemToGuestWishlist, removeItemFromGuestWishlist, isItemInGuestWishlist } from "@/lib/guestWishlistStore";
 import { getProductWithStock } from "@/actions/cartActions";
 import { ProductType } from "@/models/Product";
@@ -265,7 +266,7 @@ function ProductCard({ product }: { product: ProductCard }) {
               isDesktop ? "group-hover:-translate-y-9" : ""
             } transition-all text-white absolute uppercase font-bold text-[12px] px-1.5 py-0.5 bottom-0 left-0`}
           >
-            {product.saleInfo.discountType === "percentage" ? `-${product.saleInfo.discountValue}%` : `-${product.saleInfo.discountValue} MAD`}
+            {product.saleInfo.discountType === "percentage" ? `-${product.saleInfo.discountValue}%` : `-${price(product.saleInfo.discountValue, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           </div>
         )}
       </div>
@@ -279,14 +280,18 @@ function ProductCard({ product }: { product: ProductCard }) {
       {/* Product Price */}
       <div className='flex gap-1 items-center'>
         <div className='flex gap-1 items-center'>
-          <div className='font-bold text-blue text-[clamp(15px,1.5vw,16px)]'>{finalePrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+          <div className='font-bold text-blue text-[clamp(15px,1.5vw,16px)]'>
+            {price(finalePrice, { withUnit: false, minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
           <div className='text-[clamp(10px,1.5vw,14px)] text-blue'>
             <span className='font-bold text-[clamp(15px,1.5vw,16px)]'> MAD</span>
           </div>
         </div>
         {product.saleInfo && (
           <div className='flex gap-1 text-success-green items-center line-through italic font-medium'>
-            <div className=' text-[12px]'>{product.retailPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+            <div className=' text-[12px]'>
+              {price(product.retailPrice, { withUnit: false, minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
             <div className='text-[12px]'>
               <span className='text-[12px]'> MAD</span>
             </div>

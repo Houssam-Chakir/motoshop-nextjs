@@ -21,6 +21,7 @@ import { removeItemFromCart, updateCartItemQuantity } from "@/actions/cartAction
 import { toast } from "react-toastify";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useMemo } from "react";
+import { price } from "@/lib/price";
 
 // Placeholder for CartItemCard component - will be created in a separate file
 const CartItemCard = ({
@@ -65,11 +66,11 @@ const CartItemCard = ({
         <div>
           <h4 className='text-sm font-medium line-clamp-1'>{item.title}</h4>
           <div className='flex text-xs text-gray-500 gap-1'>
-            <span className='text-success-green font-medium'>{item.unitPrice?.toFixed(2)} MAD</span>
+            <span className='text-success-green font-medium'>{price(item.unitPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             <span>
               {item.originalPrice !== item.unitPrice && (
                 <div className=' text-xs line-through text-gray-400 italic'>
-                  {item.originalPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MAD
+                  {price(item.originalPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               )}
             </span>
@@ -93,10 +94,7 @@ const CartItemCard = ({
           <div className='-space-y-1 flex flex-col items-end'>
             <div className='flex gap-1 items-center'>
               <div className='font-bold text-blue text-[clamp(15px,1.5vw,16px)]'>
-                {item.totalPrice.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              </div>
-              <div className='text-[clamp(10px,1.5vw,14px)] text-blue'>
-                <span className='font-bold text-[clamp(15px,1.5vw,16px)]'> MAD</span>
+                {price(item.totalPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
             </div>
           </div>
@@ -289,13 +287,13 @@ export default function CartSlider({ session }: { session: Session | null }) {
               {/* Subtotal */}
               <div className='flex justify-between text-sm font-'>
                 <span>Subtotal:</span>
-                <span className='font-bold text-slate-700'>{subtotal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+                <span className='font-bold text-slate-700'>{price(subtotal, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               {/* Sales */}
               {totalDiscount > 0 && (
                 <div className='flex justify-between text-sm font-'>
                   <span>Sales:</span>
-                  <span className='font-bold text-success-green'>- {totalDiscount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+                  <span className='font-bold text-success-green'>- {price(totalDiscount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
               {/* Shipping - Placeholder */}
@@ -303,7 +301,7 @@ export default function CartSlider({ session }: { session: Session | null }) {
               {/* Total */}
               <div className='flex justify-between text-sm font-bold'>
                 <span>Total:</span>
-                <span className='font-bold text-blue'>{finalTotal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</span>
+                <span className='font-bold text-blue'>{price(finalTotal, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
             <div className='flex flex-col gap-2'>

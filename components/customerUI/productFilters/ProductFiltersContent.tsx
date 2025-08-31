@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { price } from "@/lib/price";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -178,11 +179,11 @@ export default function FiltersPage({
                   <div className='flex justify-between items-center'>
                     <div className='flex items-center gap-2'>
                       <span className='text-sm text-muted-foreground'>Min:</span>
-                      <Badge variant='outline'>{filters.priceRange[0]} MAD</Badge>
+                      <Badge variant='outline'>{price(filters.priceRange[0], { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Badge>
                     </div>
                     <div className='flex items-center gap-2'>
                       <span className='text-sm text-muted-foreground'>Max:</span>
-                      <Badge variant='outline'>{filters.priceRange[1]} MAD</Badge>
+                      <Badge variant='outline'>{price(filters.priceRange[1], { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Badge>
                     </div>
                   </div>
                 </div>
@@ -269,10 +270,10 @@ export default function FiltersPage({
                       <X className='h-3 w-3 cursor-pointer' onClick={() => handleSizeChange(size, false)} />
                     </Badge>
                   ))}
-                  {(filters.priceRange[0] > 0 || filters.priceRange[1] < 300) && (
+                  {(filters.priceRange[0] > 0 || filters.priceRange[1] < 30000) && (
                     <Badge variant='secondary' className='text-xs gap-1 bg-grey-light'>
-                      ${filters.priceRange[0]} - ${filters.priceRange[1]}
-                      <X className='h-3 w-3 cursor-pointer' onClick={() => handlePriceRangeChange([0, 300])} />
+                      {price(filters.priceRange[0], { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - {price(filters.priceRange[1], { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <X className='h-3 w-3 cursor-pointer' onClick={() => handlePriceRangeChange([0, 30000])} />
                     </Badge>
                   )}
                 </div>

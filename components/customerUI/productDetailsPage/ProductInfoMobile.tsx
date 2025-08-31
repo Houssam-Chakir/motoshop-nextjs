@@ -1,5 +1,6 @@
 import { BadgeDollarSign, PackagePlus, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { price } from "@/lib/price";
 
 interface ProductInfo {
   brand?: { name?: string };
@@ -28,7 +29,7 @@ export default function ProductTitlePriceMobile({ productInfo }: { productInfo: 
       <div className='py-2'>
         <div className='space-y-0'>
           <div className='flex gap-1 md:gap-2 lg:gap-3 items-center'>
-            <span className='pt-1 [font-size:clamp(20px,4vw,24px)] font-black tracking-wider text-blue-900'>{finalPrice?.toLocaleString("en-US")} MAD</span>
+            <span className='pt-1 [font-size:clamp(20px,4vw,24px)] font-black tracking-wider text-blue-900'>{price(finalPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             {!saleInfo && (
               <Badge className='text-emerald-50 rounded-none bg-emerald-600 mt-1'>
                 <BadgeDollarSign /> BEST PRICES
@@ -38,7 +39,7 @@ export default function ProductTitlePriceMobile({ productInfo }: { productInfo: 
             {saleInfo && (
               <div>
                 <Badge className='text-white rounded-none bg-primary'>
-                  {saleInfo.discountType === "percentage" ? `-${saleInfo.discountValue}%` : `${saleInfo.discountValue} MAD`} <Tag />
+                  {saleInfo.discountType === "percentage" ? `-${saleInfo.discountValue}%` : `${price(saleInfo.discountValue, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} <Tag />
                 </Badge>
                 <Badge className='text-white rounded-none bg-orange-600'>{saleInfo.name}</Badge>
               </div>
@@ -46,8 +47,7 @@ export default function ProductTitlePriceMobile({ productInfo }: { productInfo: 
           </div>
           {saleInfo && (
             <p className='flex gap-1 items-center italic text-[13px] text-success-green'>
-              <BadgeDollarSign size={14} /> <span className='line-through text-grey-darker'>{retailPrice?.toLocaleString("en-US")} MAD</span> saving{" "}
-              {savedAmount?.toLocaleString("en-US")} MAD
+              <BadgeDollarSign size={14} /> <span className='line-through text-grey-darker'>{price(retailPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> saving {price(savedAmount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           )}
           {productQuantity && productQuantity > 5 && (

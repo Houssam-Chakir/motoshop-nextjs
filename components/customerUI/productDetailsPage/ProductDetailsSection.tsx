@@ -19,6 +19,7 @@ import ProductMobileCTAs from "./ProductCTAsMobile";
 import ProductTitlePriceMobile from "./ProductInfoMobile";
 import { isItemInGuestWishlist } from "@/lib/guestWishlistStore";
 import { handleWishlistProcess } from "@/utils/handleWishlist";
+import { price } from "@/lib/price";
 
 function toKebabCase(str: string) {
   return str
@@ -316,7 +317,7 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
                   {/* Price and badges */}
                   <div className='space-y-0'>
                     <div className='flex gap-1 md:gap-2 lg:gap-3 items-center pb-1'>
-                      <span className='pt-1 md:text-2xl text-3xl font-black tracking-wider text-blue-900'>{finalPrice?.toLocaleString("en-US")} MAD</span>
+                      <span className='pt-1 md:text-2xl text-3xl font-black tracking-wider text-blue-900'>{price(finalPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       {!saleInfo && (
                         <Badge className='text-emerald-50 rounded-none bg-emerald-600'>
                           <BadgeDollarSign /> BEST PRICES
@@ -326,7 +327,7 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
                       {saleInfo && (
                         <div>
                           <Badge className='text-white rounded-none bg-primary'>
-                            {saleInfo.discountType === "percentage" ? `-${saleInfo.discountValue}%` : `${saleInfo.discountValue} MAD`} <Tag />
+                            {saleInfo.discountType === "percentage" ? `-${saleInfo.discountValue}%` : `${price(saleInfo.discountValue, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} <Tag />
                           </Badge>
                           <Badge className='text-white rounded-none bg-orange-600'>{saleInfo.name}</Badge>
                         </div>
@@ -334,8 +335,7 @@ export default function ProductDetailsSection({ product }: ProductInfoProps) {
                     </div>
                     {saleInfo && (
                       <p className='flex gap-1 items-center italic text-[13px] text-success-green'>
-                        <BadgeDollarSign size={14} /> <span className='line-through text-grey-darker'>{retailPrice?.toLocaleString("en-US")} MAD</span> saving{" "}
-                        {savedAmount?.toLocaleString("en-US")} MAD
+                        <BadgeDollarSign size={14} /> <span className='line-through text-grey-darker'>{price(retailPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> saving {price(savedAmount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     )}
                     {(productQuantity != null && productQuantity > 5) && (

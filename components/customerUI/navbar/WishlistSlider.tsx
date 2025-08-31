@@ -13,6 +13,7 @@ import { SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { price } from "@/lib/price";
 
 export default function WishlistSlider({ session }: { session: Session | null }) {
   const [parent] = useAutoAnimate();
@@ -160,12 +161,13 @@ function WishlistItem({ item, session }: { item: WishlistItemType; session: Sess
           {item.quantity > 0 && <span className='text-emerald-500 text-xs'>In Stock</span>}
           {item.quantity === 0 || (!item.quantity && <span className='text-red-500 text-xs'>Out of Stock</span>)}
           <div className='flex gap-2 items-center'>
-            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>{finalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
+            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>
+              {price(finalPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
             {item.salePrice && (
               <div className='flex gap-1 text-success-green items-center line-through italic'>
-                <div className=' text-[clamp(8px,1.5vw,11px)]'>{item.retailPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
-                <div className='text-[clamp(8px,1.5vw,11px)]'>
-                  <span className='text-[clamp(8px,1.5vw,11px)]'> MAD</span>
+                <div className=' text-[clamp(8px,1.5vw,11px)]'>
+                  {price(item.retailPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
             )}

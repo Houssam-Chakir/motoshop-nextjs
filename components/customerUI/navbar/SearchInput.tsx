@@ -6,6 +6,7 @@ import { Loader2, Search, X } from "lucide-react";
 import Container from "@/components/layout/Container";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { price } from "@/lib/price";
 
 interface SearchInputProps {
   searchQuery: string;
@@ -183,11 +184,13 @@ function SearchItem({ item }: { item: SearchItem }) {
           {item.quantity > 0 && <span className='text-emerald-500 text-xs'>In Stock</span>}
           {item.quantity === 0 || (!item.quantity && <span className='text-red-500 text-xs'>Out of Stock</span>)}
           <div className='flex gap-2 items-center'>
-            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>{finalPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
+            <p className='font-bold text-[clamp(13px,1.5vw,14px)] text-blue'>
+              {price(finalPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
             {item.salePrice && (
               <div className='flex gap-1 text-success-green items-center line-through italic'>
                 <div className=' text-[clamp(13px,1.5vw,14px)] font-light'>
-                  {item.retailPrice?.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MAD
+                  {price(item.retailPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
             )}

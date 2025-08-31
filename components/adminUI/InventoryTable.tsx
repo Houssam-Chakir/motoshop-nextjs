@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AdminProduct } from "@/types/admin";
+import { price } from "@/lib/price";
 
 interface InventoryTableProps {
   products: AdminProduct[];
@@ -72,9 +73,7 @@ export default function InventoryTable({ products, onEdit, onDelete, onBulkDelet
   const allSelected = selectedCount === products.length && products.length > 0;
   const someSelected = selectedCount > 0 && selectedCount < products.length;
 
-  const formatCurrency = (amount: number) => {
-    return `${amount.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MAD`;
-  };
+  const formatCurrency = (amount: number) => price(amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
